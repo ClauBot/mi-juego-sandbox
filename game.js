@@ -799,11 +799,11 @@ function playScream() {
         const pitch = 0.8 + Math.random() * 0.6;
         const duration = 0.2 + Math.random() * 0.15;
 
-        // Formantes vocales para simular "¡Ah!" o "¡Ay!"
+        // Formantes vocales para simular "¡Ah!" o "¡Ay!" - MÁS FUERTE
         const formants = [
-            { freq: 700 * pitch, gain: 0.3, q: 5 },   // F1
-            { freq: 1200 * pitch, gain: 0.2, q: 8 },  // F2
-            { freq: 2500 * pitch, gain: 0.1, q: 10 }  // F3
+            { freq: 700 * pitch, gain: 0.6, q: 5 },   // F1
+            { freq: 1200 * pitch, gain: 0.5, q: 8 },  // F2
+            { freq: 2500 * pitch, gain: 0.3, q: 10 }  // F3
         ];
 
         // Fuente de ruido + tono para la voz
@@ -827,9 +827,9 @@ function playScream() {
         voiceOsc2.frequency.linearRampToValueAtTime(205 * pitch, now + 0.05);
         voiceOsc2.frequency.linearRampToValueAtTime(125 * pitch, now + duration);
 
-        // Mezclar osciladores
+        // Mezclar osciladores - MÁS FUERTE
         const voiceMix = audioContext.createGain();
-        voiceMix.gain.value = 0.5;
+        voiceMix.gain.value = 1.0;
 
         voiceOsc.connect(voiceMix);
         voiceOsc2.connect(voiceMix);
@@ -838,14 +838,14 @@ function playScream() {
         const noiseSource = audioContext.createBufferSource();
         noiseSource.buffer = noiseBuffer;
         const noiseGain = audioContext.createGain();
-        noiseGain.gain.value = 0.15;
+        noiseGain.gain.value = 0.4;
         noiseSource.connect(noiseGain);
 
-        // Filtros formantes
+        // Filtros formantes - VOLUMEN ALTO
         const outputGain = audioContext.createGain();
         outputGain.gain.setValueAtTime(0, now);
-        outputGain.gain.linearRampToValueAtTime(0.4, now + 0.02);
-        outputGain.gain.setValueAtTime(0.4, now + 0.05);
+        outputGain.gain.linearRampToValueAtTime(0.8, now + 0.02);
+        outputGain.gain.setValueAtTime(0.8, now + 0.05);
         outputGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
         formants.forEach(f => {
@@ -903,6 +903,9 @@ function onResize(gameSize) {}
 function update() {
     // Mover nubes
     updateClouds();
+
+    // Verificar si alguien está cerca del sol
+    checkSunBurn();
 
     // Sangre
     for (let i = bloodParticles.length - 1; i >= 0; i--) {
@@ -1136,27 +1139,32 @@ function onPointerUp(pointer) {
 let clouds = [];
 let sun;
 
+const sunX = 60;
+const sunY = 60;
+const sunBurnDistance = 80; // Distancia para quemarse
+let lastBurnTime = 0;
+
 function createSky(scene) {
-    // Sol
+    // Sol en esquina superior izquierda
     sun = scene.add.graphics();
     sun.setDepth(-10);
 
     // Círculo principal del sol
     sun.fillStyle(0xFFDD00, 1);
-    sun.fillCircle(700, 60, 40);
+    sun.fillCircle(sunX, sunY, 40);
 
     // Brillo alrededor
     sun.fillStyle(0xFFEE44, 0.5);
-    sun.fillCircle(700, 60, 50);
+    sun.fillCircle(sunX, sunY, 50);
 
     // Rayos
     sun.lineStyle(3, 0xFFDD00, 0.7);
     for (let i = 0; i < 12; i++) {
         const angle = (i / 12) * Math.PI * 2;
-        const x1 = 700 + Math.cos(angle) * 55;
-        const y1 = 60 + Math.sin(angle) * 55;
-        const x2 = 700 + Math.cos(angle) * 70;
-        const y2 = 60 + Math.sin(angle) * 70;
+        const x1 = sunX + Math.cos(angle) * 55;
+        const y1 = sunY + Math.sin(angle) * 55;
+        const x2 = sunX + Math.cos(angle) * 70;
+        const y2 = sunY + Math.sin(angle) * 70;
         sun.lineBetween(x1, y1, x2, y2);
     }
 
@@ -1211,6 +1219,90 @@ function updateClouds() {
 
         cloud.graphics.setPosition(cloud.x, cloud.y);
     });
+}
+
+function checkSunBurn() {
+    const now = Date.now();
+    if (now - lastBurnTime < 500) return; // Cooldown de 500ms
+
+    ragdolls.forEach(ragdoll => {
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Phaser.Math.Distance.Between(part.x, part.y, sunX, sunY);
+
+                if (dist < sunBurnDistance) {
+                    lastBurnTime = now;
+
+                    // Mostrar texto
+                    const texts = ['Ouch!', 'Hot!', '¡Ay!', '¡Quema!'];
+                    const text = texts[Math.floor(Math.random() * texts.length)];
+
+                    const burnText = sceneRef.add.text(part.x, part.y - 20, text, {
+                        font: 'bold 16px Arial',
+                        fill: '#FF4400',
+                        stroke: '#FFFFFF',
+                        strokeThickness: 3
+                    });
+                    burnText.setOrigin(0.5);
+                    burnText.setDepth(100);
+
+                    // Animar y destruir texto
+                    sceneRef.tweens.add({
+                        targets: burnText,
+                        y: burnText.y - 40,
+                        alpha: 0,
+                        duration: 800,
+                        ease: 'Power2',
+                        onComplete: () => burnText.destroy()
+                    });
+
+                    // Sonido de quemadura
+                    playBurnSound();
+
+                    // Empujar al ragdoll lejos del sol
+                    const angle = Math.atan2(part.y - sunY, part.x - sunX);
+                    part.setVelocity(
+                        Math.cos(angle) * 8,
+                        Math.abs(Math.sin(angle)) * 5 + 3
+                    );
+                }
+            }
+        });
+    });
+}
+
+function playBurnSound() {
+    if (!audioContext) return;
+    try {
+        const now = audioContext.currentTime;
+
+        // Sonido de "sizzle"
+        const bufferSize = audioContext.sampleRate * 0.3;
+        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+        }
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+
+        const filter = audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 3000;
+        filter.Q.value = 5;
+
+        const gain = audioContext.createGain();
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContext.destination);
+
+        source.start(now);
+    } catch (e) {}
 }
 
 function createFlower(scene, x, y, color) {
