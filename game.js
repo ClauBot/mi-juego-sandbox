@@ -114,7 +114,10 @@ function create() {
     this.scale.on('resize', onResize, this);
 }
 
-// ============ MÚSICA TECNO ============
+// ============ MÚSICA TECNO PEGAJOSA ============
+let barCount = 0;
+let currentPattern = 0;
+
 function startMusic() {
     if (!audioContext || musicPlaying) return;
 
@@ -123,46 +126,101 @@ function startMusic() {
     }
 
     musicPlaying = true;
+    barCount = 0;
+    currentPattern = 0;
+
     musicGain = audioContext.createGain();
-    musicGain.gain.value = 0.15;
+    musicGain.gain.value = 0.18;
     musicGain.connect(audioContext.destination);
 
-    // Loop de música tecno
     playTechnoLoop();
 }
 
 function playTechnoLoop() {
     if (!musicPlaying || !audioContext) return;
 
-    const bpm = 128;
+    const bpm = 130;
     const beatTime = 60 / bpm;
     const now = audioContext.currentTime;
 
-    // Kick drum pattern
-    for (let i = 0; i < 4; i++) {
-        playKick(now + i * beatTime);
-    }
+    barCount++;
 
-    // Hi-hat pattern
+    // Kick - patrón más interesante
+    const kickPattern = [1, 0, 0, 1, 1, 0, 1, 0];
     for (let i = 0; i < 8; i++) {
-        playHiHat(now + i * beatTime / 2, i % 2 === 1 ? 0.3 : 0.5);
+        if (kickPattern[i]) {
+            playKick(now + i * beatTime / 2);
+        }
     }
 
-    // Bass line
-    const bassNotes = [60, 60, 63, 65];
-    for (let i = 0; i < 4; i++) {
-        playBass(now + i * beatTime, bassNotes[i]);
+    // Snare/clap en 2 y 4
+    playSnare(now + beatTime);
+    playSnare(now + beatTime * 3);
+
+    // Hi-hats con swing
+    for (let i = 0; i < 16; i++) {
+        const swing = i % 2 === 1 ? 0.02 : 0;
+        const vol = i % 4 === 0 ? 0.5 : (i % 2 === 0 ? 0.35 : 0.2);
+        playHiHat(now + i * beatTime / 4 + swing, vol);
     }
 
-    // Synth melody cada 2 compases
-    if (Math.random() > 0.5) {
-        const melodyNotes = [72, 75, 77, 79, 77, 75];
-        melodyNotes.forEach((note, i) => {
-            playSynth(now + i * beatTime / 2, note, 0.1);
-        });
+    // Open hi-hat
+    if (barCount % 2 === 0) {
+        playOpenHat(now + beatTime * 1.5);
+        playOpenHat(now + beatTime * 3.5);
     }
 
-    // Siguiente loop
+    // Bass line pegajosa - progresión de acordes
+    const bassPatterns = [
+        [36, 36, 39, 41, 36, 36, 43, 41],  // Em
+        [36, 36, 39, 41, 43, 43, 46, 48],  // Building
+        [41, 41, 44, 46, 41, 41, 48, 46],  // Am
+        [43, 43, 46, 48, 43, 41, 39, 36],  // C -> Em
+    ];
+
+    const bassPattern = bassPatterns[currentPattern % 4];
+    for (let i = 0; i < 8; i++) {
+        playBass(now + i * beatTime / 2, bassPattern[i]);
+    }
+
+    // Melodía principal pegajosa
+    const melodies = [
+        [72, 75, 79, 77, 75, 72, 74, 75],
+        [79, 77, 75, 72, 75, 77, 79, 84],
+        [72, 0, 75, 0, 79, 77, 75, 72],
+        [84, 82, 79, 77, 75, 77, 79, 75],
+    ];
+
+    const melody = melodies[currentPattern % 4];
+    for (let i = 0; i < 8; i++) {
+        if (melody[i] > 0) {
+            playSynth(now + i * beatTime / 2, melody[i], beatTime / 2 - 0.02);
+        }
+    }
+
+    // Arpeggio de fondo
+    if (barCount % 4 > 1) {
+        const arpNotes = [60, 64, 67, 72, 67, 64];
+        for (let i = 0; i < arpNotes.length; i++) {
+            playArp(now + i * beatTime / 3, arpNotes[i]);
+        }
+    }
+
+    // Pad atmosférico cada 4 compases
+    if (barCount % 4 === 1) {
+        playPad(now, [60, 64, 67, 72], beatTime * 4);
+    }
+
+    // Efecto riser cada 8 compases
+    if (barCount % 8 === 7) {
+        playRiser(now, beatTime * 4);
+    }
+
+    // Cambiar patrón cada 4 compases
+    if (barCount % 4 === 0) {
+        currentPattern++;
+    }
+
     setTimeout(() => playTechnoLoop(), beatTime * 4 * 1000 - 50);
 }
 
@@ -171,71 +229,131 @@ function playKick(time) {
     const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
 
-    osc.frequency.setValueAtTime(150, time);
-    osc.frequency.exponentialRampToValueAtTime(30, time + 0.1);
+    osc.frequency.setValueAtTime(160, time);
+    osc.frequency.exponentialRampToValueAtTime(35, time + 0.08);
 
-    gain.gain.setValueAtTime(1, time);
-    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    gain.gain.setValueAtTime(0.9, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
 
     osc.connect(gain);
     gain.connect(musicGain);
 
     osc.start(time);
-    osc.stop(time + 0.2);
+    osc.stop(time + 0.25);
+}
+
+function playSnare(time) {
+    if (!audioContext || !musicGain) return;
+
+    // Cuerpo del snare
+    const osc = audioContext.createOscillator();
+    const oscGain = audioContext.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(200, time);
+    osc.frequency.exponentialRampToValueAtTime(100, time + 0.1);
+    oscGain.gain.setValueAtTime(0.5, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+    osc.connect(oscGain);
+    oscGain.connect(musicGain);
+    osc.start(time);
+    osc.stop(time + 0.1);
+
+    // Ruido
+    const bufferSize = audioContext.sampleRate * 0.15;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+    const noise = audioContext.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 2000;
+    noiseGain.gain.setValueAtTime(0.4, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(musicGain);
+    noise.start(time);
 }
 
 function playHiHat(time, volume) {
     if (!audioContext || !musicGain) return;
-    const bufferSize = audioContext.sampleRate * 0.05;
+    const bufferSize = audioContext.sampleRate * 0.04;
     const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
     const data = buffer.getChannelData(0);
-
     for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
     }
-
     const source = audioContext.createBufferSource();
+    source.buffer = buffer;
     const gain = audioContext.createGain();
     const filter = audioContext.createBiquadFilter();
-
-    source.buffer = buffer;
     filter.type = 'highpass';
-    filter.frequency.value = 7000;
-
+    filter.frequency.value = 8000;
     gain.gain.setValueAtTime(volume, time);
-    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
-
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.04);
     source.connect(filter);
     filter.connect(gain);
     gain.connect(musicGain);
+    source.start(time);
+}
 
+function playOpenHat(time) {
+    if (!audioContext || !musicGain) return;
+    const bufferSize = audioContext.sampleRate * 0.2;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 0.5);
+    }
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 6000;
+    gain.gain.setValueAtTime(0.25, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
     source.start(time);
 }
 
 function playBass(time, note) {
     if (!audioContext || !musicGain) return;
-    const freq = 440 * Math.pow(2, (note - 69) / 12) / 4;
+    const freq = 440 * Math.pow(2, (note - 69) / 12);
 
     const osc = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
     const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
 
     osc.type = 'sawtooth';
+    osc2.type = 'square';
     osc.frequency.setValueAtTime(freq, time);
+    osc2.frequency.setValueAtTime(freq * 0.995, time);
 
-    gain.gain.setValueAtTime(0.4, time);
-    gain.gain.setValueAtTime(0.4, time + 0.1);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, time);
+    filter.frequency.exponentialRampToValueAtTime(200, time + 0.15);
+    filter.Q.value = 5;
+
+    gain.gain.setValueAtTime(0.35, time);
     gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
 
-    const filter = audioContext.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 400;
-
     osc.connect(filter);
+    osc2.connect(filter);
     filter.connect(gain);
     gain.connect(musicGain);
 
     osc.start(time);
-    osc.stop(time + 0.25);
+    osc2.start(time);
+    osc.stop(time + 0.22);
+    osc2.stop(time + 0.22);
 }
 
 function playSynth(time, note, duration) {
@@ -243,19 +361,108 @@ function playSynth(time, note, duration) {
     const freq = 440 * Math.pow(2, (note - 69) / 12);
 
     const osc = audioContext.createOscillator();
+    const osc2 = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc2.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, time);
+    osc2.frequency.setValueAtTime(freq * 1.005, time);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2000, time);
+    filter.frequency.exponentialRampToValueAtTime(500, time + duration);
+    filter.Q.value = 2;
+
+    gain.gain.setValueAtTime(0.12, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+
+    osc.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
+
+    osc.start(time);
+    osc2.start(time);
+    osc.stop(time + duration + 0.05);
+    osc2.stop(time + duration + 0.05);
+}
+
+function playArp(time, note) {
+    if (!audioContext || !musicGain) return;
+    const freq = 440 * Math.pow(2, (note - 69) / 12);
+
+    const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
 
-    osc.type = 'square';
+    osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, time);
 
-    gain.gain.setValueAtTime(0.15, time);
-    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+    gain.gain.setValueAtTime(0.08, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
 
     osc.connect(gain);
     gain.connect(musicGain);
 
     osc.start(time);
-    osc.stop(time + duration);
+    osc.stop(time + 0.15);
+}
+
+function playPad(time, notes, duration) {
+    if (!audioContext || !musicGain) return;
+
+    notes.forEach(note => {
+        const freq = 440 * Math.pow(2, (note - 69) / 12);
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+
+        filter.type = 'lowpass';
+        filter.frequency.value = 1000;
+
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.04, time + 0.5);
+        gain.gain.setValueAtTime(0.04, time + duration - 0.5);
+        gain.gain.linearRampToValueAtTime(0, time + duration);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(musicGain);
+
+        osc.start(time);
+        osc.stop(time + duration + 0.1);
+    });
+}
+
+function playRiser(time, duration) {
+    if (!audioContext || !musicGain) return;
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, time);
+    osc.frequency.exponentialRampToValueAtTime(2000, time + duration);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(200, time);
+    filter.frequency.exponentialRampToValueAtTime(4000, time + duration);
+    filter.Q.value = 5;
+
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.15, time + duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
+
+    osc.start(time);
+    osc.stop(time + duration + 0.1);
 }
 
 function stopMusic() {
@@ -277,17 +484,29 @@ function toggleMusic() {
 function updateMusicButton() {
     if (!musicButton) return;
     musicButton.clear();
-    const panelX = 800 - 70;
-    musicButton.fillStyle(musicPlaying ? 0x44AA44 : 0x666666, 1);
-    musicButton.fillRoundedRect(10, 550 - 45, 50, 35, 8);
 
-    // Icono de música
+    // Botón en esquina inferior izquierda
+    const btnX = 10;
+    const btnY = 555;
+    const btnW = 50;
+    const btnH = 35;
+
+    musicButton.fillStyle(musicPlaying ? 0x44AA44 : 0x666666, 1);
+    musicButton.fillRoundedRect(btnX, btnY, btnW, btnH, 8);
+
+    // Icono
     musicButton.fillStyle(0xFFFFFF, 1);
     if (musicPlaying) {
-        musicButton.fillRect(20, 550 - 38, 4, 20);
-        musicButton.fillRect(30, 550 - 38, 4, 20);
+        // Pausa
+        musicButton.fillRect(btnX + 15, btnY + 8, 6, 19);
+        musicButton.fillRect(btnX + 28, btnY + 8, 6, 19);
     } else {
-        musicButton.fillTriangle(20, 550 - 40, 20, 550 - 20, 40, 550 - 30);
+        // Play
+        musicButton.fillTriangle(
+            btnX + 15, btnY + 7,
+            btnX + 15, btnY + 28,
+            btnX + 38, btnY + 17
+        );
     }
 }
 
@@ -349,49 +568,82 @@ function playScream() {
     try {
         const now = audioContext.currentTime;
 
-        // Voz principal - gritito corto
-        const osc1 = audioContext.createOscillator();
-        const gain1 = audioContext.createGain();
-        const filter = audioContext.createBiquadFilter();
+        // Pitch aleatorio para variedad (voz aguda o grave)
+        const pitch = 0.8 + Math.random() * 0.6;
+        const duration = 0.2 + Math.random() * 0.15;
 
-        // Frecuencia tipo "aaah" que sube
-        osc1.type = 'sawtooth';
-        osc1.frequency.setValueAtTime(400 + Math.random() * 100, now);
-        osc1.frequency.linearRampToValueAtTime(600 + Math.random() * 150, now + 0.1);
-        osc1.frequency.linearRampToValueAtTime(350, now + 0.25);
+        // Formantes vocales para simular "¡Ah!" o "¡Ay!"
+        const formants = [
+            { freq: 700 * pitch, gain: 0.3, q: 5 },   // F1
+            { freq: 1200 * pitch, gain: 0.2, q: 8 },  // F2
+            { freq: 2500 * pitch, gain: 0.1, q: 10 }  // F3
+        ];
 
-        filter.type = 'bandpass';
-        filter.frequency.value = 1000;
-        filter.Q.value = 2;
+        // Fuente de ruido + tono para la voz
+        const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * duration, audioContext.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+            noiseData[i] = (Math.random() * 2 - 1) * 0.3;
+        }
 
-        gain1.gain.setValueAtTime(0.25, now);
-        gain1.gain.linearRampToValueAtTime(0.3, now + 0.05);
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        // Oscilador principal (cuerdas vocales)
+        const voiceOsc = audioContext.createOscillator();
+        voiceOsc.type = 'sawtooth';
+        voiceOsc.frequency.setValueAtTime(150 * pitch, now);
+        voiceOsc.frequency.linearRampToValueAtTime(200 * pitch, now + 0.05);
+        voiceOsc.frequency.linearRampToValueAtTime(120 * pitch, now + duration);
 
-        osc1.connect(filter);
-        filter.connect(gain1);
-        gain1.connect(audioContext.destination);
+        // Segundo oscilador para más cuerpo
+        const voiceOsc2 = audioContext.createOscillator();
+        voiceOsc2.type = 'triangle';
+        voiceOsc2.frequency.setValueAtTime(155 * pitch, now);
+        voiceOsc2.frequency.linearRampToValueAtTime(205 * pitch, now + 0.05);
+        voiceOsc2.frequency.linearRampToValueAtTime(125 * pitch, now + duration);
 
-        osc1.start(now);
-        osc1.stop(now + 0.3);
+        // Mezclar osciladores
+        const voiceMix = audioContext.createGain();
+        voiceMix.gain.value = 0.5;
 
-        // Armónico para más realismo
-        const osc2 = audioContext.createOscillator();
-        const gain2 = audioContext.createGain();
+        voiceOsc.connect(voiceMix);
+        voiceOsc2.connect(voiceMix);
 
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(800 + Math.random() * 200, now);
-        osc2.frequency.linearRampToValueAtTime(1000, now + 0.1);
-        osc2.frequency.linearRampToValueAtTime(600, now + 0.25);
+        // Ruido para respiración/aire
+        const noiseSource = audioContext.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+        const noiseGain = audioContext.createGain();
+        noiseGain.gain.value = 0.15;
+        noiseSource.connect(noiseGain);
 
-        gain2.gain.setValueAtTime(0.1, now);
-        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        // Filtros formantes
+        const outputGain = audioContext.createGain();
+        outputGain.gain.setValueAtTime(0, now);
+        outputGain.gain.linearRampToValueAtTime(0.4, now + 0.02);
+        outputGain.gain.setValueAtTime(0.4, now + 0.05);
+        outputGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-        osc2.connect(gain2);
-        gain2.connect(audioContext.destination);
+        formants.forEach(f => {
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = f.freq;
+            filter.Q.value = f.q;
 
-        osc2.start(now);
-        osc2.stop(now + 0.25);
+            const fGain = audioContext.createGain();
+            fGain.gain.value = f.gain;
+
+            voiceMix.connect(filter);
+            noiseGain.connect(filter);
+            filter.connect(fGain);
+            fGain.connect(outputGain);
+        });
+
+        outputGain.connect(audioContext.destination);
+
+        voiceOsc.start(now);
+        voiceOsc2.start(now);
+        noiseSource.start(now);
+        voiceOsc.stop(now + duration);
+        voiceOsc2.stop(now + duration);
+        noiseSource.stop(now + duration);
     } catch (e) {}
 }
 
@@ -873,11 +1125,14 @@ function createUI(scene) {
 
     // Botón de música (abajo izquierda)
     musicButton = scene.add.graphics();
+    musicButton.setDepth(100);
     updateMusicButton();
 
-    const musicZone = scene.add.zone(35, 550 - 27, 50, 35);
+    const musicZone = scene.add.zone(35, 572, 60, 45);
     musicZone.setInteractive();
-    musicZone.on('pointerdown', () => {
+    musicZone.setDepth(100);
+    musicZone.on('pointerdown', (pointer) => {
+        pointer.event.stopPropagation();
         toggleMusic();
     });
 }
