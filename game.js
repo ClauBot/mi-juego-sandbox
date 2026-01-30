@@ -1435,6 +1435,8 @@ function createGround(scene) {
         }
     };
 
+    // Nota: Los ragdolls ahora SÍ colisionan entre sí (pueden pegarse)
+
     scene.matter.add.rectangle(400, 575, 800, 50, {
         ...wallOptions,
         friction: 1,
@@ -1471,16 +1473,16 @@ function createRagdoll(scene, x, y, color) {
     // Categorías de colisión:
     // 0x0001 = suelo/paredes
     // 0x0002 = ragdolls
-    // Los ragdolls solo colisionan con suelo (mask: 0x0001), no entre ellos
+    // Los ragdolls colisionan con suelo Y entre ellos
     const partOptions = {
         friction: 0.8,
         frictionAir: 0.03,
         frictionStatic: 0.5,
         restitution: 0.1,
         collisionFilter: {
-            group: myGroup,           // Partes del mismo ragdoll no colisionan
+            group: myGroup,           // Partes del mismo ragdoll no colisionan entre sí
             category: 0x0002,         // Soy un ragdoll
-            mask: 0x0001              // Solo colisiono con suelo/paredes
+            mask: 0x0001 | 0x0002     // Colisiono con suelo Y otros ragdolls
         }
     };
 
