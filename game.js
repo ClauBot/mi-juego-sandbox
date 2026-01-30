@@ -1305,6 +1305,70 @@ function playBurnSound() {
     } catch (e) {}
 }
 
+function createAppleTree(scene, x) {
+    const tree = scene.add.graphics();
+    tree.setDepth(0);
+
+    const groundY = 545;
+
+    // Tronco
+    tree.fillStyle(0x8B4513, 1);
+    tree.fillRect(x - 12, groundY - 120, 24, 120);
+
+    // Textura del tronco
+    tree.fillStyle(0x654321, 1);
+    tree.fillRect(x - 8, groundY - 100, 4, 80);
+    tree.fillRect(x + 4, groundY - 90, 3, 60);
+
+    // Copa del árbol (círculos verdes)
+    tree.fillStyle(0x228B22, 1);
+    tree.fillCircle(x, groundY - 150, 50);
+    tree.fillCircle(x - 40, groundY - 130, 35);
+    tree.fillCircle(x + 40, groundY - 130, 35);
+    tree.fillCircle(x - 25, groundY - 170, 30);
+    tree.fillCircle(x + 25, groundY - 170, 30);
+    tree.fillCircle(x, groundY - 190, 25);
+
+    // Hojas más claras
+    tree.fillStyle(0x32CD32, 0.6);
+    tree.fillCircle(x - 20, groundY - 140, 20);
+    tree.fillCircle(x + 30, groundY - 150, 18);
+    tree.fillCircle(x + 10, groundY - 175, 15);
+
+    // Manzanas rojas (no caen, son decorativas)
+    tree.fillStyle(0xFF0000, 1);
+    const applePositions = [
+        { ax: x - 30, ay: groundY - 140 },
+        { ax: x + 25, ay: groundY - 135 },
+        { ax: x - 10, ay: groundY - 160 },
+        { ax: x + 35, ay: groundY - 155 },
+        { ax: x - 35, ay: groundY - 165 },
+        { ax: x + 5, ay: groundY - 180 },
+        { ax: x - 20, ay: groundY - 125 },
+        { ax: x + 15, ay: groundY - 145 },
+    ];
+
+    applePositions.forEach(pos => {
+        // Manzana
+        tree.fillStyle(0xFF0000, 1);
+        tree.fillCircle(pos.ax, pos.ay, 7);
+
+        // Brillo
+        tree.fillStyle(0xFF6666, 1);
+        tree.fillCircle(pos.ax - 2, pos.ay - 2, 2);
+
+        // Tallito
+        tree.fillStyle(0x8B4513, 1);
+        tree.fillRect(pos.ax - 1, pos.ay - 10, 2, 4);
+
+        // Hojita
+        tree.fillStyle(0x228B22, 1);
+        tree.fillEllipse(pos.ax + 3, pos.ay - 9, 5, 3);
+    });
+
+    return tree;
+}
+
 function createFlower(scene, x, y, color) {
     const flower = scene.add.graphics();
     flower.setDepth(1);
@@ -1347,6 +1411,10 @@ function createGround(scene) {
     for (let x = 0; x < 800; x += 20) {
         groundGraphics.fillRect(x, 545, 10, 5);
     }
+
+    // Árboles de manzana
+    createAppleTree(scene, 150);
+    createAppleTree(scene, 650);
 
     // Flores decorativas
     const flowerColors = [0xFF69B4, 0xFF1493, 0xFFB6C1, 0xFF4500, 0xFFFF00, 0x9370DB, 0x00CED1, 0xFF6347];
