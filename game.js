@@ -1266,17 +1266,26 @@ function createGround(scene) {
         createFlower(scene, fx, fy, color);
     }
 
-    scene.matter.add.rectangle(400, 575, 800, 50, {
+    // Colisión: suelo y paredes son categoría 0x0001
+    const wallOptions = {
         isStatic: true,
+        collisionFilter: {
+            category: 0x0001,
+            mask: 0x0002  // Colisiona con ragdolls
+        }
+    };
+
+    scene.matter.add.rectangle(400, 575, 800, 50, {
+        ...wallOptions,
         friction: 1,
         frictionStatic: 1,
         restitution: 0.05,
         label: 'ground'
     });
 
-    scene.matter.add.rectangle(-25, 300, 50, 700, { isStatic: true });
-    scene.matter.add.rectangle(825, 300, 50, 700, { isStatic: true });
-    scene.matter.add.rectangle(400, -25, 800, 50, { isStatic: true });
+    scene.matter.add.rectangle(-25, 300, 50, 700, wallOptions);
+    scene.matter.add.rectangle(825, 300, 50, 700, wallOptions);
+    scene.matter.add.rectangle(400, -25, 800, 50, wallOptions);
 }
 
 function createRagdoll(scene, x, y, color) {
@@ -1299,12 +1308,20 @@ function createRagdoll(scene, x, y, color) {
     const torsoY = feetY - legHeight - torsoHeight/2 + 5;
     const headY = torsoY - torsoHeight/2 - 11 + 5;
 
+    // Categorías de colisión:
+    // 0x0001 = suelo/paredes
+    // 0x0002 = ragdolls
+    // Los ragdolls solo colisionan con suelo (mask: 0x0001), no entre ellos
     const partOptions = {
         friction: 0.8,
         frictionAir: 0.03,
         frictionStatic: 0.5,
         restitution: 0.1,
-        collisionFilter: { group: myGroup }
+        collisionFilter: {
+            group: myGroup,           // Partes del mismo ragdoll no colisionan
+            category: 0x0002,         // Soy un ragdoll
+            mask: 0x0001              // Solo colisiono con suelo/paredes
+        }
     };
 
     const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true);
