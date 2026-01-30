@@ -1,20 +1,33 @@
 // ============================================
 // MI SANDBOX - Juego estilo Melon Playground
-// Con sangre y sonidos
+// Mobile & Tablet First + Música
 // ============================================
+
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const screenWidth = Math.min(window.innerWidth, 800);
+const screenHeight = Math.min(window.innerHeight, 600);
 
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: screenWidth,
+    height: screenHeight,
     parent: 'game-container',
     backgroundColor: '#87CEEB',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 800,
+        height: 600
+    },
     physics: {
         default: 'matter',
         matter: {
             gravity: { y: 0.8 },
             debug: false
         }
+    },
+    input: {
+        activePointers: 3
     },
     scene: {
         preload: preload,
@@ -37,6 +50,9 @@ let sceneRef;
 let ragdollCollisionGroup = 0;
 let bloodParticles = [];
 let audioContext = null;
+let musicPlaying = false;
+let musicButton;
+let musicGain = null;
 
 game = new Phaser.Game(config);
 
@@ -51,14 +67,20 @@ function create() {
 
     createGround(this);
 
-    createRagdoll(this, 200, 400, teamColors[0]);
-    createRagdoll(this, 400, 400, teamColors[1]);
-    createRagdoll(this, 600, 400, teamColors[2]);
+    if (isMobile) {
+        createRagdoll(this, 200, 400, teamColors[0]);
+        createRagdoll(this, 400, 400, teamColors[1]);
+    } else {
+        createRagdoll(this, 200, 400, teamColors[0]);
+        createRagdoll(this, 400, 400, teamColors[1]);
+        createRagdoll(this, 600, 400, teamColors[2]);
+    }
 
     createUI(this);
 
-    this.add.text(10, 10, 'Toca un muñeco para que se caiga!', {
-        font: '16px Arial',
+    const instructionText = isMobile ? 'Toca un muñeco!' : 'Toca un muñeco para que se caiga!';
+    this.add.text(10, 10, instructionText, {
+        font: '14px Arial',
         fill: '#333333'
     });
 
@@ -66,7 +88,7 @@ function create() {
     this.input.on('pointermove', onPointerMove);
     this.input.on('pointerup', onPointerUp);
 
-    // Sangre SOLO al chocar fuerte
+    // Colisiones
     this.matter.world.on('collisionstart', (event) => {
         event.pairs.forEach(pair => {
             const bodyA = pair.bodyA;
@@ -75,25 +97,201 @@ function create() {
             const vel = Math.abs(bodyA.velocity?.x || 0) + Math.abs(bodyA.velocity?.y || 0) +
                 Math.abs(bodyB.velocity?.x || 0) + Math.abs(bodyB.velocity?.y || 0);
 
-            // Solo si el impacto es MUY fuerte
             if (vel > 12) {
                 const x = pair.collision.supports[0]?.x || bodyA.position.x;
                 const y = pair.collision.supports[0]?.y || bodyA.position.y;
 
-                // 25% de chance de sangre
                 if (Math.random() < 0.25) {
-                    spawnBlood(x, y, Math.min(5, Math.floor(vel / 8))); // Máximo 5 gotas
+                    spawnBlood(x, y, Math.min(5, Math.floor(vel / 8)));
                 }
-
                 playHitSound(vel / 30);
             } else if (vel > 6) {
-                // Golpe medio: solo sonido
                 playHitSound(vel / 40);
             }
         });
     });
+
+    this.scale.on('resize', onResize, this);
 }
 
+// ============ MÚSICA TECNO ============
+function startMusic() {
+    if (!audioContext || musicPlaying) return;
+
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    musicPlaying = true;
+    musicGain = audioContext.createGain();
+    musicGain.gain.value = 0.15;
+    musicGain.connect(audioContext.destination);
+
+    // Loop de música tecno
+    playTechnoLoop();
+}
+
+function playTechnoLoop() {
+    if (!musicPlaying || !audioContext) return;
+
+    const bpm = 128;
+    const beatTime = 60 / bpm;
+    const now = audioContext.currentTime;
+
+    // Kick drum pattern
+    for (let i = 0; i < 4; i++) {
+        playKick(now + i * beatTime);
+    }
+
+    // Hi-hat pattern
+    for (let i = 0; i < 8; i++) {
+        playHiHat(now + i * beatTime / 2, i % 2 === 1 ? 0.3 : 0.5);
+    }
+
+    // Bass line
+    const bassNotes = [60, 60, 63, 65];
+    for (let i = 0; i < 4; i++) {
+        playBass(now + i * beatTime, bassNotes[i]);
+    }
+
+    // Synth melody cada 2 compases
+    if (Math.random() > 0.5) {
+        const melodyNotes = [72, 75, 77, 79, 77, 75];
+        melodyNotes.forEach((note, i) => {
+            playSynth(now + i * beatTime / 2, note, 0.1);
+        });
+    }
+
+    // Siguiente loop
+    setTimeout(() => playTechnoLoop(), beatTime * 4 * 1000 - 50);
+}
+
+function playKick(time) {
+    if (!audioContext || !musicGain) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(30, time + 0.1);
+
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+    osc.connect(gain);
+    gain.connect(musicGain);
+
+    osc.start(time);
+    osc.stop(time + 0.2);
+}
+
+function playHiHat(time, volume) {
+    if (!audioContext || !musicGain) return;
+    const bufferSize = audioContext.sampleRate * 0.05;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+
+    const source = audioContext.createBufferSource();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    source.buffer = buffer;
+    filter.type = 'highpass';
+    filter.frequency.value = 7000;
+
+    gain.gain.setValueAtTime(volume, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
+
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
+
+    source.start(time);
+}
+
+function playBass(time, note) {
+    if (!audioContext || !musicGain) return;
+    const freq = 440 * Math.pow(2, (note - 69) / 12) / 4;
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, time);
+
+    gain.gain.setValueAtTime(0.4, time);
+    gain.gain.setValueAtTime(0.4, time + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 400;
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
+
+    osc.start(time);
+    osc.stop(time + 0.25);
+}
+
+function playSynth(time, note, duration) {
+    if (!audioContext || !musicGain) return;
+    const freq = 440 * Math.pow(2, (note - 69) / 12);
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, time);
+
+    gain.gain.setValueAtTime(0.15, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+
+    osc.connect(gain);
+    gain.connect(musicGain);
+
+    osc.start(time);
+    osc.stop(time + duration);
+}
+
+function stopMusic() {
+    musicPlaying = false;
+    if (musicGain) {
+        musicGain.gain.value = 0;
+    }
+}
+
+function toggleMusic() {
+    if (musicPlaying) {
+        stopMusic();
+    } else {
+        startMusic();
+    }
+    updateMusicButton();
+}
+
+function updateMusicButton() {
+    if (!musicButton) return;
+    musicButton.clear();
+    const panelX = 800 - 70;
+    musicButton.fillStyle(musicPlaying ? 0x44AA44 : 0x666666, 1);
+    musicButton.fillRoundedRect(10, 550 - 45, 50, 35, 8);
+
+    // Icono de música
+    musicButton.fillStyle(0xFFFFFF, 1);
+    if (musicPlaying) {
+        musicButton.fillRect(20, 550 - 38, 4, 20);
+        musicButton.fillRect(30, 550 - 38, 4, 20);
+    } else {
+        musicButton.fillTriangle(20, 550 - 40, 20, 550 - 20, 40, 550 - 30);
+    }
+}
+
+// ============ SONIDOS ============
 function playHitSound(intensity) {
     if (!audioContext) return;
     try {
@@ -146,6 +344,57 @@ function playThrowSound(intensity) {
     } catch (e) {}
 }
 
+function playScream() {
+    if (!audioContext) return;
+    try {
+        const now = audioContext.currentTime;
+
+        // Voz principal - gritito corto
+        const osc1 = audioContext.createOscillator();
+        const gain1 = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+
+        // Frecuencia tipo "aaah" que sube
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(400 + Math.random() * 100, now);
+        osc1.frequency.linearRampToValueAtTime(600 + Math.random() * 150, now + 0.1);
+        osc1.frequency.linearRampToValueAtTime(350, now + 0.25);
+
+        filter.type = 'bandpass';
+        filter.frequency.value = 1000;
+        filter.Q.value = 2;
+
+        gain1.gain.setValueAtTime(0.25, now);
+        gain1.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+        osc1.connect(filter);
+        filter.connect(gain1);
+        gain1.connect(audioContext.destination);
+
+        osc1.start(now);
+        osc1.stop(now + 0.3);
+
+        // Armónico para más realismo
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(800 + Math.random() * 200, now);
+        osc2.frequency.linearRampToValueAtTime(1000, now + 0.1);
+        osc2.frequency.linearRampToValueAtTime(600, now + 0.25);
+
+        gain2.gain.setValueAtTime(0.1, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+
+        osc2.start(now);
+        osc2.stop(now + 0.25);
+    } catch (e) {}
+}
+
 function playSplatSound() {
     if (!audioContext) return;
     try {
@@ -170,8 +419,10 @@ function playSplatSound() {
     } catch (e) {}
 }
 
+function onResize(gameSize) {}
+
 function update() {
-    // Actualizar sangre
+    // Sangre
     for (let i = bloodParticles.length - 1; i >= 0; i--) {
         const blood = bloodParticles[i];
         blood.life--;
@@ -209,6 +460,7 @@ function update() {
             }
         }
 
+        // Limitar rotación
         if (torso && torso.body) {
             const torsoAngle = torso.body.angle;
             if (head && head.body) limitAngle(head, torsoAngle, 0.7);
@@ -218,8 +470,14 @@ function update() {
             if (legR && legR.body) limitAngle(legR, torsoAngle, 1.5);
         }
 
+        // Límites de pantalla y NO SALTAR
         ragdoll.parts.forEach(part => {
             if (part && part.body) {
+                // NO permitir saltos - limitar velocidad Y negativa
+                if (!ragdoll.isBeingDragged && part.body.velocity.y < -5) {
+                    part.setVelocityY(-5);
+                }
+
                 if (part.x < 20) {
                     part.setPosition(20, part.y);
                     part.setVelocityX(Math.abs(part.body.velocity.x) * 0.3);
@@ -238,6 +496,7 @@ function update() {
             }
         });
 
+        // Fricción en reposo
         if (!ragdoll.isStanding && !ragdoll.isBeingDragged) {
             let totalVel = 0;
             ragdoll.parts.forEach(p => {
@@ -259,11 +518,8 @@ function update() {
 }
 
 function spawnBlood(x, y, amount) {
-    amount = Math.min(amount, 5); // Máximo 5 gotas
-
-    if (amount > 2) {
-        playSplatSound();
-    }
+    amount = Math.min(amount, 5);
+    if (amount > 2) playSplatSound();
 
     for (let i = 0; i < amount; i++) {
         const size = Phaser.Math.Between(2, 4);
@@ -299,14 +555,22 @@ function limitAngle(part, referenceAngle, maxDiff) {
 }
 
 function onPointerDown(pointer) {
-    if (pointer.x > 710) return;
-
+    // Activar audio
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 
+    const uiAreaX = 800 - 90;
+    if (pointer.x > uiAreaX) return;
+
+    // Área de botón de música
+    if (pointer.x < 70 && pointer.y > 500) {
+        toggleMusic();
+        return;
+    }
+
     let closestPart = null;
-    let closestDist = 35;
+    let closestDist = isMobile ? 50 : 35;
     let ownerRagdoll = null;
 
     ragdolls.forEach(ragdoll => {
@@ -374,6 +638,7 @@ function onPointerUp(pointer) {
 
         if (throwSpeed > 5) {
             playThrowSound(throwSpeed);
+            playScream();
         }
 
         selectedPart.setVelocity(
@@ -423,12 +688,11 @@ function createRagdoll(scene, x, y, color) {
     const groundY = 550;
     const legHeight = 30;
     const torsoHeight = 36;
-    const headSize = 22;
 
     const feetY = groundY - 15;
     const legY = feetY - legHeight/2;
     const torsoY = feetY - legHeight - torsoHeight/2 + 5;
-    const headY = torsoY - torsoHeight/2 - headSize/2 + 5;
+    const headY = torsoY - torsoHeight/2 - 11 + 5;
 
     const partOptions = {
         friction: 0.8,
@@ -442,8 +706,7 @@ function createRagdoll(scene, x, y, color) {
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
-        density: 0.001,
-        label: 'head'
+        density: 0.001
     });
     parts.push(head);
 
@@ -451,8 +714,7 @@ function createRagdoll(scene, x, y, color) {
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
-        density: 0.002,
-        label: 'torso'
+        density: 0.002
     });
     parts.push(torso);
 
@@ -460,8 +722,7 @@ function createRagdoll(scene, x, y, color) {
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
-        density: 0.0008,
-        label: 'armL'
+        density: 0.0008
     });
     parts.push(armL);
 
@@ -469,8 +730,7 @@ function createRagdoll(scene, x, y, color) {
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
-        density: 0.0008,
-        label: 'armR'
+        density: 0.0008
     });
     parts.push(armR);
 
@@ -478,8 +738,7 @@ function createRagdoll(scene, x, y, color) {
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
-        density: 0.001,
-        label: 'legL'
+        density: 0.001
     });
     parts.push(legL);
 
@@ -487,8 +746,7 @@ function createRagdoll(scene, x, y, color) {
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
-        density: 0.001,
-        label: 'legR'
+        density: 0.001
     });
     parts.push(legR);
 
@@ -553,58 +811,55 @@ function createPartTexture(scene, name, width, height, color, isHead = false) {
 }
 
 function createUI(scene) {
-    const uiPanel = scene.add.graphics();
-    uiPanel.fillStyle(0x000000, 0.3);
-    uiPanel.fillRoundedRect(715, 5, 80, 200, 10);
+    const btnSize = isMobile ? 60 : 50;
+    const panelX = 800 - btnSize - 20;
 
+    const uiPanel = scene.add.graphics();
+    uiPanel.fillStyle(0x000000, 0.4);
+    uiPanel.fillRoundedRect(panelX - 5, 5, btnSize + 20, 220, 12);
+
+    // Botón +
     const spawnButton = scene.add.graphics();
     spawnButton.fillStyle(0x44AA44, 1);
-    spawnButton.fillRoundedRect(720, 10, 70, 40, 8);
+    spawnButton.fillRoundedRect(panelX, 15, btnSize, btnSize, 10);
     spawnButton.fillStyle(0xFFFFFF, 1);
-    spawnButton.fillRect(752, 18, 4, 24);
-    spawnButton.fillRect(742, 28, 24, 4);
+    spawnButton.fillRect(panelX + btnSize/2 - 2, 15 + 12, 4, btnSize - 24);
+    spawnButton.fillRect(panelX + 12, 15 + btnSize/2 - 2, btnSize - 24, 4);
 
-    const spawnZone = scene.add.zone(755, 30, 70, 40);
+    const spawnZone = scene.add.zone(panelX + btnSize/2, 15 + btnSize/2, btnSize, btnSize);
     spawnZone.setInteractive();
     spawnZone.on('pointerdown', () => {
-        const newX = Phaser.Math.Between(100, 650);
+        const newX = Phaser.Math.Between(100, 600);
         createRagdoll(sceneRef, newX, 400, teamColors[currentTeam]);
     });
 
+    // Botón equipo
     teamButton = scene.add.graphics();
-    drawTeamButton(teamButton, teamColors[currentTeam]);
+    drawTeamButton(teamButton, teamColors[currentTeam], panelX, btnSize);
 
-    const teamZone = scene.add.zone(755, 80, 70, 40);
+    const teamZone = scene.add.zone(panelX + btnSize/2, 85 + btnSize/2, btnSize, btnSize);
     teamZone.setInteractive();
     teamZone.on('pointerdown', () => {
         currentTeam = (currentTeam + 1) % 4;
         teamButton.clear();
-        drawTeamButton(teamButton, teamColors[currentTeam]);
-        const teamNames = ['Rojo', 'Azul', 'Amarillo', 'Verde'];
-        uiText.setText('Equipo:\n' + teamNames[currentTeam]);
+        drawTeamButton(teamButton, teamColors[currentTeam], panelX, btnSize);
     });
 
-    uiText = scene.add.text(725, 115, 'Equipo:\nRojo', {
-        font: '12px Arial',
-        fill: '#FFFFFF',
-        align: 'center'
-    });
-
+    // Botón limpiar
     const clearButton = scene.add.graphics();
     clearButton.fillStyle(0xAA4444, 1);
-    clearButton.fillRoundedRect(720, 160, 70, 30, 6);
+    clearButton.fillRoundedRect(panelX, 165, btnSize, 40, 8);
 
-    scene.add.text(730, 168, 'Limpiar', {
-        font: '12px Arial',
+    scene.add.text(panelX + btnSize/2, 185, 'X', {
+        font: 'bold 20px Arial',
         fill: '#FFFFFF'
-    });
+    }).setOrigin(0.5);
 
-    const clearZone = scene.add.zone(755, 175, 70, 30);
+    const clearZone = scene.add.zone(panelX + btnSize/2, 185, btnSize, 40);
     clearZone.setInteractive();
     clearZone.on('pointerdown', () => {
         bloodParticles.forEach(blood => blood.graphics.destroy());
         bloodParticles = [];
-
         ragdolls.forEach(ragdoll => {
             ragdoll.constraints.forEach(c => {
                 if (c) sceneRef.matter.world.removeConstraint(c);
@@ -615,11 +870,21 @@ function createUI(scene) {
         });
         ragdolls = [];
     });
+
+    // Botón de música (abajo izquierda)
+    musicButton = scene.add.graphics();
+    updateMusicButton();
+
+    const musicZone = scene.add.zone(35, 550 - 27, 50, 35);
+    musicZone.setInteractive();
+    musicZone.on('pointerdown', () => {
+        toggleMusic();
+    });
 }
 
-function drawTeamButton(graphics, color) {
-    graphics.fillStyle(0x666666, 1);
-    graphics.fillRoundedRect(720, 60, 70, 40, 8);
+function drawTeamButton(graphics, color, panelX, btnSize) {
+    graphics.fillStyle(0x555555, 1);
+    graphics.fillRoundedRect(panelX, 85, btnSize, btnSize, 10);
     graphics.fillStyle(color, 1);
-    graphics.fillCircle(755, 80, 14);
+    graphics.fillCircle(panelX + btnSize/2, 85 + btnSize/2, btnSize/2 - 8);
 }

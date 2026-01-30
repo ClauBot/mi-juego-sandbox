@@ -1,0 +1,24 @@
+{
+    "name": "Ragdoll Sandbox",
+    "short_name": "Ragdoll",
+    "description": "Sandbox ragdoll game - arrastra y lanza muñecos",
+    "start_url": "/",
+    "display": "fullscreen",
+    "orientation": "portrait",
+    "background_color": "#87CEEB",
+    "theme_color": "#87CEEB",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
