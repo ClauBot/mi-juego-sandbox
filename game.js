@@ -53,6 +53,11 @@ let audioContext = null;
 let musicPlaying = false;
 let musicButton;
 let musicGain = null;
+let currentWeapon = null; // 'pistola' o 'cuchillo'
+let weapons = [];
+let weaponMenuOpen = false;
+let weaponButton;
+let weaponMenu;
 
 game = new Phaser.Game(config);
 
@@ -105,8 +110,12 @@ function create() {
                     spawnBlood(x, y, Math.min(5, Math.floor(vel / 8)));
                 }
                 playHitSound(vel / 30);
+
+                // Reducir vida al golpear
+                damageRagdollAt(x, y, Math.floor(vel / 2));
             } else if (vel > 6) {
                 playHitSound(vel / 40);
+                damageRagdollAt(x, y, Math.floor(vel / 4));
             }
         });
     });
@@ -904,6 +913,12 @@ function update() {
     // Mover nubes
     updateClouds();
 
+    // Actualizar posición de armas
+    updateWeapons();
+
+    // Actualizar barras de vida
+    updateAllHealthBars();
+
     // Verificar si alguien está cerca del sol
     checkSunBurn();
 
@@ -1051,6 +1066,22 @@ function onPointerDown(pointer) {
     // Área de botón de música
     if (pointer.x < 70 && pointer.y > 500) {
         toggleMusic();
+        return;
+    }
+
+    // Área de botón de armas
+    if (pointer.x > 340 && pointer.x < 460 && pointer.y < 50) {
+        return;
+    }
+
+    // Si hay arma seleccionada, crear arma
+    if (currentWeapon && pointer.y > 100 && pointer.y < 530) {
+        if (currentWeapon === 'pistola') {
+            createPistola(sceneRef, pointer.x, pointer.y);
+        } else if (currentWeapon === 'cuchillo') {
+            createCuchillo(sceneRef, pointer.x, pointer.y);
+        }
+        playGrabSound();
         return;
     }
 
@@ -1557,6 +1588,17 @@ function createRagdoll(scene, x, y, color) {
         pointB: { x: 0, y: -14 }
     }));
 
+    // Barra de vida
+    const healthBg = scene.add.graphics();
+    healthBg.fillStyle(0x333333, 1);
+    healthBg.fillRect(-20, -8, 40, 8);
+    healthBg.setDepth(50);
+
+    const healthBar = scene.add.graphics();
+    healthBar.fillStyle(0x00FF00, 1);
+    healthBar.fillRect(-19, -7, 38, 6);
+    healthBar.setDepth(51);
+
     const ragdoll = {
         parts: parts,
         constraints: constraints,
@@ -1564,7 +1606,12 @@ function createRagdoll(scene, x, y, color) {
         team: teamColors.indexOf(color),
         isBeingDragged: false,
         isStanding: true,
-        collisionGroup: myGroup
+        collisionGroup: myGroup,
+        health: 100,
+        maxHealth: 100,
+        healthBar: healthBar,
+        healthBg: healthBg,
+        isDead: false
     };
 
     ragdolls.push(ragdoll);
@@ -1651,8 +1698,19 @@ function createUI(scene) {
             ragdoll.parts.forEach(p => {
                 if (p) p.destroy();
             });
+            if (ragdoll.healthBar) ragdoll.healthBar.destroy();
+            if (ragdoll.healthBg) ragdoll.healthBg.destroy();
         });
         ragdolls = [];
+
+        // Limpiar armas
+        weapons.forEach(w => {
+            if (w.graphics) w.graphics.destroy();
+            if (w.body) sceneRef.matter.world.remove(w.body);
+        });
+        weapons = [];
+        currentWeapon = null;
+        drawWeaponButton();
     });
 
     // Botón de música (abajo izquierda)
@@ -1667,6 +1725,104 @@ function createUI(scene) {
         pointer.event.stopPropagation();
         toggleMusic();
     });
+
+    // Botón de armas (arriba centro)
+    weaponButton = scene.add.graphics();
+    weaponButton.setDepth(100);
+    drawWeaponButton();
+
+    const weaponZone = scene.add.zone(400, 25, 100, 40);
+    weaponZone.setInteractive();
+    weaponZone.setDepth(100);
+    weaponZone.on('pointerdown', () => {
+        toggleWeaponMenu();
+    });
+
+    // Menú de armas (oculto inicialmente)
+    weaponMenu = scene.add.container(400, 70);
+    weaponMenu.setDepth(101);
+    weaponMenu.setVisible(false);
+
+    const menuBg = scene.add.graphics();
+    menuBg.fillStyle(0x333333, 0.95);
+    menuBg.fillRoundedRect(-80, 0, 160, 90, 10);
+    weaponMenu.add(menuBg);
+
+    // Opción Pistola
+    const pistolaBtn = scene.add.graphics();
+    pistolaBtn.fillStyle(0x555555, 1);
+    pistolaBtn.fillRoundedRect(-70, 10, 140, 35, 8);
+    weaponMenu.add(pistolaBtn);
+
+    const pistolaText = scene.add.text(0, 27, '🔫 Pistola', {
+        font: 'bold 16px Arial',
+        fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    weaponMenu.add(pistolaText);
+
+    const pistolaZone = scene.add.zone(400, 97, 140, 35);
+    pistolaZone.setInteractive();
+    pistolaZone.setDepth(102);
+    pistolaZone.on('pointerdown', () => {
+        currentWeapon = 'pistola';
+        weaponMenu.setVisible(false);
+        weaponMenuOpen = false;
+        drawWeaponButton();
+    });
+
+    // Opción Cuchillo
+    const cuchilloBtn = scene.add.graphics();
+    cuchilloBtn.fillStyle(0x555555, 1);
+    cuchilloBtn.fillRoundedRect(-70, 50, 140, 35, 8);
+    weaponMenu.add(cuchilloBtn);
+
+    const cuchilloText = scene.add.text(0, 67, '🔪 Cuchillo', {
+        font: 'bold 16px Arial',
+        fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    weaponMenu.add(cuchilloText);
+
+    const cuchilloZone = scene.add.zone(400, 137, 140, 35);
+    cuchilloZone.setInteractive();
+    cuchilloZone.setDepth(102);
+    cuchilloZone.on('pointerdown', () => {
+        currentWeapon = 'cuchillo';
+        weaponMenu.setVisible(false);
+        weaponMenuOpen = false;
+        drawWeaponButton();
+    });
+}
+
+function drawWeaponButton() {
+    weaponButton.clear();
+    weaponButton.fillStyle(0x666666, 1);
+    weaponButton.fillRoundedRect(350, 5, 100, 40, 10);
+
+    weaponButton.fillStyle(0xFFFFFF, 1);
+
+    if (currentWeapon === 'pistola') {
+        // Dibujar pistola simple
+        weaponButton.fillRect(370, 18, 25, 8);
+        weaponButton.fillRect(365, 22, 10, 15);
+        weaponButton.fillRect(395, 15, 8, 5);
+    } else if (currentWeapon === 'cuchillo') {
+        // Dibujar cuchillo simple
+        weaponButton.fillRect(365, 22, 15, 8);
+        weaponButton.fillStyle(0xCCCCCC, 1);
+        weaponButton.fillRect(380, 20, 35, 4);
+        weaponButton.fillTriangle(415, 22, 425, 22, 415, 18);
+    } else {
+        // Sin arma - mostrar texto
+        sceneRef.add.text(400, 25, 'ARMAS', {
+            font: 'bold 14px Arial',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5).setDepth(101);
+    }
+}
+
+function toggleWeaponMenu() {
+    weaponMenuOpen = !weaponMenuOpen;
+    weaponMenu.setVisible(weaponMenuOpen);
 }
 
 function drawTeamButton(graphics, color, panelX, btnSize) {
@@ -1674,4 +1830,244 @@ function drawTeamButton(graphics, color, panelX, btnSize) {
     graphics.fillRoundedRect(panelX, 85, btnSize, btnSize, 10);
     graphics.fillStyle(color, 1);
     graphics.fillCircle(panelX + btnSize/2, 85 + btnSize/2, btnSize/2 - 8);
+}
+
+// ============ ARMAS ============
+function createPistola(scene, x, y) {
+    const pistol = scene.add.graphics();
+    pistol.setDepth(10);
+
+    // Cuerpo de la pistola
+    pistol.fillStyle(0x333333, 1);
+    pistol.fillRect(-20, -5, 40, 12);
+
+    // Cañón
+    pistol.fillStyle(0x222222, 1);
+    pistol.fillRect(15, -3, 20, 8);
+
+    // Mango
+    pistol.fillStyle(0x4a3728, 1);
+    pistol.fillRect(-15, 7, 12, 18);
+
+    // Gatillo
+    pistol.fillStyle(0x222222, 1);
+    pistol.fillRect(-5, 7, 3, 8);
+
+    pistol.setPosition(x, y);
+
+    const weapon = {
+        graphics: pistol,
+        type: 'pistola',
+        x: x,
+        y: y,
+        body: scene.matter.add.rectangle(x, y, 50, 20, {
+            friction: 0.8,
+            frictionAir: 0.02,
+            restitution: 0.2,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createCuchillo(scene, x, y) {
+    const knife = scene.add.graphics();
+    knife.setDepth(10);
+
+    // Mango
+    knife.fillStyle(0x4a3728, 1);
+    knife.fillRect(-25, -4, 20, 10);
+
+    // Hoja
+    knife.fillStyle(0xCCCCCC, 1);
+    knife.fillRect(-5, -3, 35, 8);
+
+    // Punta
+    knife.fillTriangle(30, -3, 30, 5, 40, 1);
+
+    // Filo (línea brillante)
+    knife.fillStyle(0xFFFFFF, 1);
+    knife.fillRect(-5, -3, 35, 2);
+
+    knife.setPosition(x, y);
+
+    const weapon = {
+        graphics: knife,
+        type: 'cuchillo',
+        x: x,
+        y: y,
+        body: scene.matter.add.rectangle(x, y, 60, 15, {
+            friction: 0.8,
+            frictionAir: 0.02,
+            restitution: 0.2,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function updateWeapons() {
+    weapons.forEach(weapon => {
+        if (weapon.body) {
+            weapon.x = weapon.body.position.x;
+            weapon.y = weapon.body.position.y;
+            weapon.graphics.setPosition(weapon.x, weapon.y);
+            weapon.graphics.setRotation(weapon.body.angle);
+        }
+    });
+}
+
+function damageRagdollAt(x, y, damage) {
+    ragdolls.forEach(ragdoll => {
+        if (ragdoll.isDead) return;
+
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Phaser.Math.Distance.Between(x, y, part.x, part.y);
+                if (dist < 50) {
+                    ragdoll.health -= damage;
+                    if (ragdoll.health < 0) ragdoll.health = 0;
+
+                    updateHealthBar(ragdoll);
+
+                    if (ragdoll.health <= 0 && !ragdoll.isDead) {
+                        killRagdoll(ragdoll);
+                    }
+                }
+            }
+        });
+    });
+}
+
+function updateHealthBar(ragdoll) {
+    const head = ragdoll.parts[0];
+    if (!head || !ragdoll.healthBar || !ragdoll.healthBg) return;
+
+    // Posicionar encima de la cabeza
+    ragdoll.healthBg.setPosition(head.x - 20, head.y - 35);
+    ragdoll.healthBar.setPosition(head.x - 20, head.y - 35);
+
+    // Actualizar tamaño y color
+    ragdoll.healthBar.clear();
+    const healthPercent = ragdoll.health / ragdoll.maxHealth;
+    const barWidth = 38 * healthPercent;
+
+    // Color según vida
+    let color = 0x00FF00;
+    if (healthPercent < 0.3) color = 0xFF0000;
+    else if (healthPercent < 0.6) color = 0xFFFF00;
+
+    ragdoll.healthBar.fillStyle(color, 1);
+    ragdoll.healthBar.fillRect(0, 0, barWidth, 6);
+
+    ragdoll.healthBg.clear();
+    ragdoll.healthBg.fillStyle(0x333333, 1);
+    ragdoll.healthBg.fillRect(0, 0, 40, 8);
+}
+
+function killRagdoll(ragdoll) {
+    ragdoll.isDead = true;
+
+    // Cambiar ojos a X
+    const head = ragdoll.parts[0];
+    if (head) {
+        // Crear X en los ojos
+        const deadEyes = sceneRef.add.text(head.x, head.y - 2, 'X X', {
+            font: 'bold 10px Arial',
+            fill: '#000000'
+        }).setOrigin(0.5);
+        deadEyes.setDepth(60);
+        ragdoll.deadEyes = deadEyes;
+
+        // Mostrar "womp womp"
+        const wompText = sceneRef.add.text(head.x, head.y - 50, 'womp womp', {
+            font: 'bold 18px Arial',
+            fill: '#000000',
+            stroke: '#FFFFFF',
+            strokeThickness: 3
+        }).setOrigin(0.5);
+        wompText.setDepth(100);
+
+        // Sonido womp womp
+        playWompSound();
+
+        // Animar texto
+        sceneRef.tweens.add({
+            targets: wompText,
+            y: wompText.y - 30,
+            alpha: 0,
+            duration: 2000,
+            ease: 'Power2',
+            onComplete: () => wompText.destroy()
+        });
+    }
+}
+
+function playWompSound() {
+    if (!audioContext) return;
+    try {
+        const now = audioContext.currentTime;
+
+        // Primer womp
+        const osc1 = audioContext.createOscillator();
+        const gain1 = audioContext.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(200, now);
+        osc1.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gain1.gain.setValueAtTime(0.4, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc1.connect(gain1);
+        gain1.connect(audioContext.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.3);
+
+        // Segundo womp
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(180, now + 0.35);
+        osc2.frequency.linearRampToValueAtTime(80, now + 0.7);
+        gain2.gain.setValueAtTime(0.4, now + 0.35);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.start(now + 0.35);
+        osc2.stop(now + 0.7);
+    } catch (e) {}
+}
+
+function updateAllHealthBars() {
+    ragdolls.forEach(ragdoll => {
+        const head = ragdoll.parts[0];
+        if (head && ragdoll.healthBg && ragdoll.healthBar) {
+            ragdoll.healthBg.setPosition(head.x - 20, head.y - 35);
+
+            ragdoll.healthBar.clear();
+            const healthPercent = ragdoll.health / ragdoll.maxHealth;
+            const barWidth = 38 * healthPercent;
+
+            let color = 0x00FF00;
+            if (healthPercent < 0.3) color = 0xFF0000;
+            else if (healthPercent < 0.6) color = 0xFFFF00;
+
+            ragdoll.healthBar.fillStyle(color, 1);
+            ragdoll.healthBar.fillRect(0, 0, barWidth, 6);
+        }
+
+        // Actualizar posición de ojos muertos
+        if (ragdoll.isDead && ragdoll.deadEyes && head) {
+            ragdoll.deadEyes.setPosition(head.x, head.y - 2);
+        }
+    });
+}
 }
