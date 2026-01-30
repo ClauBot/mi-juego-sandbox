@@ -1213,6 +1213,36 @@ function updateClouds() {
     });
 }
 
+function createFlower(scene, x, y, color) {
+    const flower = scene.add.graphics();
+    flower.setDepth(1);
+
+    // Tallo
+    flower.fillStyle(0x228B22, 1);
+    flower.fillRect(x - 1, y, 3, 15);
+
+    // Hojas
+    flower.fillStyle(0x32CD32, 1);
+    flower.fillEllipse(x - 5, y + 8, 8, 4);
+    flower.fillEllipse(x + 5, y + 6, 8, 4);
+
+    // Pétalos
+    flower.fillStyle(color, 1);
+    const petalSize = 5 + Math.random() * 3;
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const px = x + Math.cos(angle) * 6;
+        const py = y - 5 + Math.sin(angle) * 6;
+        flower.fillCircle(px, py, petalSize);
+    }
+
+    // Centro
+    flower.fillStyle(0xFFD700, 1);
+    flower.fillCircle(x, y - 5, 4);
+
+    return flower;
+}
+
 function createGround(scene) {
     // Crear cielo primero
     createSky(scene);
@@ -1224,6 +1254,16 @@ function createGround(scene) {
     groundGraphics.fillStyle(0x3d6b35, 1);
     for (let x = 0; x < 800; x += 20) {
         groundGraphics.fillRect(x, 545, 10, 5);
+    }
+
+    // Flores decorativas
+    const flowerColors = [0xFF69B4, 0xFF1493, 0xFFB6C1, 0xFF4500, 0xFFFF00, 0x9370DB, 0x00CED1, 0xFF6347];
+
+    for (let i = 0; i < 20; i++) {
+        const fx = 30 + Math.random() * 740;
+        const fy = 535 + Math.random() * 10;
+        const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+        createFlower(scene, fx, fy, color);
     }
 
     scene.matter.add.rectangle(400, 575, 800, 50, {
