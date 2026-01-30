@@ -216,6 +216,33 @@ function playTechnoLoop() {
         playRiser(now, beatTime * 4);
     }
 
+    // GUITARRA ELÉCTRICA - riffs en compases alternos
+    if (barCount % 2 === 1) {
+        playGuitarRiff(now, beatTime);
+    }
+
+    // Power chords en momentos épicos
+    if (barCount % 8 === 4) {
+        playPowerChord(now, 40, beatTime * 2);
+        playPowerChord(now + beatTime * 2, 43, beatTime * 2);
+    }
+
+    // GUITARRA ELECTROACÚSTICA - fingerpicking
+    if (barCount % 4 === 0) {
+        const chordRoots = [40, 45, 43, 40]; // Em, Am, G, Em
+        playAcousticPattern(now, beatTime, chordRoots[currentPattern % 4]);
+    }
+
+    // Rasgueo acústico ocasional
+    if (barCount % 8 === 2) {
+        const chords = [
+            [40, 44, 47, 52], // Em
+            [45, 48, 52, 57], // Am
+        ];
+        playAcousticChord(now, chords[0], beatTime * 2);
+        playAcousticChord(now + beatTime * 2, chords[1], beatTime * 2);
+    }
+
     // Cambiar patrón cada 4 compases
     if (barCount % 4 === 0) {
         currentPattern++;
@@ -465,6 +492,206 @@ function playRiser(time, duration) {
     osc.stop(time + duration + 0.1);
 }
 
+// ============ GUITARRA ELÉCTRICA ============
+function playElectricGuitar(time, note, duration, style = 'clean') {
+    if (!audioContext || !musicGain) return;
+
+    const freq = 440 * Math.pow(2, (note - 69) / 12);
+
+    // Múltiples osciladores para simular cuerdas
+    const oscs = [];
+    const numOscs = 3;
+
+    const masterGain = audioContext.createGain();
+    const distortion = audioContext.createWaveShaper();
+    const filter = audioContext.createBiquadFilter();
+    const filter2 = audioContext.createBiquadFilter();
+
+    // Curva de distorsión
+    function makeDistortionCurve(amount) {
+        const samples = 44100;
+        const curve = new Float32Array(samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < samples; i++) {
+            const x = (i * 2) / samples - 1;
+            curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+        }
+        return curve;
+    }
+
+    if (style === 'distorted') {
+        distortion.curve = makeDistortionCurve(50);
+        distortion.oversample = '4x';
+    } else {
+        distortion.curve = makeDistortionCurve(5);
+    }
+
+    // Filtros para tono de guitarra
+    filter.type = 'lowpass';
+    filter.frequency.value = style === 'distorted' ? 3000 : 2500;
+    filter.Q.value = 1;
+
+    filter2.type = 'peaking';
+    filter2.frequency.value = 800;
+    filter2.gain.value = 3;
+    filter2.Q.value = 2;
+
+    // Crear osciladores con detuning para más riqueza
+    for (let i = 0; i < numOscs; i++) {
+        const osc = audioContext.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, time);
+        osc.detune.setValueAtTime((i - 1) * 8, time); // Detuning sutil
+
+        const oscGain = audioContext.createGain();
+        oscGain.gain.value = 0.3;
+
+        osc.connect(oscGain);
+        oscGain.connect(distortion);
+        oscs.push(osc);
+    }
+
+    distortion.connect(filter);
+    filter.connect(filter2);
+    filter2.connect(masterGain);
+    masterGain.connect(musicGain);
+
+    // Envelope de guitarra
+    const vol = style === 'distorted' ? 0.12 : 0.1;
+    masterGain.gain.setValueAtTime(0, time);
+    masterGain.gain.linearRampToValueAtTime(vol, time + 0.01);
+    masterGain.gain.setValueAtTime(vol * 0.8, time + 0.05);
+    masterGain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+
+    oscs.forEach(osc => {
+        osc.start(time);
+        osc.stop(time + duration + 0.1);
+    });
+}
+
+// Power chord para guitarra eléctrica
+function playPowerChord(time, rootNote, duration) {
+    if (!audioContext || !musicGain) return;
+
+    // Root, quinta, octava
+    playElectricGuitar(time, rootNote, duration, 'distorted');
+    playElectricGuitar(time, rootNote + 7, duration, 'distorted');
+    playElectricGuitar(time, rootNote + 12, duration, 'distorted');
+}
+
+// Riff de guitarra eléctrica
+function playGuitarRiff(time, beatTime) {
+    if (!audioContext || !musicGain) return;
+
+    const riffs = [
+        // Riff 1 - Em pentatonic
+        [40, 43, 45, 43, 40, 0, 43, 40],
+        // Riff 2 - Power chords
+        [40, 0, 40, 43, 45, 0, 43, 40],
+        // Riff 3 - Melodic
+        [52, 55, 52, 50, 48, 50, 52, 48],
+    ];
+
+    const riff = riffs[currentPattern % 3];
+
+    for (let i = 0; i < 8; i++) {
+        if (riff[i] > 0) {
+            playElectricGuitar(time + i * beatTime / 2, riff[i], beatTime / 2 - 0.02, 'distorted');
+        }
+    }
+}
+
+// ============ GUITARRA ELECTROACÚSTICA ============
+function playAcousticGuitar(time, note, duration) {
+    if (!audioContext || !musicGain) return;
+
+    const freq = 440 * Math.pow(2, (note - 69) / 12);
+
+    // Simular cuerda de guitarra acústica con Karplus-Strong simplificado
+    const bufferSize = Math.floor(audioContext.sampleRate / freq);
+    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * duration, audioContext.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+
+    // Inicializar con ruido
+    const noise = new Float32Array(bufferSize);
+    for (let i = 0; i < bufferSize; i++) {
+        noise[i] = Math.random() * 2 - 1;
+    }
+
+    // Algoritmo Karplus-Strong
+    let pos = 0;
+    for (let i = 0; i < data.length; i++) {
+        const sample = noise[pos];
+        // Filtro paso bajo (promedio con anterior)
+        noise[pos] = (noise[pos] + noise[(pos + 1) % bufferSize]) * 0.498;
+        data[i] = sample;
+        pos = (pos + 1) % bufferSize;
+    }
+
+    const source = audioContext.createBufferSource();
+    source.buffer = noiseBuffer;
+
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    const bodyResonance = audioContext.createBiquadFilter();
+
+    // Resonancia del cuerpo de la guitarra
+    bodyResonance.type = 'peaking';
+    bodyResonance.frequency.value = 250;
+    bodyResonance.gain.value = 4;
+    bodyResonance.Q.value = 2;
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 4000;
+
+    gain.gain.setValueAtTime(0.18, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+
+    source.connect(bodyResonance);
+    bodyResonance.connect(filter);
+    filter.connect(gain);
+    gain.connect(musicGain);
+
+    source.start(time);
+    source.stop(time + duration);
+}
+
+// Acorde de guitarra acústica (rasgueo)
+function playAcousticChord(time, notes, duration) {
+    if (!audioContext || !musicGain) return;
+
+    // Rasgueo - notas ligeramente desfasadas
+    notes.forEach((note, i) => {
+        playAcousticGuitar(time + i * 0.015, note, duration - i * 0.015);
+    });
+}
+
+// Patrón de guitarra acústica
+function playAcousticPattern(time, beatTime, chordRoot) {
+    if (!audioContext || !musicGain) return;
+
+    // Acorde (root, tercera, quinta, octava)
+    const chord = [chordRoot, chordRoot + 4, chordRoot + 7, chordRoot + 12];
+
+    // Patrón de fingerpicking
+    const pattern = [
+        { notes: [chord[0]], t: 0 },
+        { notes: [chord[2]], t: beatTime * 0.5 },
+        { notes: [chord[1], chord[3]], t: beatTime },
+        { notes: [chord[2]], t: beatTime * 1.5 },
+        { notes: [chord[0]], t: beatTime * 2 },
+        { notes: [chord[2]], t: beatTime * 2.5 },
+        { notes: [chord[1], chord[3]], t: beatTime * 3 },
+        { notes: [chord[2]], t: beatTime * 3.5 },
+    ];
+
+    pattern.forEach(p => {
+        p.notes.forEach(note => {
+            playAcousticGuitar(time + p.t, note, beatTime * 0.9);
+        });
+    });
+}
+
 function stopMusic() {
     musicPlaying = false;
     if (musicGain) {
@@ -674,6 +901,9 @@ function playSplatSound() {
 function onResize(gameSize) {}
 
 function update() {
+    // Mover nubes
+    updateClouds();
+
     // Sangre
     for (let i = bloodParticles.length - 1; i >= 0; i--) {
         const blood = bloodParticles[i];
@@ -903,7 +1133,90 @@ function onPointerUp(pointer) {
     }
 }
 
+let clouds = [];
+let sun;
+
+function createSky(scene) {
+    // Sol
+    sun = scene.add.graphics();
+    sun.setDepth(-10);
+
+    // Círculo principal del sol
+    sun.fillStyle(0xFFDD00, 1);
+    sun.fillCircle(700, 60, 40);
+
+    // Brillo alrededor
+    sun.fillStyle(0xFFEE44, 0.5);
+    sun.fillCircle(700, 60, 50);
+
+    // Rayos
+    sun.lineStyle(3, 0xFFDD00, 0.7);
+    for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x1 = 700 + Math.cos(angle) * 55;
+        const y1 = 60 + Math.sin(angle) * 55;
+        const x2 = 700 + Math.cos(angle) * 70;
+        const y2 = 60 + Math.sin(angle) * 70;
+        sun.lineBetween(x1, y1, x2, y2);
+    }
+
+    // Crear nubes
+    createCloud(scene, 100, 50, 1.2);
+    createCloud(scene, 300, 80, 0.8);
+    createCloud(scene, 500, 40, 1.0);
+    createCloud(scene, 150, 100, 0.6);
+    createCloud(scene, 600, 90, 0.9);
+}
+
+function createCloud(scene, x, y, scale) {
+    const cloud = scene.add.graphics();
+    cloud.setDepth(-5);
+
+    // Dibujar nube esponjosa
+    cloud.fillStyle(0xFFFFFF, 0.9);
+
+    // Múltiples círculos para forma de nube
+    cloud.fillCircle(0, 0, 25 * scale);
+    cloud.fillCircle(25 * scale, -5, 20 * scale);
+    cloud.fillCircle(-25 * scale, 0, 18 * scale);
+    cloud.fillCircle(15 * scale, 10, 22 * scale);
+    cloud.fillCircle(-15 * scale, 8, 20 * scale);
+    cloud.fillCircle(40 * scale, 5, 15 * scale);
+    cloud.fillCircle(-35 * scale, 5, 12 * scale);
+
+    // Sombra sutil
+    cloud.fillStyle(0xDDDDDD, 0.5);
+    cloud.fillCircle(5 * scale, 15 * scale, 18 * scale);
+    cloud.fillCircle(-10 * scale, 12 * scale, 15 * scale);
+
+    cloud.setPosition(x, y);
+
+    clouds.push({
+        graphics: cloud,
+        x: x,
+        y: y,
+        speed: 0.2 + Math.random() * 0.3,
+        scale: scale
+    });
+}
+
+function updateClouds() {
+    clouds.forEach(cloud => {
+        cloud.x += cloud.speed;
+
+        // Regresar al inicio cuando sale de pantalla
+        if (cloud.x > 900) {
+            cloud.x = -100;
+        }
+
+        cloud.graphics.setPosition(cloud.x, cloud.y);
+    });
+}
+
 function createGround(scene) {
+    // Crear cielo primero
+    createSky(scene);
+
     const groundGraphics = scene.add.graphics();
     groundGraphics.fillStyle(0x4a7c3f, 1);
     groundGraphics.fillRect(0, 550, 800, 50);
