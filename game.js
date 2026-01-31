@@ -371,8 +371,8 @@ function create() {
 // Contador global de visitantes
 async function checkVisitorCount() {
     try {
-        // Usar CountAPI para contar visitantes globales
-        const response = await fetch('https://api.countapi.xyz/hit/sandboxmayhem/visits');
+        // Usar CountAPI para contar visitantes globales (v2 - contador nuevo)
+        const response = await fetch('https://api.countapi.xyz/hit/sandboxmayhem-oficial/visitas');
         const data = await response.json();
         const visitorNumber = data.value;
 
