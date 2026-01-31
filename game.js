@@ -322,13 +322,13 @@ function saveSaveData() {
 function checkDailyReward() {
     const today = new Date().toDateString();
     if (lastDailyReward !== today) {
-        mayhems += 100;
+        mayhems += 1000;
         lastDailyReward = today;
         saveSaveData();
         // Mostrar notificación después de que el juego inicie
         setTimeout(() => {
             if (sceneRef) {
-                showNotification('🎁 +100 Mayhems diarios!');
+                showNotification('🎁 +1000 Mayhems diarios!');
             }
         }, 1500);
     }
