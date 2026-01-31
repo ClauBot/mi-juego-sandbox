@@ -244,7 +244,8 @@ const shopItems = {
         { id: 'arcoiris', name: 'Arcoíris', emoji: '🌈', price: 100 },
         { id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 125 },
         { id: 'playa', name: 'Playa', emoji: '🏖️', price: 75 },
-        { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 60 }
+        { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 60 },
+        { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 100 }
     ]
 };
 
@@ -2605,69 +2606,12 @@ function createUI(scene) {
         toggleMusic();
     });
 
-    // Menú de armas - grid compacto
+    // Menú de armas (dinámico - solo muestra armas desbloqueadas)
     const menuX = weaponX + btnSize/2;
     const menuY = topY + btnSize + 5;
     weaponMenu = scene.add.container(menuX, menuY);
     weaponMenu.setDepth(101);
     weaponMenu.setVisible(false);
-
-    const weaponOptions = [
-        { id: 'pistola', emoji: '🔫' },
-        { id: 'cuchillo', emoji: '🔪' },
-        { id: 'granada', emoji: '💣' },
-        { id: 'espada', emoji: '🗡️' },
-        { id: 'bat', emoji: '🏏' },
-        { id: 'barril', emoji: '🛢️' },
-        { id: 'trampolin', emoji: '🛝' },
-        { id: 'katana', emoji: '⚔️' },
-        { id: 'motosierra', emoji: '🪚' },
-        { id: 'arco', emoji: '🏹' },
-        { id: 'nuke', emoji: '☢️' },
-        { id: 'iman', emoji: '🧲' },
-        { id: 'lanzallamas', emoji: '🔥' },
-        { id: 'portal', emoji: '🌀' },
-        { id: 'ventilador', emoji: '💨' }
-    ];
-
-    const cols = 4;
-    const itemW = 70;
-    const itemH = 40;
-    const menuW = cols * itemW + 10;
-    const menuH = Math.ceil(weaponOptions.length / cols) * itemH + 10;
-
-    const menuBg = scene.add.graphics();
-    menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
-    weaponMenu.add(menuBg);
-
-    weaponOptions.forEach((opt, i) => {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const bx = -menuW/2 + 5 + col * itemW;
-        const by = 5 + row * itemH;
-
-        const btn = scene.add.graphics();
-        btn.fillStyle(0x555555, 1);
-        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
-        weaponMenu.add(btn);
-
-        const txt = scene.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, opt.emoji, {
-            font: '20px Arial'
-        }).setOrigin(0.5);
-        weaponMenu.add(txt);
-
-        // Zona interactiva dentro del container
-        const zoneGraphic = scene.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
-        zoneGraphic.setInteractive();
-        weaponMenu.add(zoneGraphic);
-        zoneGraphic.on('pointerdown', () => {
-            currentWeapon = opt.id;
-            weaponMenu.setVisible(false);
-            weaponMenuOpen = false;
-            drawWeaponButton();
-        });
-    });
 
     // === BOTÓN DE MAPA (izquierda del botón de armas) ===
     const mapX = weaponX - margin - btnSize;
@@ -2685,59 +2629,12 @@ function createUI(scene) {
     mapZone.setDepth(100);
     mapZone.on('pointerdown', () => toggleMapMenu());
 
-    // Menú de mapas
+    // Menú de mapas (dinámico - solo muestra mapas desbloqueados)
     const mapMenuX = mapX + btnSize/2;
     const mapMenuY = topY + btnSize + 5;
     mapMenu = scene.add.container(mapMenuX, mapMenuY);
     mapMenu.setDepth(101);
     mapMenu.setVisible(false);
-
-    const mapOptions = [
-        { id: 'normal', emoji: '🌳' },
-        { id: 'tornado', emoji: '🌪️' },
-        { id: 'rayos', emoji: '⚡' },
-        { id: 'lunar', emoji: '🌙' },
-        { id: 'zombie', emoji: '🧟' },
-        { id: 'blackhole', emoji: '🕳️' },
-        { id: 'agua', emoji: '🌊' },
-        { id: 'lava', emoji: '🌋' },
-        { id: 'hielo', emoji: '🧊' }
-    ];
-
-    const mapMenuW = 5 * 50 + 10;
-    const mapMenuH = Math.ceil(mapOptions.length / 5) * itemH + 10;
-
-    const mapMenuBg = scene.add.graphics();
-    mapMenuBg.fillStyle(0x333333, 0.95);
-    mapMenuBg.fillRoundedRect(-mapMenuW/2, 0, mapMenuW, mapMenuH, 8);
-    mapMenu.add(mapMenuBg);
-
-    mapOptions.forEach((opt, i) => {
-        const col = i % 5;
-        const row = Math.floor(i / 5);
-        const bx = -mapMenuW/2 + 5 + col * 50;
-        const by = 5 + row * itemH;
-
-        const btn = scene.add.graphics();
-        btn.fillStyle(0x555555, 1);
-        btn.fillRoundedRect(bx, by, 45, itemH - 5, 6);
-        mapMenu.add(btn);
-
-        const txt = scene.add.text(bx + 22, by + (itemH-5)/2, opt.emoji, {
-            font: '18px Arial'
-        }).setOrigin(0.5);
-        mapMenu.add(txt);
-
-        // Zona interactiva dentro del container
-        const zoneGraphic = scene.add.rectangle(bx + 22, by + (itemH-5)/2, 45, itemH-5, 0x000000, 0);
-        zoneGraphic.setInteractive();
-        mapMenu.add(zoneGraphic);
-        zoneGraphic.on('pointerdown', () => {
-            changeMap(opt.id);
-            mapMenu.setVisible(false);
-            mapMenuOpen = false;
-        });
-    });
 
     // === BOTÓN DE CÁMARA LENTA (abajo derecha) ===
     slowMotionButton = scene.add.graphics();
@@ -2882,6 +2779,12 @@ function drawWeaponButton(x, y, size) {
 function toggleWeaponMenu() {
     weaponMenuOpen = !weaponMenuOpen;
     weaponMenu.setVisible(weaponMenuOpen);
+
+    // Actualizar menú con armas desbloqueadas
+    if (weaponMenuOpen) {
+        updateWeaponMenu();
+    }
+
     if (mapMenuOpen) {
         mapMenu.setVisible(false);
         mapMenuOpen = false;
@@ -2892,9 +2795,63 @@ function toggleWeaponMenu() {
     }
 }
 
+function updateWeaponMenu() {
+    if (!weaponMenu) return;
+    weaponMenu.removeAll(true);
+
+    // Solo mostrar armas desbloqueadas
+    const unlockedWeapons = shopItems.weapons.filter(weapon => unlockedItems.weapons.includes(weapon.id));
+
+    const cols = 4;
+    const itemW = 60;
+    const itemH = 50;
+    const menuW = cols * itemW + 10;
+    const menuH = Math.ceil(unlockedWeapons.length / cols) * itemH + 10;
+
+    const menuBg = sceneRef.add.graphics();
+    menuBg.fillStyle(0x333333, 0.95);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    weaponMenu.add(menuBg);
+
+    unlockedWeapons.forEach((weapon, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const bx = -menuW/2 + 5 + col * itemW;
+        const by = 5 + row * itemH;
+
+        const isSelected = currentWeapon === weapon.id;
+
+        const btn = sceneRef.add.graphics();
+        btn.fillStyle(isSelected ? 0x666666 : 0x555555, 1);
+        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        weaponMenu.add(btn);
+
+        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, weapon.emoji, {
+            font: '22px Arial'
+        }).setOrigin(0.5);
+        weaponMenu.add(txt);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        zoneGraphic.setInteractive();
+        weaponMenu.add(zoneGraphic);
+        zoneGraphic.on('pointerdown', () => {
+            currentWeapon = weapon.id;
+            weaponMenu.setVisible(false);
+            weaponMenuOpen = false;
+            drawWeaponButton();
+        });
+    });
+}
+
 function toggleMapMenu() {
     mapMenuOpen = !mapMenuOpen;
     mapMenu.setVisible(mapMenuOpen);
+
+    // Actualizar menú con mapas desbloqueados
+    if (mapMenuOpen) {
+        updateMapMenu();
+    }
+
     if (weaponMenuOpen) {
         weaponMenu.setVisible(false);
         weaponMenuOpen = false;
@@ -2903,6 +2860,53 @@ function toggleMapMenu() {
         npcMenu.setVisible(false);
         npcMenuOpen = false;
     }
+}
+
+function updateMapMenu() {
+    if (!mapMenu) return;
+    mapMenu.removeAll(true);
+
+    // Solo mostrar mapas desbloqueados
+    const unlockedMaps = shopItems.worlds.filter(world => unlockedItems.worlds.includes(world.id));
+
+    const cols = 5;
+    const itemW = 50;
+    const itemH = 40;
+    const menuW = cols * itemW + 10;
+    const menuH = Math.ceil(unlockedMaps.length / cols) * itemH + 10;
+
+    const menuBg = sceneRef.add.graphics();
+    menuBg.fillStyle(0x333333, 0.95);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    mapMenu.add(menuBg);
+
+    unlockedMaps.forEach((map, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const bx = -menuW/2 + 5 + col * itemW;
+        const by = 5 + row * itemH;
+
+        const isSelected = currentMap === map.id;
+
+        const btn = sceneRef.add.graphics();
+        btn.fillStyle(isSelected ? 0x8B4513 : 0x555555, 1);
+        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        mapMenu.add(btn);
+
+        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, map.emoji, {
+            font: '18px Arial'
+        }).setOrigin(0.5);
+        mapMenu.add(txt);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        zoneGraphic.setInteractive();
+        mapMenu.add(zoneGraphic);
+        zoneGraphic.on('pointerdown', () => {
+            changeMap(map.id);
+            mapMenu.setVisible(false);
+            mapMenuOpen = false;
+        });
+    });
 }
 
 // === NPC MENU FUNCTIONS ===
@@ -3173,6 +3177,25 @@ function changeMap(mapId) {
                 const ax = Math.random() * game.scale.width;
                 sceneRef.mapOverlay.fillEllipse(ax, 100 + i * 40, 150, 30);
             }
+            break;
+        case 'espacio':
+            sceneRef.matter.world.setGravity(0, 0.05); // Casi sin gravedad
+            // Espacio: ocultar sol, árboles, flores, nubes - mostrar estrellas
+            if (sun) sun.setVisible(false);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.lunarGround) groundGraphics.lunarGround.setVisible(true);
+            if (starsGraphics) starsGraphics.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo negro espacial profundo
+            sceneRef.mapOverlay.fillStyle(0x000011, 0.95);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            // Nebulosas de colores
+            sceneRef.mapOverlay.fillStyle(0x4400AA, 0.2);
+            sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.3, 100, 200, 100);
+            sceneRef.mapOverlay.fillStyle(0xAA0044, 0.15);
+            sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.7, 150, 180, 90);
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
