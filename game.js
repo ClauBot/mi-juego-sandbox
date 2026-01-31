@@ -34,12 +34,13 @@ function getGroundLimit() {
 
 const config = {
     type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.RESIZE,
-        width: '100%',
-        height: '100%'
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     physics: {
         default: 'matter',
@@ -116,24 +117,7 @@ let selectedWeapon = null;
 let isDraggingWeapon = false;
 let scenarioElements = [];
 
-// Guardar tamaño inicial para detectar cambios grandes
-const initialSize = { w: window.innerWidth, h: window.innerHeight };
-
 game = new Phaser.Game(config);
-
-// Si el tamaño cambia mucho (ej: rotación o cambio de modo), recargar
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        const newW = window.innerWidth;
-        const newH = window.innerHeight;
-        // Si cambió más de 100px en cualquier dirección, recargar
-        if (Math.abs(newW - initialSize.w) > 100 || Math.abs(newH - initialSize.h) > 100) {
-            location.reload();
-        }
-    }, 300);
-});
 
 function preload() {}
 
