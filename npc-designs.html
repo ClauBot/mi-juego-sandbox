@@ -23,9 +23,17 @@
             color: #888;
             margin-bottom: 30px;
         }
+        .section-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 30px 0 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
@@ -36,10 +44,30 @@
             padding: 20px;
             text-align: center;
         }
+        .npc-card.implemented {
+            border: 2px solid #44AA44;
+        }
+        .npc-card.pending {
+            border: 2px solid #FFAA00;
+        }
         .npc-name {
             font-size: 1.2em;
             font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .npc-status {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 10px;
             margin-bottom: 10px;
+            display: inline-block;
+        }
+        .status-done {
+            background: #44AA44;
+        }
+        .status-pending {
+            background: #FFAA00;
+            color: #000;
         }
         .npc-preview {
             display: flex;
@@ -52,6 +80,16 @@
         .npc-id {
             color: #888;
             font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        .npc-desc {
+            font-size: 0.85em;
+            color: #AAA;
+            margin-top: 10px;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 5px;
         }
         canvas {
             image-rendering: pixelated;
@@ -60,36 +98,125 @@
 </head>
 <body>
     <h1>NPC Designs Dashboard</h1>
-    <p class="subtitle">Vista 3x - Referencia de diseño para Sandbox Mayhem</p>
+    <p class="subtitle">Vista 3x - Referencia de diseno para Sandbox Mayhem</p>
 
-    <div class="grid" id="npc-grid"></div>
+    <div class="section-title">IMPLEMENTADOS</div>
+    <div class="grid" id="implemented-grid"></div>
+
+    <div class="section-title">PROPUESTAS NUEVAS</div>
+    <div class="grid" id="pending-grid"></div>
 
     <script>
         const SCALE = 3;
 
-        // Colores de piel
-        const skinColors = {
-            normal: 0xFFDBB4,
-            skeleton: 0xF5F5DC,
-            ninja: 0x111111,
-            pirate: 0xDEB887,
-            clown: 0xFFFFFF,
-            knight: 0x708090
-        };
-
         const npcs = [
-            { id: 'normal', name: 'Normal', emoji: '🧑' },
-            { id: 'ninja', name: 'Ninja', emoji: '🥷' },
-            { id: 'pirata', name: 'Pirata', emoji: '🏴‍☠️' },
-            { id: 'knight', name: 'Caballero', emoji: '🛡️' },
-            { id: 'clown', name: 'Payaso', emoji: '🤡' },
-            { id: 'esqueleto', name: 'Esqueleto', emoji: '💀' },
-            { id: 'robot', name: 'Robot', emoji: '🤖' },
-            { id: 'alien', name: 'Alien', emoji: '👽' },
-            { id: 'wizard', name: 'Mago', emoji: '🧙' },
-            { id: 'demon', name: 'Demonio', emoji: '👹' },
-            { id: 'vampire', name: 'Vampiro', emoji: '🧛' },
-            { id: 'zombie', name: 'Zombie', emoji: '🧟' }
+            // IMPLEMENTADOS
+            {
+                id: 'normal', name: 'Normal', emoji: '🧑',
+                implemented: true,
+                desc: 'Piel color carne, ojos negros, boca simple'
+            },
+            {
+                id: 'ninja', name: 'Ninja', emoji: '🥷',
+                implemented: true,
+                desc: 'Traje negro, banda blanca en frente con colas, ojos blancos con pupila negra, vendas en extremidades'
+            },
+            {
+                id: 'pirata', name: 'Pirata', emoji: '🏴‍☠️',
+                implemented: true,
+                desc: 'Bandana roja, pelo negro con rastas, delineador en ojos, barba con perilla, camisa beige, chaleco marron, cinturon con hebilla dorada, botas negras'
+            },
+            {
+                id: 'knight', name: 'Caballero', emoji: '🛡️',
+                implemented: true,
+                desc: 'Yelmo gris con visera y penacho rojo, peto con cruz dorada, brazales con codo articulado, grebas con rodillera, bordes dorados'
+            },
+            {
+                id: 'clown', name: 'Payaso', emoji: '🤡',
+                implemented: true,
+                desc: 'Cara blanca, pelo rojo a los lados, ojos amarillos con pupilas rojas, nariz roja grande, sonrisa roja extendida (estilo Pennywise), traje gris con pompones rojos'
+            },
+            {
+                id: 'esqueleto', name: 'Esqueleto', emoji: '💀',
+                implemented: true,
+                desc: 'Calavera beige con cuencas negras, nariz triangular, dientes con lineas, costillas visibles en torso, huesos con extremos anchos'
+            },
+            // PENDIENTES - CON PROPUESTAS
+            {
+                id: 'robot', name: 'Robot', emoji: '🤖',
+                implemented: false,
+                desc: 'Cabeza cuadrada gris metalico, antena en la cabeza, ojos LED rojos cuadrados, boca de rejilla, torso con panel de control y luces, brazos y piernas con juntas visibles, pies grandes'
+            },
+            {
+                id: 'alien', name: 'Alien', emoji: '👽',
+                implemented: false,
+                desc: 'Cabeza grande gris verdosa, ojos negros enormes almendrados, sin nariz, boca pequena, cuello delgado, cuerpo delgado gris, dedos largos'
+            },
+            {
+                id: 'wizard', name: 'Mago', emoji: '🧙',
+                implemented: false,
+                desc: 'Sombrero de punta morado con estrellas doradas, barba blanca larga, tunica morada con cinturon, manga ancha, estrellas brillantes en la ropa'
+            },
+            {
+                id: 'demon', name: 'Demonio', emoji: '👹',
+                implemented: false,
+                desc: 'Piel roja, cuernos negros curvos, ojos amarillos con pupilas de gato, cejas gruesas, colmillos, torso musculoso con marcas negras, cola con punta de flecha (opcional)'
+            },
+            {
+                id: 'vampire', name: 'Vampiro', emoji: '🧛',
+                implemented: false,
+                desc: 'Piel palida blanca, pelo negro peinado hacia atras, ojos rojos, colmillos visibles, capa negra con interior rojo, traje elegante negro, cuello alto'
+            },
+            {
+                id: 'fairy', name: 'Hada', emoji: '🧚',
+                implemented: false,
+                desc: 'Piel brillante rosada, pelo rubio/rosa, ojos grandes azules con pestanas, alas transparentes con brillo (en la espalda), vestido de petalos verde/rosa, corona de flores, particulas de polvo magico'
+            },
+            {
+                id: 'mermaid', name: 'Sirena', emoji: '🧜',
+                implemented: false,
+                desc: 'Torso humano con piel azulada, pelo largo azul/verde, ojos marinos, bikini de conchas, cola de pez escamada verde-azul en lugar de piernas, aletas'
+            },
+            {
+                id: 'genie', name: 'Genio', emoji: '🧞',
+                implemented: false,
+                desc: 'Piel azul brillante, sin pelo (calvo con brillo), ojos dorados, sonrisa amplia, orejas puntiagudas con arete dorado, torso musculoso azul, brazaletes dorados, parte inferior como humo/nube'
+            },
+            {
+                id: 'superhero', name: 'Superheroe', emoji: '🦸',
+                implemented: false,
+                desc: 'Mascara azul con ojos blancos, pelo negro, menton cuadrado, traje azul ajustado con simbolo S en el pecho, capa roja, cinturon amarillo, botas rojas'
+            },
+            {
+                id: 'villain', name: 'Villano', emoji: '🦹',
+                implemented: false,
+                desc: 'Mascara negra completa con ojos rojos brillantes, traje negro con calavera en el pecho, capa negra rasgada, guantes con garras, botas con picos'
+            },
+            {
+                id: 'zombie', name: 'Zombie', emoji: '🧟',
+                implemented: false,
+                desc: 'Piel verde palida, ojos blancos sin pupila, heridas y cicatrices visibles, pelo despeinado con calvas, ropa rasgada y sucia, brazos extendidos, caminar torpe'
+            },
+            {
+                id: 'ghost', name: 'Fantasma', emoji: '👻',
+                implemented: false,
+                desc: 'Blanco semi-transparente, forma flotante sin piernas definidas, ojos negros grandes, boca abierta en O, cola de fantasma en lugar de piernas, particulas de humo'
+            },
+            {
+                id: 'astronaut', name: 'Astronauta', emoji: '🧑‍🚀',
+                implemented: false,
+                desc: 'Casco blanco con visera dorada reflectante, traje espacial blanco con parches, tanque de oxigeno en la espalda (torso), guantes y botas gruesas, bandera en el hombro'
+            },
+            {
+                id: 'king', name: 'Rey', emoji: '🤴',
+                implemented: false,
+                desc: 'Corona dorada con joyas rojas, pelo/barba castaña, cara seria, capa de armino (blanca con puntos negros), tunica roja con bordados dorados, cetro (opcional como accesorio)'
+            },
+            {
+                id: 'queen', name: 'Reina', emoji: '👸',
+                implemented: false,
+                desc: 'Corona alta dorada con joyas, pelo largo rubio/castano, cara elegante, vestido largo rojo con bordados dorados, collar de perlas, guantes blancos largos'
+            }
         ];
 
         function hexToRgb(hex) {
@@ -123,150 +250,90 @@
             const isPirate = npcType === 'pirata';
             const isClown = npcType === 'clown';
             const isKnight = npcType === 'knight';
+            const isRobot = npcType === 'robot';
+            const isAlien = npcType === 'alien';
+            const isWizard = npcType === 'wizard';
+            const isDemon = npcType === 'demon';
+            const isVampire = npcType === 'vampire';
+            const isFairy = npcType === 'fairy';
+            const isZombie = npcType === 'zombie';
+            const isGhost = npcType === 'ghost';
+            const isSuperhero = npcType === 'superhero';
+            const isVillain = npcType === 'villain';
+            const isAstronaut = npcType === 'astronaut';
+            const isKing = npcType === 'king';
+            const isQueen = npcType === 'queen';
+            const isMermaid = npcType === 'mermaid';
+            const isGenie = npcType === 'genie';
 
             if (isKnight) {
                 if (isHead) {
-                    // Yelmo
                     fillStyle(ctx, 0x708090);
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Visera
                     fillStyle(ctx, 0x4a4a4a);
                     ctx.fillRect(2, height/2 - 2, width - 4, 8);
-                    // Ranura ojos
                     fillStyle(ctx, 0x1a1a1a);
                     ctx.fillRect(4, height/2, width - 8, 3);
-                    // Respiraderos
-                    fillStyle(ctx, 0x2a2a2a);
-                    ctx.beginPath();
-                    ctx.arc(width/2 - 3, height/2 + 5, 1, 0, Math.PI * 2);
-                    ctx.arc(width/2, height/2 + 5, 1, 0, Math.PI * 2);
-                    ctx.arc(width/2 + 3, height/2 + 5, 1, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Penacho rojo
                     fillStyle(ctx, 0xCC0000);
                     ctx.fillRect(width/2 - 2, 0, 4, 5);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, 2, 3, 2, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Borde dorado
                     strokeStyle(ctx, 0xDAA520);
                     ctx.lineWidth = 1;
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2 - 1, 0, Math.PI * 2);
                     ctx.stroke();
                 } else if (partName === 'torso') {
-                    // Peto
                     fillStyle(ctx, 0x708090);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Placa central
-                    fillStyle(ctx, 0x808080);
-                    ctx.fillRect(width/4, 2, width/2, height - 4);
-                    // Cruz dorada
                     fillStyle(ctx, 0xDAA520);
                     ctx.fillRect(width/2 - 1, 6, 3, 16);
                     ctx.fillRect(width/2 - 5, 12, 11, 3);
-                    // Lineas
-                    strokeStyle(ctx, 0x4a4a4a);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(width/4, 0); ctx.lineTo(width/4, height);
-                    ctx.moveTo(width*3/4, 0); ctx.lineTo(width*3/4, height);
-                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
-                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
-                    ctx.stroke();
-                } else if (partName.includes('arm')) {
-                    fillStyle(ctx, 0x708090);
-                    ctx.beginPath();
-                    ctx.roundRect(0, 0, width, height, 2);
-                    ctx.fill();
-                    strokeStyle(ctx, 0x4a4a4a);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
-                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
-                    ctx.stroke();
-                    fillStyle(ctx, 0x606060);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, height/2, (width-2)/2, 3, 0, 0, Math.PI * 2);
-                    ctx.fill();
                 } else {
-                    // Grebas
                     fillStyle(ctx, 0x708090);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 2);
                     ctx.fill();
-                    fillStyle(ctx, 0x808080);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, 8, (width-2)/2, 4, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    strokeStyle(ctx, 0x4a4a4a);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
-                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
-                    ctx.stroke();
                 }
             } else if (isClown) {
                 if (isHead) {
-                    // Cara blanca
                     fillStyle(ctx, 0xFFFFFF);
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Pelo rojo
                     fillStyle(ctx, 0xFF2200);
                     ctx.beginPath();
                     ctx.ellipse(2, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
                     ctx.ellipse(width - 2, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Ojos amarillos
                     fillStyle(ctx, 0xFFFF00);
                     ctx.beginPath();
                     ctx.ellipse(width/2 - 4, height/2 - 2, 2, 1.5, 0, 0, Math.PI * 2);
                     ctx.ellipse(width/2 + 4, height/2 - 2, 2, 1.5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Pupilas rojas
                     fillStyle(ctx, 0xFF0000);
                     ctx.beginPath();
                     ctx.arc(width/2 - 4, height/2 - 2, 1.5, 0, Math.PI * 2);
                     ctx.arc(width/2 + 4, height/2 - 2, 1.5, 0, Math.PI * 2);
                     ctx.fill();
-                    // Nariz roja
                     fillStyle(ctx, 0xFF0000);
                     ctx.beginPath();
                     ctx.arc(width/2, height/2 + 2, 3, 0, Math.PI * 2);
                     ctx.fill();
-                    // Sonrisa
                     fillStyle(ctx, 0xCC0000);
                     ctx.fillRect(width/2 - 6, height/2 + 6, 12, 3);
-                    strokeStyle(ctx, 0xCC0000);
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(width/2 - 6, height/2 + 6);
-                    ctx.lineTo(width/2 - 8, height/2 + 2);
-                    ctx.moveTo(width/2 + 6, height/2 + 6);
-                    ctx.lineTo(width/2 + 8, height/2 + 2);
-                    ctx.stroke();
                 } else if (partName === 'torso') {
                     fillStyle(ctx, 0x888888);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Pompones
                     fillStyle(ctx, 0xFF0000);
                     ctx.beginPath();
                     ctx.arc(width/2, 6, 4, 0, Math.PI * 2);
                     ctx.arc(width/2, 16, 4, 0, Math.PI * 2);
                     ctx.arc(width/2, 26, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Cuello
-                    fillStyle(ctx, 0xCCCCCC);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, 2, (width-4)/2, 3, 0, 0, Math.PI * 2);
                     ctx.fill();
                 } else {
                     fillStyle(ctx, 0x666666);
@@ -276,32 +343,23 @@
                 }
             } else if (isPirate) {
                 if (isHead) {
-                    // Cara bronceada
                     fillStyle(ctx, 0xDEB887);
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Bandana roja
                     fillStyle(ctx, 0x8B0000);
                     ctx.fillRect(0, 0, width, 6);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, 3, width/2, 3, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Pelo negro
                     fillStyle(ctx, 0x1a1a1a);
                     ctx.beginPath();
                     ctx.ellipse(1, height/2 + 2, 2, 5, 0, 0, Math.PI * 2);
                     ctx.ellipse(width - 1, height/2 + 2, 2, 5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Ojos
                     fillStyle(ctx, 0x000000);
                     ctx.beginPath();
                     ctx.ellipse(width/2 - 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
                     ctx.ellipse(width/2 + 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Barba
                     fillStyle(ctx, 0x1a1a1a);
-                    ctx.fillRect(width/2 - 2, height/2 + 4, 4, 2);
                     ctx.beginPath();
                     ctx.ellipse(width/2, height/2 + 8, 3, 2, 0, 0, Math.PI * 2);
                     ctx.fill();
@@ -310,13 +368,11 @@
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Chaleco
                     fillStyle(ctx, 0x4a3728);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, 8, height, 2);
                     ctx.roundRect(width - 8, 0, 8, height, 2);
                     ctx.fill();
-                    // Cinturon
                     fillStyle(ctx, 0x2a1a0a);
                     ctx.fillRect(0, height - 8, width, 6);
                     fillStyle(ctx, 0xFFD700);
@@ -340,29 +396,18 @@
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Cuencas
                     fillStyle(ctx, 0x000000);
                     ctx.beginPath();
                     ctx.ellipse(width/2 - 4, height/2 - 2, 2.5, 3, 0, 0, Math.PI * 2);
                     ctx.ellipse(width/2 + 4, height/2 - 2, 2.5, 3, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Nariz
                     ctx.beginPath();
                     ctx.moveTo(width/2, height/2 + 2);
                     ctx.lineTo(width/2 - 2, height/2 + 5);
                     ctx.lineTo(width/2 + 2, height/2 + 5);
                     ctx.fill();
-                    // Dientes
                     fillStyle(ctx, boneColor);
                     ctx.fillRect(width/2 - 5, height/2 + 6, 10, 4);
-                    strokeStyle(ctx, 0x000000);
-                    ctx.lineWidth = 1;
-                    for (let i = 0; i < 5; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(width/2 - 4 + i*2, height/2 + 6);
-                        ctx.lineTo(width/2 - 4 + i*2, height/2 + 10);
-                        ctx.stroke();
-                    }
                 } else if (partName === 'torso') {
                     fillStyle(ctx, boneColor);
                     ctx.fillRect(width/2 - 2, 0, 4, height);
@@ -389,27 +434,18 @@
                     ctx.beginPath();
                     ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Banda blanca
                     fillStyle(ctx, 0xFFFFFF);
                     ctx.fillRect(0, height/2 - 6, width, 4);
-                    // Colas
                     ctx.beginPath();
                     ctx.moveTo(width + 2, height/2 - 6);
                     ctx.lineTo(width + 8, height/2 - 8);
                     ctx.lineTo(width + 6, height/2 - 2);
                     ctx.fill();
-                    ctx.beginPath();
-                    ctx.moveTo(width + 2, height/2 - 2);
-                    ctx.lineTo(width + 10, height/2);
-                    ctx.lineTo(width + 8, height/2 + 4);
-                    ctx.fill();
-                    // Ojos blancos
                     fillStyle(ctx, 0xFFFFFF);
                     ctx.beginPath();
                     ctx.ellipse(width/2 - 4, height/2, 2.5, 1.5, 0, 0, Math.PI * 2);
                     ctx.ellipse(width/2 + 4, height/2, 2.5, 1.5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Pupilas
                     fillStyle(ctx, 0x000000);
                     ctx.beginPath();
                     ctx.arc(width/2 - 4, height/2, 1.5, 0, Math.PI * 2);
@@ -420,21 +456,13 @@
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Cinturon blanco
                     fillStyle(ctx, 0xFFFFFF);
                     ctx.fillRect(0, height/2 - 3, width, 6);
-                    strokeStyle(ctx, 0x222222);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(width/2, 0);
-                    ctx.lineTo(width/2, height/2 - 3);
-                    ctx.stroke();
                 } else {
                     fillStyle(ctx, 0x111111);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Vendas
                     strokeStyle(ctx, 0xFFFFFF);
                     ctx.lineWidth = 2;
                     ctx.globalAlpha = 0.7;
@@ -445,6 +473,817 @@
                         ctx.lineTo(width, y + 3);
                         ctx.stroke();
                     }
+                    ctx.globalAlpha = 1;
+                }
+            } else if (isRobot) {
+                if (isHead) {
+                    // Cabeza cuadrada metalica
+                    fillStyle(ctx, 0x888888);
+                    ctx.fillRect(1, 1, width-2, height-2);
+                    // Antena
+                    fillStyle(ctx, 0x444444);
+                    ctx.fillRect(width/2 - 1, 0, 2, 4);
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos LED
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.fillRect(width/2 - 6, height/2 - 3, 4, 4);
+                    ctx.fillRect(width/2 + 2, height/2 - 3, 4, 4);
+                    // Boca rejilla
+                    fillStyle(ctx, 0x333333);
+                    ctx.fillRect(width/2 - 5, height/2 + 4, 10, 4);
+                    strokeStyle(ctx, 0x666666);
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 4; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(width/2 - 4 + i*3, height/2 + 4);
+                        ctx.lineTo(width/2 - 4 + i*3, height/2 + 8);
+                        ctx.stroke();
+                    }
+                    // Borde metalico
+                    strokeStyle(ctx, 0xAAAAAA);
+                    ctx.strokeRect(1, 1, width-2, height-2);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x777777);
+                    ctx.fillRect(0, 0, width, height);
+                    // Panel de control
+                    fillStyle(ctx, 0x333333);
+                    ctx.fillRect(width/4, 4, width/2, height/2);
+                    // Luces
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, 10, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 + 4, 10, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, 18, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Lineas
+                    strokeStyle(ctx, 0x999999);
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(0, 0, width, height);
+                } else {
+                    fillStyle(ctx, 0x666666);
+                    ctx.fillRect(0, 0, width, height);
+                    // Juntas
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, width/2-1, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, height*2/3, width/2-1, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    strokeStyle(ctx, 0x888888);
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(0, 0, width, height);
+                }
+            } else if (isAlien) {
+                if (isHead) {
+                    // Cabeza grande gris-verde
+                    fillStyle(ctx, 0x9BAA9B);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 2, width/2, height/2 + 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos negros enormes
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 5, height/2, 4, 5, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 5, height/2, 4, 5, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo en ojos
+                    fillStyle(ctx, 0x333333);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 6, height/2 - 2, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Boca pequena
+                    fillStyle(ctx, 0x666666);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 6, 2, 1, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x8A9A8A);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2, width/2 - 2, height/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x8A9A8A);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isWizard) {
+                if (isHead) {
+                    // Cara con barba
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombrero morado
+                    fillStyle(ctx, 0x6A0DAD);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, -8);
+                    ctx.lineTo(width + 2, height/2 - 2);
+                    ctx.lineTo(-2, height/2 - 2);
+                    ctx.fill();
+                    // Estrella en sombrero
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/2, 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Barba blanca
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 8, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Tunica morada
+                    fillStyle(ctx, 0x6A0DAD);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cinturon
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.fillRect(0, height/2 - 2, width, 4);
+                    // Estrellas
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/4, height/4, 2, 0, Math.PI * 2);
+                    ctx.arc(width*3/4, height*3/4, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x6A0DAD);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isDemon) {
+                if (isHead) {
+                    // Cara roja
+                    fillStyle(ctx, 0xCC2222);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cuernos
+                    fillStyle(ctx, 0x222222);
+                    ctx.beginPath();
+                    ctx.moveTo(2, height/2 - 4);
+                    ctx.lineTo(-4, -4);
+                    ctx.lineTo(6, height/2 - 6);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width - 2, height/2 - 4);
+                    ctx.lineTo(width + 4, -4);
+                    ctx.lineTo(width - 6, height/2 - 6);
+                    ctx.fill();
+                    // Ojos amarillos
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas de gato
+                    fillStyle(ctx, 0x000000);
+                    ctx.fillRect(width/2 - 4.5, height/2 - 2, 1, 3);
+                    ctx.fillRect(width/2 + 3.5, height/2 - 2, 1, 3);
+                    // Cejas gruesas
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 7, height/2 - 5, 5, 2);
+                    ctx.fillRect(width/2 + 2, height/2 - 5, 5, 2);
+                    // Colmillos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 3, height/2 + 5);
+                    ctx.lineTo(width/2 - 4, height/2 + 9);
+                    ctx.lineTo(width/2 - 2, height/2 + 5);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 + 3, height/2 + 5);
+                    ctx.lineTo(width/2 + 4, height/2 + 9);
+                    ctx.lineTo(width/2 + 2, height/2 + 5);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xBB2222);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Marcas negras
+                    strokeStyle(ctx, 0x660000);
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(width/4, 5);
+                    ctx.lineTo(width/4, height - 5);
+                    ctx.moveTo(width*3/4, 5);
+                    ctx.lineTo(width*3/4, height - 5);
+                    ctx.stroke();
+                } else {
+                    fillStyle(ctx, 0xBB2222);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isVampire) {
+                if (isHead) {
+                    // Cara palida
+                    fillStyle(ctx, 0xF5F5F5);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo negro
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, width/2 - 1, 5, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    // Pico de viuda
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 0);
+                    ctx.lineTo(width/2 - 4, 5);
+                    ctx.lineTo(width/2 + 4, 5);
+                    ctx.fill();
+                    // Ojos rojos
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Colmillos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 2, height/2 + 5);
+                    ctx.lineTo(width/2 - 3, height/2 + 9);
+                    ctx.lineTo(width/2 - 1, height/2 + 5);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 + 2, height/2 + 5);
+                    ctx.lineTo(width/2 + 3, height/2 + 9);
+                    ctx.lineTo(width/2 + 1, height/2 + 5);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Traje negro
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cuello rojo
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(width/2, 8);
+                    ctx.lineTo(width, 0);
+                    ctx.fill();
+                    // Camisa blanca
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 4, 2);
+                    ctx.lineTo(width/2, height/2);
+                    ctx.lineTo(width/2 + 4, 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isZombie) {
+                if (isHead) {
+                    // Cara verde palida
+                    fillStyle(ctx, 0x7A9A6A);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo despeinado con calvas
+                    fillStyle(ctx, 0x3A3A2A);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 5, 3, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, 4, 3, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos blancos sin pupila
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Herida
+                    fillStyle(ctx, 0x8B0000);
+                    ctx.fillRect(width/2 + 5, height/2 - 4, 3, 5);
+                    // Boca abierta
+                    fillStyle(ctx, 0x333333);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 6, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Ropa rasgada
+                    fillStyle(ctx, 0x5A5A4A);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Rasgaduras
+                    fillStyle(ctx, 0x6A8A5A);
+                    ctx.fillRect(width/4, height/3, 4, 10);
+                    ctx.fillRect(width*2/3, height/2, 5, 8);
+                } else {
+                    fillStyle(ctx, 0x4A4A3A);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Rasgaduras
+                    fillStyle(ctx, 0x6A8A5A);
+                    ctx.fillRect(width/3, height/2, 3, 6);
+                }
+            } else if (isGhost) {
+                if (isHead) {
+                    // Forma fantasmal blanca
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Ojos negros grandes
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Boca O
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.7;
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 5);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                } else {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.6;
+                    // Cola ondulada
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(width, 0);
+                    ctx.lineTo(width, height - 5);
+                    ctx.quadraticCurveTo(width*3/4, height, width/2, height - 5);
+                    ctx.quadraticCurveTo(width/4, height - 10, 0, height - 5);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            } else if (isSuperhero) {
+                if (isHead) {
+                    // Mascara azul
+                    fillStyle(ctx, 0x2244AA);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Parte inferior cara
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 4, width/2 - 2, 0, Math.PI);
+                    ctx.fill();
+                    // Ojos blancos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 3, 2, -0.2, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 3, 2, 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo negro
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, 6, 4, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Traje azul
+                    fillStyle(ctx, 0x2244AA);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Simbolo S
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, 6, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('S', width/2, height/3 + 4);
+                    // Cinturon amarillo
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, height - 8, width, 4);
+                } else {
+                    if (partName.includes('leg')) {
+                        // Botas rojas
+                        fillStyle(ctx, 0xCC0000);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0x2244AA);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (isVillain) {
+                if (isHead) {
+                    // Mascara negra completa
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos rojos brillantes
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 3, 2, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 3, 2, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo en ojos
+                    fillStyle(ctx, 0xFFAAAA);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 2, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 - 2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Traje negro
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Calavera
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/3, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 2, height/3 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 2, height/3 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillRect(width/2 - 2, height/3 + 2, 4, 2);
+                } else {
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    if (partName.includes('leg')) {
+                        // Picos en botas
+                        fillStyle(ctx, 0x444444);
+                        ctx.beginPath();
+                        ctx.moveTo(width/2, height - 3);
+                        ctx.lineTo(width/2 - 3, height);
+                        ctx.lineTo(width/2 + 3, height);
+                        ctx.fill();
+                    }
+                }
+            } else if (isAstronaut) {
+                if (isHead) {
+                    // Casco blanco
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Visera dorada
+                    fillStyle(ctx, 0xDAA520);
+                    ctx.globalAlpha = 0.7;
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2, width/2 - 3, height/2 - 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Reflejo
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 3, height/2 - 3, 3, 2, -0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Borde del casco
+                    strokeStyle(ctx, 0xCCCCCC);
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2 - 1, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    // Traje espacial
+                    fillStyle(ctx, 0xF5F5F5);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Mochila oxigeno
+                    fillStyle(ctx, 0xCCCCCC);
+                    ctx.fillRect(width - 6, 5, 6, height - 10);
+                    // Parche
+                    fillStyle(ctx, 0x0044AA);
+                    ctx.fillRect(2, 5, 8, 8);
+                    // Lineas del traje
+                    strokeStyle(ctx, 0xAAAAAA);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 0);
+                    ctx.lineTo(width/2, height);
+                    ctx.stroke();
+                } else {
+                    fillStyle(ctx, 0xF5F5F5);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Juntas del traje
+                    strokeStyle(ctx, 0xAAAAAA);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/2);
+                    ctx.lineTo(width, height/2);
+                    ctx.stroke();
+                }
+            } else if (isKing) {
+                if (isHead) {
+                    // Cara
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Corona
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.moveTo(2, height/2 - 4);
+                    ctx.lineTo(2, 0);
+                    ctx.lineTo(6, 4);
+                    ctx.lineTo(width/2, 0);
+                    ctx.lineTo(width - 6, 4);
+                    ctx.lineTo(width - 2, 0);
+                    ctx.lineTo(width - 2, height/2 - 4);
+                    ctx.fill();
+                    // Joyas rojas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Barba
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 7, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Tunica roja
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Capa armino
+                    fillStyle(ctx, 0xFFF8DC);
+                    ctx.fillRect(0, 0, 6, height);
+                    ctx.fillRect(width - 6, 0, 6, height);
+                    // Puntos negros armino
+                    fillStyle(ctx, 0x000000);
+                    for (let i = 0; i < 4; i++) {
+                        ctx.beginPath();
+                        ctx.arc(3, 5 + i * 9, 1, 0, Math.PI * 2);
+                        ctx.arc(width - 3, 5 + i * 9, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Bordado dorado
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(width/2 - 1, 5, 2, height - 10);
+                } else {
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isQueen) {
+                if (isHead) {
+                    // Cara
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Corona alta
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.moveTo(3, height/2 - 2);
+                    ctx.lineTo(3, -2);
+                    ctx.lineTo(7, 3);
+                    ctx.lineTo(width/2 - 2, -4);
+                    ctx.lineTo(width/2, -8);
+                    ctx.lineTo(width/2 + 2, -4);
+                    ctx.lineTo(width - 7, 3);
+                    ctx.lineTo(width - 3, -2);
+                    ctx.lineTo(width - 3, height/2 - 2);
+                    ctx.fill();
+                    // Joyas
+                    fillStyle(ctx, 0x0000FF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, -5, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(6, 0, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width - 6, 0, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo largo
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.ellipse(2, height/2 + 4, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width - 2, height/2 + 4, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Labios
+                    fillStyle(ctx, 0xCC4444);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 3, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Vestido rojo
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Bordados dorados
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, 0, width, 3);
+                    ctx.fillRect(0, height - 3, width, 3);
+                    // Collar de perlas
+                    fillStyle(ctx, 0xFFFFF0);
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.arc(width/2 - 8 + i * 4, 6, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Guantes blancos (brazos)
+                    if (partName.includes('arm')) {
+                        fillStyle(ctx, 0xFFFFFF);
+                        ctx.fillRect(0, height - 8, width, 8);
+                    }
+                }
+            } else if (isMermaid) {
+                if (isHead) {
+                    fillStyle(ctx, 0xB0E0E6);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo largo azul-verde
+                    fillStyle(ctx, 0x20B2AA);
+                    ctx.beginPath();
+                    ctx.ellipse(0, height/2, 4, 10, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width, height/2, 4, 10, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, 2, 8, 4, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos
+                    fillStyle(ctx, 0x000080);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa
+                    strokeStyle(ctx, 0xFF6699);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 3, 3, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xB0E0E6);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Bikini de conchas
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.beginPath();
+                    ctx.arc(width/3, 8, 5, 0, Math.PI * 2);
+                    ctx.arc(width*2/3, 8, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Escamas empezando
+                    fillStyle(ctx, 0x40E0D0);
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(width/4 + i * width/4, height - 5, 5, Math.PI, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    // Cola de pez
+                    fillStyle(ctx, 0x40E0D0);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Escamas
+                    fillStyle(ctx, 0x20B2AA);
+                    for (let y = 0; y < height; y += 6) {
+                        for (let x = (y/6 % 2) * 3; x < width; x += 6) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 3, Math.PI, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    // Aleta al final
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0x48D1CC);
+                        ctx.beginPath();
+                        ctx.moveTo(0, height - 5);
+                        ctx.lineTo(-3, height + 3);
+                        ctx.lineTo(width/2, height);
+                        ctx.lineTo(width + 3, height + 3);
+                        ctx.lineTo(width, height - 5);
+                        ctx.fill();
+                    }
+                }
+            } else if (isGenie) {
+                if (isHead) {
+                    // Piel azul
+                    fillStyle(ctx, 0x4169E1);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Calvo con brillo
+                    fillStyle(ctx, 0x6495ED);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 3, 4, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos dorados
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas puntiagudas
+                    fillStyle(ctx, 0x4169E1);
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/2);
+                    ctx.lineTo(-4, height/2 - 4);
+                    ctx.lineTo(2, height/2 - 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width, height/2);
+                    ctx.lineTo(width + 4, height/2 - 4);
+                    ctx.lineTo(width - 2, height/2 - 2);
+                    ctx.fill();
+                    // Arete dorado
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(-2, height/2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa amplia
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 5, 3, 0, 0, Math.PI);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Torso musculoso azul
+                    fillStyle(ctx, 0x4169E1);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height * 2/3, 3);
+                    ctx.fill();
+                    // Brazaletes
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, 0, width, 4);
+                    // Humo abajo
+                    fillStyle(ctx, 0x87CEEB);
+                    ctx.globalAlpha = 0.6;
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height - 5, width/2 + 5, 10, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                } else {
+                    // Humo/nube
+                    fillStyle(ctx, 0x87CEEB);
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2, width/2 + 3, height/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
                     ctx.globalAlpha = 1;
                 }
             } else {
@@ -475,11 +1314,20 @@
             const container = document.createElement('div');
             container.className = 'npc-preview';
 
+            const skinColors = {
+                normal: 0xFFDBB4, esqueleto: 0xF5F5DC, ninja: 0x111111,
+                pirata: 0xDEB887, clown: 0xFFFFFF, knight: 0x708090,
+                robot: 0x888888, alien: 0x9BAA9B, wizard: 0xFFDBB4,
+                demon: 0xCC2222, vampire: 0xF5F5F5, fairy: 0xFFDBB4,
+                zombie: 0x7A9A6A, ghost: 0xFFFFFF, superhero: 0xFFDBB4,
+                villain: 0x111111, astronaut: 0xFFFFFF, king: 0xFFDBB4,
+                queen: 0xFFDBB4, mermaid: 0xB0E0E6, genie: 0x4169E1
+            };
+
             const skinColor = skinColors[npcType] || 0xFFDBB4;
             const shirtColor = 0x3366CC;
             const pantsColor = 0x333366;
 
-            // Crear las partes
             const parts = [
                 { name: 'head', w: 22, h: 22, color: skinColor },
                 { name: 'torso', w: 28, h: 36, color: shirtColor },
@@ -489,7 +1337,6 @@
                 { name: 'legR', w: 12, h: 30, color: pantsColor }
             ];
 
-            // Contenedor para posicionar las partes
             const wrapper = document.createElement('div');
             wrapper.style.position = 'relative';
             wrapper.style.width = (28 + 20 + 20) * SCALE + 'px';
@@ -499,7 +1346,6 @@
                 const canvas = drawPart(npcType, part.name, part.w, part.h, part.color);
                 canvas.style.position = 'absolute';
 
-                // Posicionar cada parte
                 if (part.name === 'head') {
                     canvas.style.left = ((28 - 22) / 2 + 10) * SCALE + 'px';
                     canvas.style.top = '0px';
@@ -528,14 +1374,20 @@
         }
 
         // Generar cards
-        const grid = document.getElementById('npc-grid');
+        const implementedGrid = document.getElementById('implemented-grid');
+        const pendingGrid = document.getElementById('pending-grid');
+
         npcs.forEach(npc => {
             const card = document.createElement('div');
-            card.className = 'npc-card';
+            card.className = 'npc-card ' + (npc.implemented ? 'implemented' : 'pending');
 
             const name = document.createElement('div');
             name.className = 'npc-name';
             name.textContent = npc.emoji + ' ' + npc.name;
+
+            const status = document.createElement('div');
+            status.className = 'npc-status ' + (npc.implemented ? 'status-done' : 'status-pending');
+            status.textContent = npc.implemented ? 'IMPLEMENTADO' : 'PROPUESTA';
 
             const preview = createNpcPreview(npc.id);
 
@@ -543,10 +1395,21 @@
             id.className = 'npc-id';
             id.textContent = 'ID: ' + npc.id;
 
+            const desc = document.createElement('div');
+            desc.className = 'npc-desc';
+            desc.textContent = npc.desc;
+
             card.appendChild(name);
+            card.appendChild(status);
             card.appendChild(preview);
             card.appendChild(id);
-            grid.appendChild(card);
+            card.appendChild(desc);
+
+            if (npc.implemented) {
+                implementedGrid.appendChild(card);
+            } else {
+                pendingGrid.appendChild(card);
+            }
         });
     </script>
 </body>
