@@ -15,12 +15,13 @@ Juego sandbox estilo Melon Playground. Arrastra, lanza y destruye ragdolls.
 - Vercel (deploy)
 
 ## Archivos
-- `game.js` - Logica del juego (~2500 lineas)
+- `game.js` - Logica del juego (~6000 lineas)
 - `index.html` - Entrada
 - `style.css` - Estilos minimos
 - `sw.js` - Service Worker para offline
 - `manifest.json` - Config PWA
 - `icon.svg` - Icono del juego
+- `npc-designs.html` - Dashboard de diseno de NPCs (3x escala)
 
 ## Funcionalidades
 - Ragdolls con fisica realista (parpadean cada 30s)
@@ -150,8 +151,47 @@ git add -A && git commit -m "mensaje" && git push origin master
 
 **IMPORTANTE**: El boton "Limpiar Todo" esta DENTRO del menu ☰ para evitar borrados accidentales por niños
 
+## Sistema de NPCs
+
+### Dashboard de diseno
+Abrir `npc-designs.html` en el navegador para ver todos los NPCs a 3x escala.
+```bash
+# Abrir dashboard de diseno
+xdg-open npc-designs.html
+# o en local
+python3 -m http.server 3000
+# Luego ir a http://localhost:3000/npc-designs.html
+```
+
+### NPCs con apariencia especial
+Estos NPCs tienen renderizado custom en `createPartTexture()`:
+- **knight** (caballero): Armadura gris metalica con yelmo, peto, brazales y grebas
+- **clown** (payaso): Estilo Pennywise - cara blanca, pelo rojo, ojos amarillos
+- **pirata**: Estilo Jack Sparrow - bandana roja, barba, chaleco
+- **ninja**: Traje negro, banda blanca en la frente, vendas
+- **esqueleto**: Huesos beige, calavera con cuencas y dientes
+
+### Como agregar NPC con apariencia custom
+1. Agregar flag en `createRagdoll()`:
+   ```javascript
+   const isMyNpc = (npcType === 'mi_npc');
+   ```
+2. Pasar flag a todas las llamadas de `createPartTexture()`:
+   ```javascript
+   createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown, isKnight, isMyNpc);
+   ```
+3. Actualizar firma de `createPartTexture()` y agregar bloque de dibujo
+4. Actualizar `npc-designs.html` para preview
+
+### Partes del ragdoll
+- `head`: 22x22px, circulo
+- `torso`: 28x36px, rectangulo
+- `armL/armR`: 10x22px, rectangulo
+- `legL/legR`: 12x30px, rectangulo
+
 ## Reglas de desarrollo
 - **NO ROMPER NADA**: Al hacer cambios, asegurar que toda la funcionalidad existente siga funcionando
 - Los mundos/mapas siempre deben funcionar correctamente
 - Los botones del menu deben seguir funcionando despues de cambiar de mapa
 - **NO mover el boton Limpiar fuera del menu** - debe quedarse dentro del ☰
+- **PROBAR NPCs**: Despues de cambios en createPartTexture, verificar en npc-designs.html

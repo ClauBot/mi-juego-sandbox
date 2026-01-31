@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Designs - Sandbox Mayhem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .npc-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        .npc-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .npc-preview {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            min-height: 150px;
+            align-items: flex-end;
+        }
+        .npc-id {
+            color: #888;
+            font-size: 0.8em;
+        }
+        canvas {
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <h1>NPC Designs Dashboard</h1>
+    <p class="subtitle">Vista 3x - Referencia de diseño para Sandbox Mayhem</p>
+
+    <div class="grid" id="npc-grid"></div>
+
+    <script>
+        const SCALE = 3;
+
+        // Colores de piel
+        const skinColors = {
+            normal: 0xFFDBB4,
+            skeleton: 0xF5F5DC,
+            ninja: 0x111111,
+            pirate: 0xDEB887,
+            clown: 0xFFFFFF,
+            knight: 0x708090
+        };
+
+        const npcs = [
+            { id: 'normal', name: 'Normal', emoji: '🧑' },
+            { id: 'ninja', name: 'Ninja', emoji: '🥷' },
+            { id: 'pirata', name: 'Pirata', emoji: '🏴‍☠️' },
+            { id: 'knight', name: 'Caballero', emoji: '🛡️' },
+            { id: 'clown', name: 'Payaso', emoji: '🤡' },
+            { id: 'esqueleto', name: 'Esqueleto', emoji: '💀' },
+            { id: 'robot', name: 'Robot', emoji: '🤖' },
+            { id: 'alien', name: 'Alien', emoji: '👽' },
+            { id: 'wizard', name: 'Mago', emoji: '🧙' },
+            { id: 'demon', name: 'Demonio', emoji: '👹' },
+            { id: 'vampire', name: 'Vampiro', emoji: '🧛' },
+            { id: 'zombie', name: 'Zombie', emoji: '🧟' }
+        ];
+
+        function hexToRgb(hex) {
+            return {
+                r: (hex >> 16) & 255,
+                g: (hex >> 8) & 255,
+                b: hex & 255
+            };
+        }
+
+        function fillStyle(ctx, color, alpha = 1) {
+            const rgb = hexToRgb(color);
+            ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+
+        function strokeStyle(ctx, color, alpha = 1) {
+            const rgb = hexToRgb(color);
+            ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+
+        function drawPart(npcType, partName, width, height, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width * SCALE;
+            canvas.height = height * SCALE;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(SCALE, SCALE);
+
+            const isHead = partName === 'head';
+            const isSkeleton = npcType === 'esqueleto';
+            const isNinja = npcType === 'ninja';
+            const isPirate = npcType === 'pirata';
+            const isClown = npcType === 'clown';
+            const isKnight = npcType === 'knight';
+
+            if (isKnight) {
+                if (isHead) {
+                    // Yelmo
+                    fillStyle(ctx, 0x708090);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Visera
+                    fillStyle(ctx, 0x4a4a4a);
+                    ctx.fillRect(2, height/2 - 2, width - 4, 8);
+                    // Ranura ojos
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.fillRect(4, height/2, width - 8, 3);
+                    // Respiraderos
+                    fillStyle(ctx, 0x2a2a2a);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 3, height/2 + 5, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/2 + 5, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 + 5, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Penacho rojo
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.fillRect(width/2 - 2, 0, 4, 5);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Borde dorado
+                    strokeStyle(ctx, 0xDAA520);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2 - 1, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    // Peto
+                    fillStyle(ctx, 0x708090);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Placa central
+                    fillStyle(ctx, 0x808080);
+                    ctx.fillRect(width/4, 2, width/2, height - 4);
+                    // Cruz dorada
+                    fillStyle(ctx, 0xDAA520);
+                    ctx.fillRect(width/2 - 1, 6, 3, 16);
+                    ctx.fillRect(width/2 - 5, 12, 11, 3);
+                    // Lineas
+                    strokeStyle(ctx, 0x4a4a4a);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(width/4, 0); ctx.lineTo(width/4, height);
+                    ctx.moveTo(width*3/4, 0); ctx.lineTo(width*3/4, height);
+                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
+                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
+                    ctx.stroke();
+                } else if (partName.includes('arm')) {
+                    fillStyle(ctx, 0x708090);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 2);
+                    ctx.fill();
+                    strokeStyle(ctx, 0x4a4a4a);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
+                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
+                    ctx.stroke();
+                    fillStyle(ctx, 0x606060);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2, (width-2)/2, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Grebas
+                    fillStyle(ctx, 0x708090);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x808080);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 8, (width-2)/2, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    strokeStyle(ctx, 0x4a4a4a);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/3); ctx.lineTo(width, height/3);
+                    ctx.moveTo(0, height*2/3); ctx.lineTo(width, height*2/3);
+                    ctx.stroke();
+                }
+            } else if (isClown) {
+                if (isHead) {
+                    // Cara blanca
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo rojo
+                    fillStyle(ctx, 0xFF2200);
+                    ctx.beginPath();
+                    ctx.ellipse(2, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width - 2, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos amarillos
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas rojas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nariz roja
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.fillRect(width/2 - 6, height/2 + 6, 12, 3);
+                    strokeStyle(ctx, 0xCC0000);
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 6, height/2 + 6);
+                    ctx.lineTo(width/2 - 8, height/2 + 2);
+                    ctx.moveTo(width/2 + 6, height/2 + 6);
+                    ctx.lineTo(width/2 + 8, height/2 + 2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x888888);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Pompones
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, 6, 4, 0, Math.PI * 2);
+                    ctx.arc(width/2, 16, 4, 0, Math.PI * 2);
+                    ctx.arc(width/2, 26, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cuello
+                    fillStyle(ctx, 0xCCCCCC);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, (width-4)/2, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x666666);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (isPirate) {
+                if (isHead) {
+                    // Cara bronceada
+                    fillStyle(ctx, 0xDEB887);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Bandana roja
+                    fillStyle(ctx, 0x8B0000);
+                    ctx.fillRect(0, 0, width, 6);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 3, width/2, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo negro
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.beginPath();
+                    ctx.ellipse(1, height/2 + 2, 2, 5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width - 1, height/2 + 2, 2, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 2, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Barba
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.fillRect(width/2 - 2, height/2 + 4, 4, 2);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 8, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xF5F5DC);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Chaleco
+                    fillStyle(ctx, 0x4a3728);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, 8, height, 2);
+                    ctx.roundRect(width - 8, 0, 8, height, 2);
+                    ctx.fill();
+                    // Cinturon
+                    fillStyle(ctx, 0x2a1a0a);
+                    ctx.fillRect(0, height - 8, width, 6);
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(width/2 - 3, height - 7, 6, 4);
+                } else {
+                    fillStyle(ctx, 0x3a2a1a);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0x1a1a0a);
+                        ctx.beginPath();
+                        ctx.roundRect(0, height - 10, width, 10, 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (isSkeleton) {
+                const boneColor = 0xF5F5DC;
+                if (isHead) {
+                    fillStyle(ctx, boneColor);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cuencas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 2.5, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 2.5, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nariz
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, height/2 + 2);
+                    ctx.lineTo(width/2 - 2, height/2 + 5);
+                    ctx.lineTo(width/2 + 2, height/2 + 5);
+                    ctx.fill();
+                    // Dientes
+                    fillStyle(ctx, boneColor);
+                    ctx.fillRect(width/2 - 5, height/2 + 6, 10, 4);
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(width/2 - 4 + i*2, height/2 + 6);
+                        ctx.lineTo(width/2 - 4 + i*2, height/2 + 10);
+                        ctx.stroke();
+                    }
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, boneColor);
+                    ctx.fillRect(width/2 - 2, 0, 4, height);
+                    for (let i = 0; i < 5; i++) {
+                        const y = 4 + i * 7;
+                        ctx.beginPath();
+                        ctx.ellipse(width/2 - 8, y, 6, 1.5, 0, 0, Math.PI * 2);
+                        ctx.ellipse(width/2 + 8, y, 6, 1.5, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    fillStyle(ctx, boneColor);
+                    ctx.beginPath();
+                    ctx.roundRect(width/4, 0, width/2, height, 3);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 3, (width-2)/2, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, height - 3, (width-2)/2, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (isNinja) {
+                if (isHead) {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Banda blanca
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(0, height/2 - 6, width, 4);
+                    // Colas
+                    ctx.beginPath();
+                    ctx.moveTo(width + 2, height/2 - 6);
+                    ctx.lineTo(width + 8, height/2 - 8);
+                    ctx.lineTo(width + 6, height/2 - 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width + 2, height/2 - 2);
+                    ctx.lineTo(width + 10, height/2);
+                    ctx.lineTo(width + 8, height/2 + 4);
+                    ctx.fill();
+                    // Ojos blancos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2, 2.5, 1.5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2, 2.5, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cinturon blanco
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(0, height/2 - 3, width, 6);
+                    strokeStyle(ctx, 0x222222);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 0);
+                    ctx.lineTo(width/2, height/2 - 3);
+                    ctx.stroke();
+                } else {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Vendas
+                    strokeStyle(ctx, 0xFFFFFF);
+                    ctx.lineWidth = 2;
+                    ctx.globalAlpha = 0.7;
+                    for (let i = 0; i < 3; i++) {
+                        const y = 5 + i * (height / 3);
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y + 3);
+                        ctx.stroke();
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            } else {
+                // Default NPC
+                if (isHead) {
+                    fillStyle(ctx, color);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillRect(width/2 - 3, height/2 + 5, 6, 2);
+                } else {
+                    fillStyle(ctx, color);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            }
+
+            return canvas;
+        }
+
+        function createNpcPreview(npcType) {
+            const container = document.createElement('div');
+            container.className = 'npc-preview';
+
+            const skinColor = skinColors[npcType] || 0xFFDBB4;
+            const shirtColor = 0x3366CC;
+            const pantsColor = 0x333366;
+
+            // Crear las partes
+            const parts = [
+                { name: 'head', w: 22, h: 22, color: skinColor },
+                { name: 'torso', w: 28, h: 36, color: shirtColor },
+                { name: 'armL', w: 10, h: 22, color: skinColor },
+                { name: 'armR', w: 10, h: 22, color: skinColor },
+                { name: 'legL', w: 12, h: 30, color: pantsColor },
+                { name: 'legR', w: 12, h: 30, color: pantsColor }
+            ];
+
+            // Contenedor para posicionar las partes
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.width = (28 + 20 + 20) * SCALE + 'px';
+            wrapper.style.height = (22 + 36 + 30) * SCALE + 'px';
+
+            parts.forEach(part => {
+                const canvas = drawPart(npcType, part.name, part.w, part.h, part.color);
+                canvas.style.position = 'absolute';
+
+                // Posicionar cada parte
+                if (part.name === 'head') {
+                    canvas.style.left = ((28 - 22) / 2 + 10) * SCALE + 'px';
+                    canvas.style.top = '0px';
+                } else if (part.name === 'torso') {
+                    canvas.style.left = 10 * SCALE + 'px';
+                    canvas.style.top = 22 * SCALE + 'px';
+                } else if (part.name === 'armL') {
+                    canvas.style.left = '0px';
+                    canvas.style.top = 22 * SCALE + 'px';
+                } else if (part.name === 'armR') {
+                    canvas.style.left = (10 + 28) * SCALE + 'px';
+                    canvas.style.top = 22 * SCALE + 'px';
+                } else if (part.name === 'legL') {
+                    canvas.style.left = (10 + 28/2 - 12 - 2) * SCALE + 'px';
+                    canvas.style.top = (22 + 36) * SCALE + 'px';
+                } else if (part.name === 'legR') {
+                    canvas.style.left = (10 + 28/2 + 2) * SCALE + 'px';
+                    canvas.style.top = (22 + 36) * SCALE + 'px';
+                }
+
+                wrapper.appendChild(canvas);
+            });
+
+            container.appendChild(wrapper);
+            return container;
+        }
+
+        // Generar cards
+        const grid = document.getElementById('npc-grid');
+        npcs.forEach(npc => {
+            const card = document.createElement('div');
+            card.className = 'npc-card';
+
+            const name = document.createElement('div');
+            name.className = 'npc-name';
+            name.textContent = npc.emoji + ' ' + npc.name;
+
+            const preview = createNpcPreview(npc.id);
+
+            const id = document.createElement('div');
+            id.className = 'npc-id';
+            id.textContent = 'ID: ' + npc.id;
+
+            card.appendChild(name);
+            card.appendChild(preview);
+            card.appendChild(id);
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
