@@ -26,21 +26,18 @@ let frameCount = 0;
 
 // Función para obtener la Y del suelo dinámicamente
 function getGroundY() {
-    return game.scale.height - 50;
+    return Math.max(game.scale.height, window.innerHeight) - 50;
 }
 function getGroundLimit() {
-    return game.scale.height - 65; // Donde los objetos dejan de caer
+    return Math.max(game.scale.height, window.innerHeight) - 65;
 }
 
 const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.RESIZE
     },
     physics: {
         default: 'matter',
@@ -124,14 +121,20 @@ function preload() {}
 function create() {
     sceneRef = this;
 
+    // IMPORTANTE: Usar dimensiones reales del canvas, no las cacheadas
+    const realWidth = this.scale.width;
+    const realHeight = this.scale.height;
+
+    console.log('CREATE - Dimensiones:', realWidth, 'x', realHeight);
+
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     } catch (e) {}
 
     createGround(this);
 
-    const spawnY = game.scale.height - 200;
-    const w = game.scale.width;
+    const spawnY = realHeight - 200;
+    const w = realWidth;
 
     if (isMobile) {
         createRagdoll(this, w * 0.3, spawnY, teamColors[0]);
@@ -1613,9 +1616,12 @@ function createGround(scene) {
     // Crear cielo primero
     createSky(scene);
 
-    const w = game.scale.width;
-    const h = game.scale.height;
+    // USAR dimensiones reales del viewport, no del game.scale
+    const w = Math.max(scene.scale.width, window.innerWidth);
+    const h = Math.max(scene.scale.height, window.innerHeight);
     const groundY = h - 50;
+
+    console.log('GROUND - w:', w, 'h:', h, 'groundY:', groundY);
 
     const groundGraphics = scene.add.graphics();
     groundGraphics.fillStyle(0x4a7c3f, 1);
@@ -1676,7 +1682,7 @@ function createRagdoll(scene, x, y, color) {
     const shirtColor = color;
     const pantsColor = 0x333333;
 
-    const groundY = game.scale.height - 50;
+    const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
     const torsoHeight = 36;
 
