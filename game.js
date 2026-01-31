@@ -2433,6 +2433,29 @@ function createGround(scene) {
     rockGround.setVisible(false);
     groundGraphics.rockGround = rockGround;
 
+    // Suelo de desierto (arena naranja/dorada con dunas)
+    const desertGround = scene.add.graphics();
+    desertGround.fillStyle(0xD2691E, 1); // Arena naranja
+    desertGround.fillRect(0, groundY, w, 50);
+    // Dunas de arena
+    desertGround.fillStyle(0xE2811E, 1);
+    for (let x = 0; x < w; x += 80) {
+        desertGround.fillEllipse(x + 40, groundY - 5, 50, 15);
+    }
+    // Textura granulada
+    desertGround.fillStyle(0xC2691E, 0.7);
+    for (let x = 0; x < w; x += 20) {
+        desertGround.fillCircle(x + Math.random() * 15, groundY + 10 + Math.random() * 20, 2);
+    }
+    // Piedras pequeñas
+    desertGround.fillStyle(0x8B4513, 1);
+    for (let x = 100; x < w; x += 200) {
+        desertGround.fillEllipse(x, groundY + 15, 8, 5);
+    }
+    desertGround.setDepth(-9);
+    desertGround.setVisible(false);
+    groundGraphics.desertGround = desertGround;
+
     // Crear Tierra para mapa lunar (oculta inicialmente)
     earthGraphics = scene.add.graphics();
     earthGraphics.setDepth(-10);
@@ -3662,6 +3685,22 @@ function changeMap(mapId) {
             }
             // Crear un esqueleto al entrar al mapa
             createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0x666666, 'esqueleto');
+            break;
+        case 'desierto':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Desierto: sol grande, sin árboles ni flores, suelo de arena naranja
+            if (sun) sun.setVisible(true);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.desertGround) groundGraphics.desertGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo del desierto (amarillo/naranja caliente)
+            sceneRef.mapOverlay.fillStyle(0xFFD700, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            // Degradado más intenso arriba
+            sceneRef.mapOverlay.fillStyle(0xFFA500, 0.2);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
             break;
         case 'playa':
             sceneRef.matter.world.setGravity(0, 0.8);
@@ -5030,6 +5069,125 @@ function updateMapEffects() {
         }));
     } else if (sceneRef.iceGraphics) {
         sceneRef.iceGraphics.clear();
+    }
+
+    // Desierto - cactus, dunas y lagartijas
+    if (currentMap === 'desierto') {
+        if (!sceneRef.desertGraphics) {
+            sceneRef.desertGraphics = sceneRef.add.graphics();
+            sceneRef.desertGraphics.setDepth(-6);
+        }
+        sceneRef.desertGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // === DUNAS EN EL FONDO ===
+        sceneRef.desertGraphics.fillStyle(0xE8A030, 0.6);
+        sceneRef.desertGraphics.fillEllipse(w * 0.2, groundY - 30, 150, 40);
+        sceneRef.desertGraphics.fillEllipse(w * 0.6, groundY - 25, 180, 35);
+        sceneRef.desertGraphics.fillEllipse(w * 0.85, groundY - 35, 120, 45);
+
+        // === CACTUS (3 en diferentes posiciones) ===
+        const cactusPositions = [
+            { x: 100, size: 1 },
+            { x: w * 0.5, size: 1.2 },
+            { x: w - 120, size: 0.9 }
+        ];
+
+        cactusPositions.forEach(cactus => {
+            const cx = cactus.x;
+            const s = cactus.size;
+            const sway = Math.sin(Date.now()/2000 + cx) * 2;
+
+            // Cuerpo principal del cactus
+            sceneRef.desertGraphics.fillStyle(0x228B22, 1);
+            sceneRef.desertGraphics.fillRect(cx - 12 * s, groundY - 80 * s, 24 * s, 80 * s);
+            // Parte superior redondeada
+            sceneRef.desertGraphics.fillCircle(cx, groundY - 80 * s, 12 * s);
+
+            // Brazo izquierdo
+            sceneRef.desertGraphics.fillRect(cx - 30 * s, groundY - 60 * s, 20 * s, 12 * s);
+            sceneRef.desertGraphics.fillRect(cx - 32 * s, groundY - 70 * s, 14 * s, 25 * s);
+            sceneRef.desertGraphics.fillCircle(cx - 25 * s, groundY - 70 * s, 7 * s);
+
+            // Brazo derecho
+            sceneRef.desertGraphics.fillRect(cx + 10 * s, groundY - 45 * s, 20 * s, 12 * s);
+            sceneRef.desertGraphics.fillRect(cx + 22 * s, groundY - 60 * s, 14 * s, 30 * s);
+            sceneRef.desertGraphics.fillCircle(cx + 29 * s, groundY - 60 * s, 7 * s);
+
+            // Lineas del cactus (textura)
+            sceneRef.desertGraphics.lineStyle(1, 0x1A6B1A, 0.5);
+            for (let i = 0; i < 4; i++) {
+                sceneRef.desertGraphics.lineBetween(
+                    cx - 8 * s + i * 5 * s, groundY - 75 * s,
+                    cx - 8 * s + i * 5 * s, groundY - 5 * s
+                );
+            }
+
+            // Espinas (pequeños puntos)
+            sceneRef.desertGraphics.fillStyle(0xFFFFAA, 0.8);
+            for (let spine = 0; spine < 8; spine++) {
+                const spineX = cx + (Math.random() - 0.5) * 20 * s;
+                const spineY = groundY - 20 * s - Math.random() * 55 * s;
+                sceneRef.desertGraphics.fillCircle(spineX, spineY, 1.5);
+            }
+        });
+
+        // === LAGARTIJA CORRIENDO (decorativa) ===
+        const lizardX = 250 + Math.sin(Date.now()/1500) * 100;
+        const lizardY = groundY - 8;
+        const lizardDir = Math.cos(Date.now()/1500) > 0 ? 1 : -1;
+
+        // Cuerpo
+        sceneRef.desertGraphics.fillStyle(0x8B7355, 1);
+        sceneRef.desertGraphics.fillEllipse(lizardX, lizardY, 15, 6);
+        // Cabeza
+        sceneRef.desertGraphics.fillEllipse(lizardX + 12 * lizardDir, lizardY - 1, 6, 4);
+        // Cola
+        sceneRef.desertGraphics.lineStyle(3, 0x8B7355, 1);
+        sceneRef.desertGraphics.lineBetween(lizardX - 12 * lizardDir, lizardY, lizardX - 25 * lizardDir, lizardY + 3);
+        // Patas (animadas)
+        const legAnim = Math.sin(Date.now()/100) * 3;
+        sceneRef.desertGraphics.lineStyle(2, 0x8B7355, 1);
+        sceneRef.desertGraphics.lineBetween(lizardX - 5, lizardY + 3, lizardX - 10, lizardY + 8 + legAnim);
+        sceneRef.desertGraphics.lineBetween(lizardX + 5, lizardY + 3, lizardX + 10, lizardY + 8 - legAnim);
+        // Ojo
+        sceneRef.desertGraphics.fillStyle(0x000000, 1);
+        sceneRef.desertGraphics.fillCircle(lizardX + 14 * lizardDir, lizardY - 2, 1.5);
+
+        // === ONDAS DE CALOR (efecto visual) ===
+        sceneRef.desertGraphics.lineStyle(1, 0xFFFFFF, 0.15);
+        for (let wave = 0; wave < 5; wave++) {
+            const waveY = groundY - 100 - wave * 30;
+            sceneRef.desertGraphics.beginPath();
+            sceneRef.desertGraphics.moveTo(0, waveY);
+            for (let wx = 0; wx < w; wx += 20) {
+                const offset = Math.sin(Date.now()/500 + wx * 0.02 + wave) * 5;
+                sceneRef.desertGraphics.lineTo(wx, waveY + offset);
+            }
+            sceneRef.desertGraphics.strokePath();
+        }
+
+        // === CALAVERA DE VACA (decorativa) ===
+        const skullX = w - 80;
+        const skullY = groundY - 12;
+        sceneRef.desertGraphics.fillStyle(0xFFFACD, 1);
+        sceneRef.desertGraphics.fillEllipse(skullX, skullY, 12, 8);
+        // Cuernos
+        sceneRef.desertGraphics.lineStyle(3, 0xFFFACD, 1);
+        sceneRef.desertGraphics.lineBetween(skullX - 10, skullY - 3, skullX - 18, skullY - 10);
+        sceneRef.desertGraphics.lineBetween(skullX + 10, skullY - 3, skullX + 18, skullY - 10);
+        // Ojos (huecos)
+        sceneRef.desertGraphics.fillStyle(0x000000, 1);
+        sceneRef.desertGraphics.fillCircle(skullX - 4, skullY - 2, 2);
+        sceneRef.desertGraphics.fillCircle(skullX + 4, skullY - 2, 2);
+        // Nariz
+        sceneRef.desertGraphics.fillCircle(skullX, skullY + 3, 1.5);
+
+    } else if (sceneRef.desertGraphics) {
+        sceneRef.desertGraphics.clear();
     }
 
     // Playa - palmeras con cocos y agua con fisica
