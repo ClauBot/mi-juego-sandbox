@@ -35,8 +35,9 @@
             border-radius: 15px;
             overflow: hidden;
         }
-        .world-card.implemented { border: 2px solid #44AA44; }
-        .world-card.pending { border: 2px solid #FFAA00; }
+        .world-card.implemented { border: 2px solid #44AA44; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .world-card.implemented:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(68, 170, 68, 0.4); }
+        .world-card.pending { border: 2px solid #FFAA00; opacity: 0.7; }
         .world-preview {
             height: 180px;
             position: relative;
@@ -72,6 +73,20 @@
             padding: 5px 8px;
             border-radius: 5px;
         }
+        .play-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(68, 170, 68, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .world-card.implemented:hover .play-hint { opacity: 1; }
     </style>
 </head>
 <body>
@@ -1369,6 +1384,12 @@
             const preview = document.createElement('div');
             preview.className = 'world-preview';
             preview.appendChild(drawWorld(world.id));
+            if (world.implemented) {
+                const playHint = document.createElement('div');
+                playHint.className = 'play-hint';
+                playHint.textContent = '▶ JUGAR';
+                preview.appendChild(playHint);
+            }
 
             const info = document.createElement('div');
             info.className = 'world-info';
@@ -1390,6 +1411,13 @@
 
             card.appendChild(preview);
             card.appendChild(info);
+
+            // Click para abrir el juego con ese mundo
+            if (world.implemented) {
+                card.addEventListener('click', () => {
+                    window.location.href = `index.html?world=${world.id}&spawn=2`;
+                });
+            }
 
             if (world.implemented) {
                 implementedGrid.appendChild(card);

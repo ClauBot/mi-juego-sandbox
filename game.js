@@ -548,10 +548,22 @@ function initGameContent(scene) {
 
     createGround(scene);
 
+    // Leer parámetros de URL (para dashboard de mundos)
+    const urlParams = new URLSearchParams(window.location.search);
+    const worldParam = urlParams.get('world');
+    const spawnParam = parseInt(urlParams.get('spawn')) || 0;
+
     const spawnY = realHeight - 200;
     const w = realWidth;
 
-    if (isMobile) {
+    // Si hay parámetro spawn, crear esa cantidad de NPCs random
+    if (spawnParam > 0) {
+        for (let i = 0; i < spawnParam; i++) {
+            const x = w * (0.2 + Math.random() * 0.6);
+            const color = teamColors[Math.floor(Math.random() * teamColors.length)];
+            createRagdoll(scene, x, spawnY, color);
+        }
+    } else if (isMobile) {
         createRagdoll(scene, w * 0.3, spawnY, teamColors[0]);
         createRagdoll(scene, w * 0.7, spawnY, teamColors[1]);
     } else {
@@ -561,6 +573,11 @@ function initGameContent(scene) {
     }
 
     createUI(scene);
+
+    // Si hay parámetro world, cambiar al mapa especificado
+    if (worldParam) {
+        setTimeout(() => changeMap(worldParam), 100);
+    }
 
     scene.input.on('pointerdown', onPointerDown, scene);
     scene.input.on('pointermove', onPointerMove, scene);
