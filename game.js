@@ -4,8 +4,8 @@
 // ============================================
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const screenWidth = Math.min(window.innerWidth, 800);
-const screenHeight = Math.min(window.innerHeight, 600);
+const screenWidth = window.innerWidth;
+const screenHeight = window.innerHeight;
 
 const config = {
     type: Phaser.AUTO,
@@ -14,10 +14,10 @@ const config = {
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 800,
-        height: 600
+        width: '100%',
+        height: '100%'
     },
     physics: {
         default: 'matter',
@@ -72,13 +72,16 @@ function create() {
 
     createGround(this);
 
+    const spawnY = game.scale.height - 200;
+    const w = game.scale.width;
+
     if (isMobile) {
-        createRagdoll(this, 200, 400, teamColors[0]);
-        createRagdoll(this, 400, 400, teamColors[1]);
+        createRagdoll(this, w * 0.3, spawnY, teamColors[0]);
+        createRagdoll(this, w * 0.7, spawnY, teamColors[1]);
     } else {
-        createRagdoll(this, 200, 400, teamColors[0]);
-        createRagdoll(this, 400, 400, teamColors[1]);
-        createRagdoll(this, 600, 400, teamColors[2]);
+        createRagdoll(this, w * 0.25, spawnY, teamColors[0]);
+        createRagdoll(this, w * 0.5, spawnY, teamColors[1]);
+        createRagdoll(this, w * 0.75, spawnY, teamColors[2]);
     }
 
     createUI(this);
@@ -89,9 +92,10 @@ function create() {
         fill: '#333333'
     });
 
-    this.input.on('pointerdown', onPointerDown);
-    this.input.on('pointermove', onPointerMove);
-    this.input.on('pointerup', onPointerUp);
+    this.input.on('pointerdown', onPointerDown, this);
+    this.input.on('pointermove', onPointerMove, this);
+    this.input.on('pointerup', onPointerUp, this);
+    this.input.on('pointerupoutside', onPointerUp, this);
 
     // Colisiones
     this.matter.world.on('collisionstart', (event) => {
@@ -1060,11 +1064,11 @@ function onPointerDown(pointer) {
         audioContext.resume();
     }
 
-    const uiAreaX = 800 - 90;
+    const uiAreaX = game.scale.width - 90;
     if (pointer.x > uiAreaX) return;
 
     // Área de botón de música
-    if (pointer.x < 70 && pointer.y > 500) {
+    if (pointer.x < 70 && pointer.y > game.scale.height - 100) {
         toggleMusic();
         return;
     }
@@ -1075,7 +1079,7 @@ function onPointerDown(pointer) {
     }
 
     // Si hay arma seleccionada, crear arma
-    if (currentWeapon && pointer.y > 100 && pointer.y < 530) {
+    if (currentWeapon && pointer.y > 100 && pointer.y < game.scale.height - 70) {
         if (currentWeapon === 'pistola') {
             createPistola(sceneRef, pointer.x, pointer.y);
         } else if (currentWeapon === 'cuchillo') {
@@ -1086,7 +1090,7 @@ function onPointerDown(pointer) {
     }
 
     let closestPart = null;
-    let closestDist = isMobile ? 50 : 35;
+    let closestDist = isMobile ? 70 : 50;  // Área de detección más grande
     let ownerRagdoll = null;
 
     ragdolls.forEach(ragdoll => {
@@ -1434,25 +1438,29 @@ function createGround(scene) {
     // Crear cielo primero
     createSky(scene);
 
+    const w = game.scale.width;
+    const h = game.scale.height;
+    const groundY = h - 50;
+
     const groundGraphics = scene.add.graphics();
     groundGraphics.fillStyle(0x4a7c3f, 1);
-    groundGraphics.fillRect(0, 550, 800, 50);
+    groundGraphics.fillRect(0, groundY, w, 50);
 
     groundGraphics.fillStyle(0x3d6b35, 1);
-    for (let x = 0; x < 800; x += 20) {
-        groundGraphics.fillRect(x, 545, 10, 5);
+    for (let x = 0; x < w; x += 20) {
+        groundGraphics.fillRect(x, groundY - 5, 10, 5);
     }
 
     // Árboles de manzana
     createAppleTree(scene, 150);
-    createAppleTree(scene, 650);
+    createAppleTree(scene, w - 150);
 
     // Flores decorativas
     const flowerColors = [0xFF69B4, 0xFF1493, 0xFFB6C1, 0xFF4500, 0xFFFF00, 0x9370DB, 0x00CED1, 0xFF6347];
 
     for (let i = 0; i < 20; i++) {
-        const fx = 30 + Math.random() * 740;
-        const fy = 535 + Math.random() * 10;
+        const fx = 30 + Math.random() * (w - 60);
+        const fy = groundY - 15 + Math.random() * 10;
         const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
         createFlower(scene, fx, fy, color);
     }
@@ -1468,7 +1476,7 @@ function createGround(scene) {
 
     // Nota: Los ragdolls ahora SÍ colisionan entre sí (pueden pegarse)
 
-    scene.matter.add.rectangle(400, 575, 800, 50, {
+    scene.matter.add.rectangle(w / 2, groundY + 25, w, 50, {
         ...wallOptions,
         friction: 1,
         frictionStatic: 1,
@@ -1476,9 +1484,9 @@ function createGround(scene) {
         label: 'ground'
     });
 
-    scene.matter.add.rectangle(-25, 300, 50, 700, wallOptions);
-    scene.matter.add.rectangle(825, 300, 50, 700, wallOptions);
-    scene.matter.add.rectangle(400, -25, 800, 50, wallOptions);
+    scene.matter.add.rectangle(-25, h / 2, 50, h, wallOptions);
+    scene.matter.add.rectangle(w + 25, h / 2, 50, h, wallOptions);
+    scene.matter.add.rectangle(w / 2, -25, w, 50, wallOptions);
 }
 
 function createRagdoll(scene, x, y, color) {
@@ -1643,7 +1651,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false) {
 
 function createUI(scene) {
     const btnSize = isMobile ? 60 : 50;
-    const panelX = 800 - btnSize - 20;
+    const panelX = game.scale.width - btnSize - 20;
 
     const uiPanel = scene.add.graphics();
     uiPanel.fillStyle(0x000000, 0.4);
@@ -1660,8 +1668,8 @@ function createUI(scene) {
     const spawnZone = scene.add.zone(panelX + btnSize/2, 15 + btnSize/2, btnSize, btnSize);
     spawnZone.setInteractive();
     spawnZone.on('pointerdown', () => {
-        const newX = Phaser.Math.Between(100, 600);
-        createRagdoll(sceneRef, newX, 400, teamColors[currentTeam]);
+        const newX = Phaser.Math.Between(100, game.scale.width - 100);
+        createRagdoll(sceneRef, newX, game.scale.height - 200, teamColors[currentTeam]);
     });
 
     // Botón equipo
