@@ -3197,6 +3197,29 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillStyle(0xAA0044, 0.15);
             sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.7, 150, 180, 90);
             break;
+        case 'niebla':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Niebla: ocultar sol, árboles, flores - solo nubes blancas
+            if (sun) sun.setVisible(false);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            // Fondo blanco puro
+            sceneRef.mapOverlay.fillStyle(0xFFFFFF, 1);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            // Nubes de niebla en diferentes capas
+            sceneRef.mapOverlay.fillStyle(0xEEEEEE, 0.8);
+            for (let i = 0; i < 8; i++) {
+                const fogX = Math.random() * game.scale.width;
+                const fogY = Math.random() * game.scale.height;
+                sceneRef.mapOverlay.fillEllipse(fogX, fogY, 200 + Math.random() * 150, 80 + Math.random() * 60);
+            }
+            sceneRef.mapOverlay.fillStyle(0xDDDDDD, 0.6);
+            for (let i = 0; i < 6; i++) {
+                const fogX = Math.random() * game.scale.width;
+                const fogY = Math.random() * game.scale.height;
+                sceneRef.mapOverlay.fillEllipse(fogX, fogY, 250 + Math.random() * 100, 100 + Math.random() * 50);
+            }
+            break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
             // Sin overlay
