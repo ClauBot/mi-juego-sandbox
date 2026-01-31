@@ -161,7 +161,7 @@ let creatorOpen = false;
 let creatorMenu;
 let mayhemsText;
 let unlockedItems = {
-    npcs: ['normal'],
+    npcs: ['normal', 'esqueleto'],
     weapons: ['pistola', 'cuchillo', 'granada'],
     worlds: ['normal']
 };
