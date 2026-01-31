@@ -2424,6 +2424,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     }
 
     const isSkeleton = (npcType === 'esqueleto');
+    const isNinja = (npcType === 'ninja');
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -2450,7 +2451,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         }
     };
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2488,7 +2489,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2496,7 +2497,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton);
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2504,7 +2505,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2512,7 +2513,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2520,7 +2521,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2569,7 +2570,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false) {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
@@ -2620,6 +2621,47 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             // Sombra
             graphics.lineStyle(1, darkBone, 0.5);
             graphics.strokeRoundedRect(width/4, 0, width/2, height, 3);
+        }
+    } else if (isNinja) {
+        // Dibujar ninja con máscara
+        if (isHead) {
+            // Cabeza con máscara ninja negra
+            graphics.fillStyle(0x111111, 1); // Negro máscara
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Banda roja en la frente
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRect(0, height/2 - 6, width, 4);
+            // Colas de la banda
+            graphics.fillTriangle(width + 2, height/2 - 6, width + 8, height/2 - 8, width + 6, height/2 - 2);
+            graphics.fillTriangle(width + 2, height/2 - 2, width + 10, height/2, width + 8, height/2 + 4);
+            // Solo los ojos visibles (blancos con pupila)
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2 - 4, height/2, 5, 3);
+            graphics.fillEllipse(width/2 + 4, height/2, 5, 3);
+            // Pupilas
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 4, height/2, 1.5);
+            graphics.fillCircle(width/2 + 4, height/2, 1.5);
+        } else if (name === 'torso') {
+            // Traje ninja negro con cinturón
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Cinturón rojo
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRect(0, height/2 - 3, width, 6);
+            // Línea del traje
+            graphics.lineStyle(1, 0x222222, 1);
+            graphics.lineBetween(width/2, 0, width/2, height/2 - 3);
+        } else {
+            // Brazos/piernas ninja negros
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Vendas grises
+            graphics.lineStyle(2, 0x333333, 0.5);
+            for (let i = 0; i < 3; i++) {
+                const y = 5 + i * (height / 3);
+                graphics.lineBetween(0, y, width, y + 3);
+            }
         }
     } else if (isHead) {
         graphics.fillStyle(color, 1);
