@@ -116,6 +116,25 @@ let selectedWeapon = null;
 let isDraggingWeapon = false;
 let scenarioElements = [];
 
+// === SISTEMA DE MAPAS ===
+let currentMap = 'normal';
+let mapMenuOpen = false;
+let mapButton;
+let mapMenu;
+let slowMotion = false;
+let slowMotionButton;
+
+// Efectos de mapa
+let tornadoActive = false;
+let tornadoX = 0;
+let lightningTimer = 0;
+let zombieMode = false;
+let blackHoleActive = false;
+let blackHoleX = 0;
+let blackHoleY = 0;
+let trampolines = [];
+let cannons = [];
+
 // Esperar a que el DOM esté listo para tener dimensiones correctas
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -196,18 +215,6 @@ function initGameContent(scene) {
 
         // En móvil, limitar frecuencia de efectos
         if (isLowPerf && now - lastCollisionTime < collisionCooldown) {
-            // Solo procesar daño sin efectos visuales/sonoros
-            event.pairs.forEach(pair => {
-                const bodyA = pair.bodyA;
-                const bodyB = pair.bodyB;
-                const vel = Math.abs(bodyA.velocity?.x || 0) + Math.abs(bodyA.velocity?.y || 0) +
-                    Math.abs(bodyB.velocity?.x || 0) + Math.abs(bodyB.velocity?.y || 0);
-                if (vel > 12) {
-                    const x = pair.collision.supports[0]?.x || bodyA.position.x;
-                    const y = pair.collision.supports[0]?.y || bodyA.position.y;
-                    damageRagdollAt(x, y, Math.floor(vel / 2));
-                }
-            });
             return;
         }
 
@@ -218,25 +225,39 @@ function initGameContent(scene) {
             const vel = Math.abs(bodyA.velocity?.x || 0) + Math.abs(bodyA.velocity?.y || 0) +
                 Math.abs(bodyB.velocity?.x || 0) + Math.abs(bodyB.velocity?.y || 0);
 
-            if (vel > 12) {
+            // Verificar si es colisión con arma
+            const isWeaponHit = (bodyA.collisionFilter?.category === 0x0004) ||
+                               (bodyB.collisionFilter?.category === 0x0004);
+
+            if (vel > 12 || (isWeaponHit && vel > 5)) {
                 lastCollisionTime = now;
                 const x = pair.collision.supports[0]?.x || bodyA.position.x;
                 const y = pair.collision.supports[0]?.y || bodyA.position.y;
 
-                // Menos probabilidad de sangre en móvil
-                const bloodChance = isLowPerf ? 0.15 : 0.25;
-                if (Math.random() < bloodChance) {
-                    spawnBlood(x, y, Math.min(isLowPerf ? 3 : 5, Math.floor(vel / 8)));
-                }
-                playHitSound(vel / 30);
+                // Verificar si un barril fue golpeado
+                weapons.forEach(weapon => {
+                    if (weapon.type === 'barril' && weapon.body) {
+                        if (weapon.body === bodyA || weapon.body === bodyB) {
+                            weapon.hitCount = (weapon.hitCount || 0) + 1;
+                            if (weapon.hitCount >= 2 || vel > 20) {
+                                setTimeout(() => explodeBarril(weapon), 50);
+                            }
+                        }
+                    }
+                });
 
-                // Reducir vida al golpear
-                damageRagdollAt(x, y, Math.floor(vel / 2));
+                if (isWeaponHit) {
+                    spawnBlood(x, y, Math.min(8, Math.floor(vel / 4)));
+                    playHitSound(vel / 20);
+                } else {
+                    const bloodChance = isLowPerf ? 0.15 : 0.25;
+                    if (Math.random() < bloodChance) {
+                        spawnBlood(x, y, Math.min(isLowPerf ? 3 : 5, Math.floor(vel / 8)));
+                    }
+                    playHitSound(vel / 30);
+                }
             } else if (vel > 6) {
                 playHitSound(vel / 40);
-                const x = pair.collision.supports[0]?.x || bodyA.position.x;
-                const y = pair.collision.supports[0]?.y || bodyA.position.y;
-                damageRagdollAt(x, y, Math.floor(vel / 4));
             }
         });
     });
@@ -1113,10 +1134,11 @@ function update() {
     // Actualizar balas
     updateBullets();
 
-    // Actualizar barras de vida solo cada 3 frames (posición)
-    if (frameCount % 3 === 0) {
-        updateAllHealthBars();
-    }
+    // Actualizar parpadeo de ragdolls
+    updateBlink();
+
+    // Actualizar efectos de mapa
+    updateMapEffects();
 
     // Verificar sol cada 5 frames en móvil
     if (!isLowPerf || frameCount % 5 === 0) {
@@ -1334,12 +1356,25 @@ function onPointerDown(pointer) {
             });
             return;
         }
-        if (currentWeapon === 'pistola') {
-            createPistola(sceneRef, pointer.x, pointer.y);
-        } else if (currentWeapon === 'cuchillo') {
-            createCuchillo(sceneRef, pointer.x, pointer.y);
+        // Crear arma según tipo
+        const weaponCreators = {
+            'pistola': createPistola,
+            'cuchillo': createCuchillo,
+            'granada': createGranada,
+            'espada': createEspada,
+            'bat': createBat,
+            'cohete': createCohete,
+            'barril': createBarril,
+            'trampolin': createTrampolin
+        };
+
+        if (weaponCreators[currentWeapon]) {
+            weaponCreators[currentWeapon](sceneRef, pointer.x, pointer.y);
+            playGrabSound();
+            // Deseleccionar arma después de colocarla
+            currentWeapon = null;
+            drawWeaponButton();
         }
-        playGrabSound();
         return;
     }
 
@@ -1444,13 +1479,175 @@ function onPointerUp(pointer) {
 
     // Soltar arma
     if (isDraggingWeapon && selectedWeapon) {
-        // Si no se movió mucho y es pistola, disparar
-        if (!selectedWeapon.hasMoved && selectedWeapon.type === 'pistola') {
-            shootBullet(selectedWeapon);
+        // Si no se movió mucho, activar arma
+        if (!selectedWeapon.hasMoved) {
+            if (selectedWeapon.type === 'pistola') {
+                shootBullet(selectedWeapon);
+            } else if (selectedWeapon.type === 'cohete') {
+                activateCohete(selectedWeapon);
+            } else if (selectedWeapon.type === 'barril') {
+                explodeBarril(selectedWeapon);
+            }
         }
         selectedWeapon = null;
         isDraggingWeapon = false;
     }
+}
+
+function activateCohete(weapon) {
+    if (weapon.isFlying) return;
+
+    weapon.isFlying = true;
+    playRocketSound();
+
+    // El cohete vuela por 3 segundos y luego explota
+    setTimeout(() => {
+        if (weapon && weapons.includes(weapon)) {
+            explodeCohete(weapon);
+        }
+    }, 3000);
+}
+
+function explodeCohete(weapon) {
+    const explosionX = weapon.x;
+    const explosionY = weapon.y;
+
+    // Explosión grande
+    const explosion = sceneRef.add.graphics();
+    explosion.setDepth(50);
+    explosion.fillStyle(0xFF4500, 0.9);
+    explosion.fillCircle(explosionX, explosionY, 30);
+    explosion.fillStyle(0xFFFF00, 0.7);
+    explosion.fillCircle(explosionX, explosionY, 50);
+    explosion.fillStyle(0xFF6600, 0.5);
+    explosion.fillCircle(explosionX, explosionY, 80);
+
+    sceneRef.tweens.add({
+        targets: explosion,
+        alpha: 0,
+        scale: 2,
+        duration: 400,
+        onComplete: () => explosion.destroy()
+    });
+
+    playExplosionSound();
+
+    // Empujar ragdolls (radio más grande que granada)
+    const radius = 200;
+    const force = 30;
+
+    ragdolls.forEach(ragdoll => {
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Phaser.Math.Distance.Between(explosionX, explosionY, part.x, part.y);
+                if (dist < radius) {
+                    const angle = Math.atan2(part.y - explosionY, part.x - explosionX);
+                    const f = (1 - dist / radius) * force;
+                    part.setVelocity(Math.cos(angle) * f, Math.sin(angle) * f - 8);
+
+                    if (ragdoll.isStanding) {
+                        ragdoll.isStanding = false;
+                        ragdoll.parts.forEach(p => p && p.body && p.setStatic(false));
+                    }
+                }
+            }
+        });
+    });
+
+    spawnBlood(explosionX, explosionY, 20);
+
+    // Eliminar cohete
+    if (weapon.graphics) weapon.graphics.destroy();
+    if (weapon.body) sceneRef.matter.world.remove(weapon.body);
+    const idx = weapons.indexOf(weapon);
+    if (idx > -1) weapons.splice(idx, 1);
+}
+
+function explodeBarril(weapon) {
+    const explosionX = weapon.x;
+    const explosionY = weapon.y;
+
+    // Explosión de fuego
+    const explosion = sceneRef.add.graphics();
+    explosion.setDepth(50);
+    explosion.fillStyle(0xFF0000, 0.9);
+    explosion.fillCircle(explosionX, explosionY, 40);
+    explosion.fillStyle(0xFF6600, 0.7);
+    explosion.fillCircle(explosionX, explosionY, 60);
+    explosion.fillStyle(0xFFFF00, 0.5);
+    explosion.fillCircle(explosionX, explosionY, 80);
+
+    sceneRef.tweens.add({
+        targets: explosion,
+        alpha: 0,
+        scale: 2.5,
+        duration: 500,
+        onComplete: () => explosion.destroy()
+    });
+
+    playExplosionSound();
+
+    // Empujar todo con mucha fuerza
+    const radius = 180;
+    const force = 35;
+
+    ragdolls.forEach(ragdoll => {
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Phaser.Math.Distance.Between(explosionX, explosionY, part.x, part.y);
+                if (dist < radius) {
+                    const angle = Math.atan2(part.y - explosionY, part.x - explosionX);
+                    const f = (1 - dist / radius) * force;
+                    part.setVelocity(Math.cos(angle) * f, Math.sin(angle) * f - 10);
+
+                    if (ragdoll.isStanding) {
+                        ragdoll.isStanding = false;
+                        ragdoll.parts.forEach(p => p && p.body && p.setStatic(false));
+                    }
+                }
+            }
+        });
+    });
+
+    // También empujar otras armas
+    weapons.forEach(w => {
+        if (w !== weapon && w.body) {
+            const dist = Phaser.Math.Distance.Between(explosionX, explosionY, w.x, w.y);
+            if (dist < radius) {
+                const angle = Math.atan2(w.y - explosionY, w.x - explosionX);
+                const f = (1 - dist / radius) * force;
+                sceneRef.matter.body.setVelocity(w.body, {
+                    x: Math.cos(angle) * f,
+                    y: Math.sin(angle) * f - 10
+                });
+            }
+        }
+    });
+
+    spawnBlood(explosionX, explosionY, 25);
+
+    // Eliminar barril
+    if (weapon.graphics) weapon.graphics.destroy();
+    if (weapon.body) sceneRef.matter.world.remove(weapon.body);
+    const idx = weapons.indexOf(weapon);
+    if (idx > -1) weapons.splice(idx, 1);
+}
+
+function playRocketSound() {
+    if (!audioContext) return;
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, audioContext.currentTime);
+    osc.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.5);
+    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.15, audioContext.currentTime + 2);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 3);
 }
 
 let clouds = [];
@@ -1784,9 +1981,11 @@ function createRagdoll(scene, x, y, color) {
     ragdollCollisionGroup--;
     const myGroup = ragdollCollisionGroup;
 
-    const skinColor = 0xFFDBB4;
-    const shirtColor = color;
-    const pantsColor = 0x333333;
+    // Color zombie si estamos en modo zombie
+    const isZombie = (currentMap === 'zombie');
+    const skinColor = isZombie ? 0x6B8E23 : 0xFFDBB4; // Verde zombie o piel normal
+    const shirtColor = isZombie ? 0x4A4A4A : color; // Ropa rasgada gris
+    const pantsColor = isZombie ? 0x2F2F2F : 0x333333;
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -1809,7 +2008,7 @@ function createRagdoll(scene, x, y, color) {
         collisionFilter: {
             group: myGroup,           // Partes del mismo ragdoll no colisionan entre sí
             category: 0x0002,         // Soy un ragdoll
-            mask: 0x0001 | 0x0002     // Colisiono con suelo Y otros ragdolls
+            mask: 0x0001 | 0x0002 | 0x0004  // Colisiono con suelo, ragdolls y armas
         }
     };
 
@@ -1820,6 +2019,36 @@ function createRagdoll(scene, x, y, color) {
         density: 0.001
     });
     parts.push(head);
+
+    // Párpados para parpadear
+    const eyelids = scene.add.graphics();
+    eyelids.fillStyle(skinColor, 1);
+    eyelids.fillRect(-6, -4, 4, 4);
+    eyelids.fillRect(2, -4, 4, 4);
+    eyelids.setVisible(false);
+    eyelids.setDepth(55);
+    head.eyelids = eyelids;
+
+    // Cerebro expuesto si es zombie
+    let brainGraphics = null;
+    if (isZombie) {
+        brainGraphics = scene.add.graphics();
+        brainGraphics.setDepth(56);
+        // Herida/agujero en el cráneo
+        brainGraphics.fillStyle(0x8B0000, 1); // Rojo oscuro (sangre seca)
+        brainGraphics.fillEllipse(4, -8, 10, 6);
+        // Cerebro rosado expuesto
+        brainGraphics.fillStyle(0xFFB6C1, 1); // Rosa cerebro
+        brainGraphics.fillCircle(3, -7, 4);
+        brainGraphics.fillCircle(6, -8, 3);
+        brainGraphics.fillStyle(0xFF9999, 1);
+        brainGraphics.fillCircle(4, -9, 2);
+        // Líneas del cerebro
+        brainGraphics.lineStyle(1, 0xCC8888, 0.8);
+        brainGraphics.lineBetween(1, -8, 5, -6);
+        brainGraphics.lineBetween(4, -9, 7, -7);
+        head.brainGraphics = brainGraphics;
+    }
 
     const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
@@ -1884,17 +2113,6 @@ function createRagdoll(scene, x, y, color) {
         pointB: { x: 0, y: -14 }
     }));
 
-    // Barra de vida
-    const healthBg = scene.add.graphics();
-    healthBg.fillStyle(0x333333, 1);
-    healthBg.fillRect(-20, -8, 40, 8);
-    healthBg.setDepth(50);
-
-    const healthBar = scene.add.graphics();
-    healthBar.fillStyle(0x00FF00, 1);
-    healthBar.fillRect(-19, -7, 38, 6);
-    healthBar.setDepth(51);
-
     const ragdoll = {
         parts: parts,
         constraints: constraints,
@@ -1903,11 +2121,10 @@ function createRagdoll(scene, x, y, color) {
         isBeingDragged: false,
         isStanding: true,
         collisionGroup: myGroup,
-        health: 100,
-        maxHealth: 100,
-        healthBar: healthBar,
-        healthBg: healthBg,
-        isDead: false
+        eyelids: eyelids,
+        brainGraphics: brainGraphics,
+        isZombie: isZombie,
+        lastBlinkTime: Date.now()
     };
 
     ragdolls.push(ragdoll);
@@ -1969,8 +2186,8 @@ function createUI(scene) {
             ragdoll.parts.forEach(p => {
                 if (p) p.destroy();
             });
-            if (ragdoll.healthBar) ragdoll.healthBar.destroy();
-            if (ragdoll.healthBg) ragdoll.healthBg.destroy();
+            if (ragdoll.eyelids) ragdoll.eyelids.destroy();
+            if (ragdoll.brainGraphics) ragdoll.brainGraphics.destroy();
         });
         ragdolls = [];
         weapons.forEach(w => {
@@ -2056,62 +2273,141 @@ function createUI(scene) {
         toggleMusic();
     });
 
-    // Menú de armas (oculto inicialmente)
-    // Menú de armas - posicionado debajo del botón de armas
+    // Menú de armas - grid compacto
     const menuX = weaponX + btnSize/2;
     const menuY = topY + btnSize + 5;
     weaponMenu = scene.add.container(menuX, menuY);
     weaponMenu.setDepth(101);
     weaponMenu.setVisible(false);
 
+    const weaponOptions = [
+        { id: 'pistola', emoji: '🔫', name: 'Pistola' },
+        { id: 'cuchillo', emoji: '🔪', name: 'Cuchillo' },
+        { id: 'granada', emoji: '💣', name: 'Granada' },
+        { id: 'espada', emoji: '🗡️', name: 'Espada' },
+        { id: 'bat', emoji: '🏏', name: 'Bat' },
+        { id: 'cohete', emoji: '🚀', name: 'Cohete' },
+        { id: 'barril', emoji: '🛢️', name: 'Barril' },
+        { id: 'trampolin', emoji: '🛝', name: 'Trampolín' }
+    ];
+
+    const cols = 2;
+    const itemW = 70;
+    const itemH = 40;
+    const menuW = cols * itemW + 10;
+    const menuH = Math.ceil(weaponOptions.length / cols) * itemH + 10;
+
     const menuBg = scene.add.graphics();
     menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-60, 0, 120, 80, 8);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
     weaponMenu.add(menuBg);
 
-    // Opción Pistola
-    const pistolaBtn = scene.add.graphics();
-    pistolaBtn.fillStyle(0x555555, 1);
-    pistolaBtn.fillRoundedRect(-55, 5, 110, 32, 6);
-    weaponMenu.add(pistolaBtn);
+    weaponOptions.forEach((opt, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const bx = -menuW/2 + 5 + col * itemW;
+        const by = 5 + row * itemH;
 
-    const pistolaText = scene.add.text(0, 21, '🔫 Pistola', {
-        font: 'bold 14px Arial',
-        fill: '#FFFFFF'
-    }).setOrigin(0.5);
-    weaponMenu.add(pistolaText);
+        const btn = scene.add.graphics();
+        btn.fillStyle(0x555555, 1);
+        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        weaponMenu.add(btn);
 
-    const pistolaZone = scene.add.zone(menuX, menuY + 21, 110, 32);
-    pistolaZone.setInteractive();
-    pistolaZone.setDepth(102);
-    pistolaZone.on('pointerdown', () => {
-        currentWeapon = 'pistola';
-        weaponMenu.setVisible(false);
-        weaponMenuOpen = false;
-        drawWeaponButton();
+        const txt = scene.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, opt.emoji, {
+            font: '20px Arial'
+        }).setOrigin(0.5);
+        weaponMenu.add(txt);
+
+        // Zona interactiva dentro del container
+        const zoneGraphic = scene.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        zoneGraphic.setInteractive();
+        weaponMenu.add(zoneGraphic);
+        zoneGraphic.on('pointerdown', () => {
+            currentWeapon = opt.id;
+            weaponMenu.setVisible(false);
+            weaponMenuOpen = false;
+            drawWeaponButton();
+        });
     });
 
-    // Opción Cuchillo
-    const cuchilloBtn = scene.add.graphics();
-    cuchilloBtn.fillStyle(0x555555, 1);
-    cuchilloBtn.fillRoundedRect(-55, 42, 110, 32, 6);
-    weaponMenu.add(cuchilloBtn);
+    // === BOTÓN DE MAPA (izquierda del botón de armas) ===
+    const mapX = weaponX - margin - btnSize;
+    mapButton = scene.add.graphics();
+    mapButton.setDepth(100);
+    mapButton.fillStyle(0x8B4513, 1);
+    mapButton.fillRoundedRect(mapX, topY, btnSize, btnSize, 8);
+    mapButton.fillStyle(0xFFFFFF, 1);
+    const mapIcon = scene.add.text(mapX + btnSize/2, topY + btnSize/2, '🗺️', {
+        font: '24px Arial'
+    }).setOrigin(0.5).setDepth(100);
 
-    const cuchilloText = scene.add.text(0, 58, '🔪 Cuchillo', {
-        font: 'bold 14px Arial',
-        fill: '#FFFFFF'
-    }).setOrigin(0.5);
-    weaponMenu.add(cuchilloText);
+    const mapZone = scene.add.zone(mapX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    mapZone.setInteractive();
+    mapZone.setDepth(100);
+    mapZone.on('pointerdown', () => toggleMapMenu());
 
-    const cuchilloZone = scene.add.zone(menuX, menuY + 58, 110, 32);
-    cuchilloZone.setInteractive();
-    cuchilloZone.setDepth(102);
-    cuchilloZone.on('pointerdown', () => {
-        currentWeapon = 'cuchillo';
-        weaponMenu.setVisible(false);
-        weaponMenuOpen = false;
-        drawWeaponButton();
+    // Menú de mapas
+    const mapMenuX = mapX + btnSize/2;
+    const mapMenuY = topY + btnSize + 5;
+    mapMenu = scene.add.container(mapMenuX, mapMenuY);
+    mapMenu.setDepth(101);
+    mapMenu.setVisible(false);
+
+    const mapOptions = [
+        { id: 'normal', emoji: '🌳', name: 'Normal' },
+        { id: 'tornado', emoji: '🌪️', name: 'Tornado' },
+        { id: 'rayos', emoji: '⚡', name: 'Tormenta' },
+        { id: 'lunar', emoji: '🌙', name: 'Luna' },
+        { id: 'zombie', emoji: '🧟', name: 'Zombie' },
+        { id: 'blackhole', emoji: '🕳️', name: 'Agujero' }
+    ];
+
+    const mapMenuW = 2 * itemW + 10;
+    const mapMenuH = Math.ceil(mapOptions.length / 2) * itemH + 10;
+
+    const mapMenuBg = scene.add.graphics();
+    mapMenuBg.fillStyle(0x333333, 0.95);
+    mapMenuBg.fillRoundedRect(-mapMenuW/2, 0, mapMenuW, mapMenuH, 8);
+    mapMenu.add(mapMenuBg);
+
+    mapOptions.forEach((opt, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const bx = -mapMenuW/2 + 5 + col * itemW;
+        const by = 5 + row * itemH;
+
+        const btn = scene.add.graphics();
+        btn.fillStyle(0x555555, 1);
+        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        mapMenu.add(btn);
+
+        const txt = scene.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, opt.emoji, {
+            font: '20px Arial'
+        }).setOrigin(0.5);
+        mapMenu.add(txt);
+
+        // Zona interactiva dentro del container
+        const zoneGraphic = scene.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        zoneGraphic.setInteractive();
+        mapMenu.add(zoneGraphic);
+        zoneGraphic.on('pointerdown', () => {
+            changeMap(opt.id);
+            mapMenu.setVisible(false);
+            mapMenuOpen = false;
+        });
     });
+
+    // === BOTÓN DE CÁMARA LENTA (abajo derecha) ===
+    slowMotionButton = scene.add.graphics();
+    slowMotionButton.setDepth(100);
+    const slowX = game.scale.width - margin - btnSize;
+    const slowY = game.scale.height - margin - btnSize;
+    drawSlowMotionButton(slowX, slowY, btnSize);
+
+    const slowZone = scene.add.zone(slowX + btnSize/2, slowY + btnSize/2, btnSize, btnSize);
+    slowZone.setInteractive();
+    slowZone.setDepth(100);
+    slowZone.on('pointerdown', () => toggleSlowMotion());
 }
 
 // Posición del botón de armas (se actualiza en createUI)
@@ -2130,17 +2426,31 @@ function drawWeaponButton(x, y, size) {
 
     weaponButton.fillStyle(0xFFFFFF, 1);
 
-    if (currentWeapon === 'pistola') {
-        // Dibujar pistola simple
-        weaponButton.fillRect(bx + 8, by + bs/2 - 4, 20, 8);
-        weaponButton.fillRect(bx + 5, by + bs/2, 8, 12);
-    } else if (currentWeapon === 'cuchillo') {
-        // Dibujar cuchillo simple
-        weaponButton.fillRect(bx + 5, by + bs/2 - 3, 12, 6);
-        weaponButton.fillStyle(0xCCCCCC, 1);
-        weaponButton.fillRect(bx + 17, by + bs/2 - 2, 25, 4);
+    // Mostrar emoji del arma actual
+    const weaponEmojis = {
+        'pistola': '🔫',
+        'cuchillo': '🔪',
+        'granada': '💣',
+        'espada': '🗡️',
+        'bat': '🏏',
+        'cohete': '🚀',
+        'barril': '🛢️',
+        'trampolin': '🛝'
+    };
+
+    if (currentWeapon && weaponEmojis[currentWeapon]) {
+        if (!weaponButton.emojiText) {
+            weaponButton.emojiText = sceneRef.add.text(bx + bs/2, by + bs/2, '', {
+                font: '24px Arial'
+            }).setOrigin(0.5).setDepth(101);
+        }
+        weaponButton.emojiText.setText(weaponEmojis[currentWeapon]);
+        weaponButton.emojiText.setPosition(bx + bs/2, by + bs/2);
     } else {
-        // Sin arma - mostrar icono de arma
+        if (weaponButton.emojiText) {
+            weaponButton.emojiText.setText('⚔️');
+        }
+        // Dibujar icono genérico
         weaponButton.fillRect(bx + 10, by + bs/2 - 3, 15, 6);
         weaponButton.fillRect(bx + 8, by + bs/2 + 3, 8, 10);
         weaponButton.fillStyle(0x888888, 1);
@@ -2151,6 +2461,120 @@ function drawWeaponButton(x, y, size) {
 function toggleWeaponMenu() {
     weaponMenuOpen = !weaponMenuOpen;
     weaponMenu.setVisible(weaponMenuOpen);
+    if (mapMenuOpen) {
+        mapMenu.setVisible(false);
+        mapMenuOpen = false;
+    }
+}
+
+function toggleMapMenu() {
+    mapMenuOpen = !mapMenuOpen;
+    mapMenu.setVisible(mapMenuOpen);
+    if (weaponMenuOpen) {
+        weaponMenu.setVisible(false);
+        weaponMenuOpen = false;
+    }
+}
+
+function changeMap(mapId) {
+    currentMap = mapId;
+
+    // Reset efectos del mapa anterior
+    tornadoActive = false;
+    zombieMode = false;
+    blackHoleActive = false;
+
+    // Limpiar gráficos de efectos anteriores
+    if (sceneRef.tornadoGraphics) {
+        sceneRef.tornadoGraphics.clear();
+    }
+    if (sceneRef.blackHoleGraphics) {
+        sceneRef.blackHoleGraphics.clear();
+    }
+    if (sceneRef.mapOverlay) {
+        sceneRef.mapOverlay.clear();
+    }
+    if (sceneRef.rainGraphics) {
+        sceneRef.rainGraphics.clear();
+    }
+
+    // Crear overlay si no existe
+    if (!sceneRef.mapOverlay) {
+        sceneRef.mapOverlay = sceneRef.add.graphics();
+        sceneRef.mapOverlay.setDepth(-8);
+    }
+
+    // Aplicar efectos del nuevo mapa
+    switch(mapId) {
+        case 'lunar':
+            sceneRef.matter.world.setGravity(0, 0.15);
+            // Cielo nocturno
+            sceneRef.mapOverlay.fillStyle(0x000033, 0.7);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'tornado':
+            tornadoActive = true;
+            tornadoX = game.scale.width / 2;
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cielo gris tormentoso
+            sceneRef.mapOverlay.fillStyle(0x444444, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'rayos':
+            lightningTimer = 0;
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cielo oscuro de tormenta
+            sceneRef.mapOverlay.fillStyle(0x222233, 0.6);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'zombie':
+            zombieMode = true;
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cielo rojo apocalíptico
+            sceneRef.mapOverlay.fillStyle(0x330000, 0.5);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'blackhole':
+            blackHoleActive = true;
+            blackHoleX = game.scale.width / 2;
+            blackHoleY = game.scale.height / 3;
+            sceneRef.matter.world.setGravity(0, 0.3);
+            // Cielo espacial
+            sceneRef.mapOverlay.fillStyle(0x110022, 0.6);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        default:
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Sin overlay
+            break;
+    }
+}
+
+let slowBtnPos = { x: 0, y: 0, size: 50 };
+
+function drawSlowMotionButton(x, y, size) {
+    if (x !== undefined) slowBtnPos = { x, y, size };
+    const { x: bx, y: by, size: bs } = slowBtnPos;
+
+    slowMotionButton.clear();
+    slowMotionButton.fillStyle(slowMotion ? 0x44AA44 : 0x666666, 1);
+    slowMotionButton.fillRoundedRect(bx, by, bs, bs, 8);
+    slowMotionButton.fillStyle(0xFFFFFF, 1);
+    // Icono de slow motion (reloj)
+    slowMotionButton.lineStyle(3, 0xFFFFFF, 1);
+    slowMotionButton.strokeCircle(bx + bs/2, by + bs/2, bs/3);
+    slowMotionButton.lineBetween(bx + bs/2, by + bs/2, bx + bs/2, by + bs/4 + 5);
+    slowMotionButton.lineBetween(bx + bs/2, by + bs/2, bx + bs/2 + 8, by + bs/2);
+}
+
+function toggleSlowMotion() {
+    slowMotion = !slowMotion;
+    if (slowMotion) {
+        sceneRef.matter.world.engine.timing.timeScale = 0.3;
+    } else {
+        sceneRef.matter.world.engine.timing.timeScale = 1;
+    }
+    drawSlowMotionButton();
 }
 
 function drawTeamButton(graphics, color, x, y, btnSize) {
@@ -2189,9 +2613,10 @@ function createPistola(scene, x, y) {
         x: x,
         y: y,
         body: scene.matter.add.rectangle(x, y, 50, 20, {
-            friction: 0.8,
-            frictionAir: 0.02,
-            restitution: 0.2,
+            friction: 0.3,
+            frictionAir: 0.01,
+            restitution: 0.3,
+            slop: 0.01,
             collisionFilter: {
                 category: 0x0004,
                 mask: 0x0001 | 0x0002
@@ -2230,8 +2655,310 @@ function createCuchillo(scene, x, y) {
         x: x,
         y: y,
         body: scene.matter.add.rectangle(x, y, 60, 15, {
-            friction: 0.8,
+            friction: 0.3,
+            frictionAir: 0.01,
+            restitution: 0.3,
+            slop: 0.01,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createGranada(scene, x, y) {
+    const grenade = scene.add.graphics();
+    grenade.setDepth(10);
+
+    // Cuerpo de la granada
+    grenade.fillStyle(0x556B2F, 1);
+    grenade.fillCircle(0, 0, 12);
+
+    // Tapa
+    grenade.fillStyle(0x333333, 1);
+    grenade.fillRect(-4, -18, 8, 8);
+
+    // Anillo
+    grenade.fillStyle(0xFFD700, 1);
+    grenade.fillCircle(6, -14, 3);
+
+    grenade.setPosition(x, y);
+
+    // Timer text
+    const timerText = scene.add.text(0, -30, '5', {
+        font: 'bold 16px Arial',
+        fill: '#FF0000',
+        stroke: '#000000',
+        strokeThickness: 3
+    }).setOrigin(0.5);
+    timerText.setDepth(100);
+
+    const weapon = {
+        graphics: grenade,
+        type: 'granada',
+        x: x,
+        y: y,
+        timerText: timerText,
+        timeLeft: 5,
+        body: scene.matter.add.circle(x, y, 12, {
+            friction: 0.5,
+            frictionAir: 0.01,
+            restitution: 0.4,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    // Timer de 5 segundos
+    weapon.timerInterval = setInterval(() => {
+        weapon.timeLeft--;
+        if (weapon.timerText) {
+            weapon.timerText.setText(weapon.timeLeft.toString());
+        }
+        if (weapon.timeLeft <= 0) {
+            clearInterval(weapon.timerInterval);
+            explodeGranada(weapon);
+        }
+    }, 1000);
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function explodeGranada(weapon) {
+    const explosionX = weapon.x;
+    const explosionY = weapon.y;
+    const explosionRadius = 150;
+    const explosionForce = 25;
+
+    // Efecto visual de explosión
+    const explosion = sceneRef.add.graphics();
+    explosion.setDepth(50);
+
+    // Círculo de explosión
+    explosion.fillStyle(0xFF4500, 0.8);
+    explosion.fillCircle(explosionX, explosionY, 20);
+    explosion.fillStyle(0xFFFF00, 0.6);
+    explosion.fillCircle(explosionX, explosionY, 40);
+    explosion.fillStyle(0xFF6600, 0.4);
+    explosion.fillCircle(explosionX, explosionY, 60);
+
+    // Animar explosión
+    sceneRef.tweens.add({
+        targets: explosion,
+        alpha: 0,
+        scale: 2,
+        duration: 300,
+        onComplete: () => explosion.destroy()
+    });
+
+    // Sonido de explosión
+    playExplosionSound();
+
+    // Empujar ragdolls
+    ragdolls.forEach(ragdoll => {
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Phaser.Math.Distance.Between(explosionX, explosionY, part.x, part.y);
+                if (dist < explosionRadius) {
+                    const angle = Math.atan2(part.y - explosionY, part.x - explosionX);
+                    const force = (1 - dist / explosionRadius) * explosionForce;
+                    part.setVelocity(
+                        Math.cos(angle) * force,
+                        Math.sin(angle) * force - 5
+                    );
+
+                    // Si está parado, tirarlo
+                    if (ragdoll.isStanding) {
+                        ragdoll.isStanding = false;
+                        ragdoll.parts.forEach(p => {
+                            if (p && p.body) p.setStatic(false);
+                        });
+                    }
+                }
+            }
+        });
+    });
+
+    // Empujar otras armas
+    weapons.forEach(w => {
+        if (w !== weapon && w.body) {
+            const dist = Phaser.Math.Distance.Between(explosionX, explosionY, w.x, w.y);
+            if (dist < explosionRadius) {
+                const angle = Math.atan2(w.y - explosionY, w.x - explosionX);
+                const force = (1 - dist / explosionRadius) * explosionForce;
+                sceneRef.matter.body.setVelocity(w.body, {
+                    x: Math.cos(angle) * force,
+                    y: Math.sin(angle) * force - 5
+                });
+            }
+        }
+    });
+
+    // Mucha sangre
+    spawnBlood(explosionX, explosionY, 15);
+
+    // Eliminar granada
+    if (weapon.timerText) weapon.timerText.destroy();
+    if (weapon.graphics) weapon.graphics.destroy();
+    if (weapon.body) sceneRef.matter.world.remove(weapon.body);
+
+    const idx = weapons.indexOf(weapon);
+    if (idx > -1) weapons.splice(idx, 1);
+}
+
+function playExplosionSound() {
+    if (!audioContext) return;
+
+    // Explosion bass
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, audioContext.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.4);
+
+    // Noise burst
+    const noise = audioContext.createOscillator();
+    const noiseGain = audioContext.createGain();
+    noise.type = 'square';
+    noise.frequency.setValueAtTime(200, audioContext.currentTime);
+    noise.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.2);
+    noiseGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    noise.connect(noiseGain);
+    noiseGain.connect(audioContext.destination);
+    noise.start();
+    noise.stop(audioContext.currentTime + 0.3);
+}
+
+// === NUEVAS ARMAS ===
+
+function createEspada(scene, x, y) {
+    const sword = scene.add.graphics();
+    sword.setDepth(10);
+
+    // Mango
+    sword.fillStyle(0x8B4513, 1);
+    sword.fillRect(-35, -4, 20, 10);
+
+    // Guardia
+    sword.fillStyle(0xFFD700, 1);
+    sword.fillRect(-15, -8, 6, 18);
+
+    // Hoja
+    sword.fillStyle(0xC0C0C0, 1);
+    sword.fillRect(-9, -4, 55, 10);
+
+    // Punta
+    sword.fillTriangle(46, -4, 46, 6, 60, 1);
+
+    // Filo brillante
+    sword.fillStyle(0xFFFFFF, 1);
+    sword.fillRect(-9, -4, 55, 2);
+
+    sword.setPosition(x, y);
+
+    const weapon = {
+        graphics: sword,
+        type: 'espada',
+        x: x,
+        y: y,
+        body: scene.matter.add.rectangle(x, y, 80, 15, {
+            friction: 0.6,
             frictionAir: 0.02,
+            restitution: 0.3,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createBat(scene, x, y) {
+    const bat = scene.add.graphics();
+    bat.setDepth(10);
+
+    // Mango
+    bat.fillStyle(0x8B4513, 1);
+    bat.fillRect(-35, -3, 25, 8);
+
+    // Cuerpo del bat
+    bat.fillStyle(0xDEB887, 1);
+    bat.fillRect(-10, -6, 50, 14);
+
+    // Punta redondeada
+    bat.fillCircle(40, 1, 7);
+
+    bat.setPosition(x, y);
+
+    const weapon = {
+        graphics: bat,
+        type: 'bat',
+        x: x,
+        y: y,
+        body: scene.matter.add.rectangle(x, y, 70, 15, {
+            friction: 0.7,
+            frictionAir: 0.02,
+            restitution: 0.4,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createCohete(scene, x, y) {
+    const rocket = scene.add.graphics();
+    rocket.setDepth(10);
+
+    // Cuerpo
+    rocket.fillStyle(0xFF0000, 1);
+    rocket.fillRect(-20, -6, 40, 14);
+
+    // Punta
+    rocket.fillStyle(0xFFFFFF, 1);
+    rocket.fillTriangle(20, -6, 20, 8, 35, 1);
+
+    // Aletas
+    rocket.fillStyle(0x333333, 1);
+    rocket.fillTriangle(-20, -6, -30, -12, -20, 0);
+    rocket.fillTriangle(-20, 8, -30, 14, -20, 2);
+
+    // Fuego (se animará)
+    rocket.fillStyle(0xFFA500, 1);
+    rocket.fillTriangle(-20, -4, -35, 1, -20, 6);
+
+    rocket.setPosition(x, y);
+
+    const weapon = {
+        graphics: rocket,
+        type: 'cohete',
+        x: x,
+        y: y,
+        isFlying: false,
+        body: scene.matter.add.rectangle(x, y, 50, 15, {
+            friction: 0.3,
+            frictionAir: 0.005,
             restitution: 0.2,
             collisionFilter: {
                 category: 0x0004,
@@ -2244,6 +2971,421 @@ function createCuchillo(scene, x, y) {
     return weapon;
 }
 
+function createBarril(scene, x, y) {
+    const barrel = scene.add.graphics();
+    barrel.setDepth(10);
+
+    // Cuerpo
+    barrel.fillStyle(0x8B0000, 1);
+    barrel.fillCircle(0, 0, 18);
+
+    // Bandas metálicas
+    barrel.lineStyle(3, 0x333333, 1);
+    barrel.strokeCircle(0, 0, 18);
+    barrel.strokeCircle(0, 0, 12);
+
+    // Símbolo de peligro
+    barrel.fillStyle(0xFFFF00, 1);
+    barrel.fillTriangle(0, -10, -8, 5, 8, 5);
+    barrel.fillStyle(0x000000, 1);
+    barrel.fillRect(-2, -6, 4, 8);
+    barrel.fillCircle(0, 5, 2);
+
+    barrel.setPosition(x, y);
+
+    const weapon = {
+        graphics: barrel,
+        type: 'barril',
+        x: x,
+        y: y,
+        health: 3, // Explota después de 3 golpes
+        body: scene.matter.add.circle(x, y, 18, {
+            friction: 0.8,
+            frictionAir: 0.01,
+            restitution: 0.3,
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createTrampolin(scene, x, y) {
+    const tramp = scene.add.graphics();
+    tramp.setDepth(5);
+
+    // Base
+    tramp.fillStyle(0x333333, 1);
+    tramp.fillRect(-40, 5, 80, 10);
+
+    // Superficie de rebote
+    tramp.fillStyle(0x00BFFF, 1);
+    tramp.fillRect(-35, -5, 70, 10);
+
+    // Resortes
+    tramp.lineStyle(2, 0xFFFFFF, 1);
+    for (let i = -30; i <= 30; i += 15) {
+        tramp.lineBetween(i, 5, i, -5);
+    }
+
+    tramp.setPosition(x, y);
+
+    const weapon = {
+        graphics: tramp,
+        type: 'trampolin',
+        x: x,
+        y: y,
+        body: scene.matter.add.rectangle(x, y, 80, 20, {
+            isStatic: true,
+            friction: 0.1,
+            restitution: 1.5, // Super rebote
+            collisionFilter: {
+                category: 0x0004,
+                mask: 0x0001 | 0x0002
+            }
+        })
+    };
+
+    trampolines.push(weapon);
+    weapons.push(weapon);
+    return weapon;
+}
+
+// === EFECTOS DE MAPA ===
+
+function updateMapEffects() {
+    // Tornado
+    if (tornadoActive) {
+        // El tornado se mueve lentamente por la pantalla
+        tornadoX += Math.sin(Date.now() / 1500) * 2;
+
+        // Dibujar tornado simple
+        if (!sceneRef.tornadoGraphics) {
+            sceneRef.tornadoGraphics = sceneRef.add.graphics();
+            sceneRef.tornadoGraphics.setDepth(5);
+        }
+        sceneRef.tornadoGraphics.clear();
+
+        // Tornado simple - embudo
+        for (let i = 0; i < 8; i++) {
+            const w = 15 + i * 12;
+            const yy = game.scale.height - 60 - i * 45;
+            const wobble = Math.sin(Date.now()/150 + i) * 8;
+            sceneRef.tornadoGraphics.fillStyle(0x888888, 0.5);
+            sceneRef.tornadoGraphics.fillEllipse(tornadoX + wobble, yy, w, 15);
+        }
+
+        const tornadoRadius = 120;
+
+        // Afectar ragdolls
+        ragdolls.forEach(ragdoll => {
+            ragdoll.parts.forEach(part => {
+                if (part && part.body) {
+                    const dist = Math.abs(part.x - tornadoX);
+
+                    if (dist < tornadoRadius) {
+                        // Si está parado, tirarlo
+                        if (ragdoll.isStanding) {
+                            ragdoll.isStanding = false;
+                            ragdoll.parts.forEach(p => p && p.body && p.setStatic(false));
+                        }
+
+                        // ¡LANZAR VOLANDO!
+                        part.setVelocity(
+                            (Math.random() - 0.5) * 25,
+                            -30 - Math.random() * 20
+                        );
+                    }
+                }
+            });
+        });
+
+        // Afectar armas
+        weapons.forEach(weapon => {
+            if (weapon.body && weapon.type !== 'trampolin') {
+                const dist = Math.abs(weapon.x - tornadoX);
+
+                if (dist < tornadoRadius) {
+                    sceneRef.matter.body.setVelocity(weapon.body, {
+                        x: (Math.random() - 0.5) * 20,
+                        y: -25 - Math.random() * 15
+                    });
+                }
+            }
+        });
+    }
+
+    // Lunar - estrellas brillantes y saltos altos
+    if (currentMap === 'lunar') {
+        // Dibujar estrellas
+        if (!sceneRef.lunarGraphics) {
+            sceneRef.lunarGraphics = sceneRef.add.graphics();
+            sceneRef.lunarGraphics.setDepth(-7);
+        }
+        sceneRef.lunarGraphics.clear();
+
+        // Estrellas titilantes
+        for (let i = 0; i < 30; i++) {
+            const sx = (i * 137) % game.scale.width;
+            const sy = (i * 89) % (game.scale.height - 100);
+            const twinkle = Math.sin(Date.now() / 200 + i) * 0.5 + 0.5;
+            sceneRef.lunarGraphics.fillStyle(0xFFFFFF, twinkle);
+            sceneRef.lunarGraphics.fillCircle(sx, sy, 1 + twinkle);
+        }
+
+        // Luna grande
+        sceneRef.lunarGraphics.fillStyle(0xEEEECC, 1);
+        sceneRef.lunarGraphics.fillCircle(game.scale.width - 80, 80, 40);
+        sceneRef.lunarGraphics.fillStyle(0xCCCCAA, 0.5);
+        sceneRef.lunarGraphics.fillCircle(game.scale.width - 90, 75, 8);
+        sceneRef.lunarGraphics.fillCircle(game.scale.width - 70, 90, 5);
+    } else if (sceneRef.lunarGraphics) {
+        sceneRef.lunarGraphics.clear();
+    }
+
+    // Rayos - tormenta con lluvia
+    if (currentMap === 'rayos') {
+        // Lluvia
+        if (!sceneRef.rainGraphics) {
+            sceneRef.rainGraphics = sceneRef.add.graphics();
+            sceneRef.rainGraphics.setDepth(2);
+        }
+        sceneRef.rainGraphics.clear();
+        sceneRef.rainGraphics.lineStyle(1, 0x6666FF, 0.4);
+
+        for (let i = 0; i < 50; i++) {
+            const rx = (Date.now() / 5 + i * 47) % game.scale.width;
+            const ry = (Date.now() / 3 + i * 31) % game.scale.height;
+            sceneRef.rainGraphics.lineBetween(rx, ry, rx - 5, ry + 15);
+        }
+
+        // Rayos más frecuentes
+        lightningTimer++;
+        if (lightningTimer > 90 && Math.random() < 0.05) {
+            spawnLightning();
+            lightningTimer = 0;
+        }
+    } else if (sceneRef.rainGraphics) {
+        sceneRef.rainGraphics.clear();
+    }
+
+    // Zombie mode - ragdolls persiguen agresivamente
+    if (zombieMode) {
+        ragdolls.forEach(ragdoll => {
+            if (!ragdoll.isBeingDragged && ragdoll.parts[0]) {
+                // Tirar ragdoll si está parado
+                if (ragdoll.isStanding) {
+                    ragdoll.isStanding = false;
+                    ragdoll.parts.forEach(p => p && p.body && p.setStatic(false));
+                }
+
+                const head = ragdoll.parts[0];
+
+                // Buscar ragdoll más cercano para perseguir
+                let closestDist = 999;
+                let targetX = head.x;
+
+                ragdolls.forEach(other => {
+                    if (other !== ragdoll && other.parts[0]) {
+                        const dist = Math.abs(other.parts[0].x - head.x);
+                        if (dist < closestDist && dist > 40) {
+                            closestDist = dist;
+                            targetX = other.parts[0].x;
+                        }
+                    }
+                });
+
+                // Moverse hacia el objetivo con más fuerza
+                const dx = targetX - head.x;
+                if (Math.abs(dx) > 30) {
+                    const moveForce = 0.4;
+                    head.setVelocity(
+                        head.body.velocity.x + Math.sign(dx) * moveForce,
+                        head.body.velocity.y
+                    );
+
+                    // A veces saltar
+                    if (Math.random() < 0.02 && head.body.velocity.y > -2) {
+                        head.setVelocity(head.body.velocity.x, -8);
+                    }
+                }
+            }
+        });
+    }
+
+    // Agujero negro
+    if (blackHoleActive) {
+        // Dibujar agujero negro DETRÁS de todo (depth negativo)
+        if (!sceneRef.blackHoleGraphics) {
+            sceneRef.blackHoleGraphics = sceneRef.add.graphics();
+            sceneRef.blackHoleGraphics.setDepth(-5); // Detrás de los NPCs
+        }
+        sceneRef.blackHoleGraphics.clear();
+
+        // Efecto de distorsión del espacio (anillos giratorios)
+        const time = Date.now() / 1000;
+        for (let i = 8; i > 0; i--) {
+            const rotation = time * (0.5 + i * 0.1);
+            const radius = 40 + i * 25;
+            const alpha = 0.4 - i * 0.04;
+
+            // Anillo distorsionado
+            sceneRef.blackHoleGraphics.lineStyle(3, 0x9400D3, alpha);
+            sceneRef.blackHoleGraphics.beginPath();
+            for (let a = 0; a < Math.PI * 2; a += 0.1) {
+                const wobble = Math.sin(a * 3 + rotation) * 5;
+                const rx = blackHoleX + Math.cos(a) * (radius + wobble);
+                const ry = blackHoleY + Math.sin(a) * (radius * 0.6 + wobble);
+                if (a === 0) {
+                    sceneRef.blackHoleGraphics.moveTo(rx, ry);
+                } else {
+                    sceneRef.blackHoleGraphics.lineTo(rx, ry);
+                }
+            }
+            sceneRef.blackHoleGraphics.closePath();
+            sceneRef.blackHoleGraphics.strokePath();
+        }
+
+        // Disco de acreción brillante
+        sceneRef.blackHoleGraphics.fillStyle(0xFF6600, 0.3);
+        sceneRef.blackHoleGraphics.fillEllipse(blackHoleX, blackHoleY, 80, 30);
+        sceneRef.blackHoleGraphics.fillStyle(0xFFFF00, 0.2);
+        sceneRef.blackHoleGraphics.fillEllipse(blackHoleX, blackHoleY, 60, 20);
+
+        // Centro negro absoluto
+        sceneRef.blackHoleGraphics.fillStyle(0x000000, 1);
+        sceneRef.blackHoleGraphics.fillCircle(blackHoleX, blackHoleY, 35);
+
+        // Atraer TODO desde CUALQUIER lugar
+        const attractObjects = (obj, isRagdoll = false) => {
+            const px = obj.x;
+            const py = obj.y;
+            const dx = blackHoleX - px;
+            const dy = blackHoleY - py;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            // Fuerza inversamente proporcional a la distancia (más cerca = más fuerte)
+            // Mínimo dist de 50 para evitar división por casi 0
+            const effectiveDist = Math.max(dist, 50);
+            const force = 800 / (effectiveDist * effectiveDist) * 10;
+
+            // Limitar fuerza máxima
+            const maxForce = 3;
+            const actualForce = Math.min(force, maxForce);
+
+            if (dist > 45) { // No atraer si ya está en el centro
+                if (isRagdoll && obj.body) {
+                    obj.setVelocity(
+                        obj.body.velocity.x + (dx/dist) * actualForce,
+                        obj.body.velocity.y + (dy/dist) * actualForce
+                    );
+
+                    // Si está parado y cerca, tirarlo
+                    if (dist < 200) {
+                        ragdolls.forEach(r => {
+                            if (r.parts.includes(obj) && r.isStanding) {
+                                r.isStanding = false;
+                                r.parts.forEach(p => p && p.body && p.setStatic(false));
+                            }
+                        });
+                    }
+                } else if (obj.body) {
+                    sceneRef.matter.body.setVelocity(obj.body, {
+                        x: obj.body.velocity.x + (dx/dist) * actualForce,
+                        y: obj.body.velocity.y + (dy/dist) * actualForce
+                    });
+                }
+            }
+        };
+
+        ragdolls.forEach(r => r.parts.forEach(p => p && attractObjects(p, true)));
+        weapons.forEach(w => w.type !== 'trampolin' && attractObjects(w));
+    }
+
+    // Actualizar cohetes voladores
+    weapons.forEach(weapon => {
+        if (weapon.type === 'cohete' && weapon.isFlying) {
+            const angle = weapon.body.angle;
+            sceneRef.matter.body.setVelocity(weapon.body, {
+                x: Math.cos(angle) * 12,
+                y: Math.sin(angle) * 12
+            });
+        }
+    });
+}
+
+function spawnLightning() {
+    const lx = Math.random() * game.scale.width;
+    const ly = 0;
+
+    // Gráfico del rayo
+    const lightning = sceneRef.add.graphics();
+    lightning.setDepth(100);
+    lightning.lineStyle(4, 0xFFFF00, 1);
+
+    let cx = lx;
+    let cy = ly;
+    lightning.moveTo(cx, cy);
+
+    while (cy < game.scale.height - 50) {
+        cx += (Math.random() - 0.5) * 60;
+        cy += 30 + Math.random() * 40;
+        lightning.lineTo(cx, cy);
+    }
+    lightning.strokePath();
+
+    // Destello
+    const flash = sceneRef.add.graphics();
+    flash.setDepth(99);
+    flash.fillStyle(0xFFFFFF, 0.3);
+    flash.fillRect(0, 0, game.scale.width, game.scale.height);
+
+    // Daño a ragdolls cercanos
+    ragdolls.forEach(ragdoll => {
+        ragdoll.parts.forEach(part => {
+            if (part && part.body) {
+                const dist = Math.abs(part.x - cx);
+                if (dist < 50) {
+                    part.setVelocity(
+                        (Math.random() - 0.5) * 20,
+                        -15
+                    );
+                    spawnBlood(part.x, part.y, 3);
+                }
+            }
+        });
+    });
+
+    // Sonido de trueno
+    playThunderSound();
+
+    // Eliminar gráficos
+    sceneRef.time.delayedCall(100, () => {
+        lightning.destroy();
+        flash.destroy();
+    });
+}
+
+function playThunderSound() {
+    if (!audioContext) return;
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(80, audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(20, audioContext.currentTime + 0.5);
+    gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.8);
+}
+
 function updateWeapons() {
     weapons.forEach(weapon => {
         if (weapon.body) {
@@ -2251,6 +3393,11 @@ function updateWeapons() {
             weapon.y = weapon.body.position.y;
             weapon.graphics.setPosition(weapon.x, weapon.y);
             weapon.graphics.setRotation(weapon.body.angle);
+
+            // Actualizar posición del timer de granada
+            if (weapon.type === 'granada' && weapon.timerText) {
+                weapon.timerText.setPosition(weapon.x, weapon.y - 25);
+            }
         }
     });
 }
@@ -2312,6 +3459,43 @@ function playGunSound() {
     noise.stop(audioContext.currentTime + 0.1);
 }
 
+function updateBlink() {
+    const now = Date.now();
+
+    ragdolls.forEach(ragdoll => {
+        const head = ragdoll.parts[0];
+        if (!head || !ragdoll.eyelids) return;
+
+        // Actualizar posición de párpados
+        ragdoll.eyelids.setPosition(head.x, head.y);
+        ragdoll.eyelids.setRotation(head.rotation);
+
+        // Actualizar posición del cerebro zombie
+        if (ragdoll.brainGraphics) {
+            ragdoll.brainGraphics.setPosition(head.x, head.y);
+            ragdoll.brainGraphics.setRotation(head.rotation);
+        }
+
+        // Parpadear cada 30 segundos
+        const timeSinceLastBlink = now - ragdoll.lastBlinkTime;
+
+        if (timeSinceLastBlink >= 30000 && !ragdoll.isBlinking) {
+            // Iniciar parpadeo
+            ragdoll.isBlinking = true;
+            ragdoll.eyelids.setVisible(true);
+
+            // Cerrar párpados por 150ms
+            setTimeout(() => {
+                if (ragdoll.eyelids) {
+                    ragdoll.eyelids.setVisible(false);
+                    ragdoll.isBlinking = false;
+                    ragdoll.lastBlinkTime = Date.now();
+                }
+            }, 150);
+        }
+    });
+}
+
 function updateBullets() {
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
 
@@ -2327,7 +3511,7 @@ function updateBullets() {
         // Verificar colisión con ragdolls
         let hitRagdoll = false;
         ragdolls.forEach(ragdoll => {
-            if (ragdoll.isDead || hitRagdoll) return;
+            if (hitRagdoll) return;
 
             ragdoll.parts.forEach(part => {
                 if (part && part.body && !hitRagdoll) {
@@ -2335,21 +3519,12 @@ function updateBullets() {
                     if (dist < 20) {
                         hitRagdoll = true;
 
-                        // Dañar ragdoll
-                        ragdoll.health -= 25;
-                        if (ragdoll.health < 0) ragdoll.health = 0;
-                        updateHealthBar(ragdoll);
-
                         // Aplicar fuerza al impacto
                         part.setVelocity(bullet.vx * 0.5, bullet.vy * 0.5);
 
                         // Efecto de sangre
                         spawnBlood(bullet.x, bullet.y, 5);
                         playHitSound(0.5);
-
-                        if (ragdoll.health <= 0 && !ragdoll.isDead) {
-                            killRagdoll(ragdoll);
-                        }
                     }
                 }
             });
