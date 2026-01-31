@@ -6143,21 +6143,137 @@ function updateMapEffects() {
             }
         });
 
-        // === CANGREJOS CAMINANDO (decorativos, fondo - NPCs no los tocan) ===
-        // Cangrejo 1 - cerca del agua
+        // === SOL DE ATARDECER (grande, bajando) ===
+        const sunX = w - 100;
+        const sunY = 80 + Math.sin(Date.now()/10000) * 20;
+        // Resplandor exterior
+        sceneRef.beachGraphics.fillStyle(0xFF6347, 0.2);
+        sceneRef.beachGraphics.fillCircle(sunX, sunY, 80);
+        sceneRef.beachGraphics.fillStyle(0xFF4500, 0.3);
+        sceneRef.beachGraphics.fillCircle(sunX, sunY, 60);
+        // Sol principal
+        sceneRef.beachGraphics.fillStyle(0xFFD700, 1);
+        sceneRef.beachGraphics.fillCircle(sunX, sunY, 45);
+        // Brillo
+        sceneRef.beachGraphics.fillStyle(0xFFFF00, 0.7);
+        sceneRef.beachGraphics.fillCircle(sunX - 10, sunY - 10, 20);
+
+        // === GAVIOTAS VOLANDO ===
+        for (let g = 0; g < 4; g++) {
+            const gullX = (200 + g * 150 + Date.now()/20) % (w + 100) - 50;
+            const gullY = 60 + g * 30 + Math.sin(Date.now()/300 + g) * 15;
+            const wingUp = Math.sin(Date.now()/100 + g * 2) > 0;
+            sceneRef.beachGraphics.lineStyle(2, 0x333333, 0.8);
+            sceneRef.beachGraphics.beginPath();
+            sceneRef.beachGraphics.moveTo(gullX - 12, gullY + (wingUp ? -5 : 3));
+            sceneRef.beachGraphics.lineTo(gullX, gullY);
+            sceneRef.beachGraphics.lineTo(gullX + 12, gullY + (wingUp ? -5 : 3));
+            sceneRef.beachGraphics.strokePath();
+        }
+
+        // === NUBES ROSADAS DE ATARDECER ===
+        sceneRef.beachGraphics.fillStyle(0xFFB6C1, 0.6);
+        sceneRef.beachGraphics.fillEllipse(100, 50, 60, 25);
+        sceneRef.beachGraphics.fillEllipse(130, 45, 40, 20);
+        sceneRef.beachGraphics.fillEllipse(300, 70, 70, 30);
+        sceneRef.beachGraphics.fillEllipse(340, 65, 45, 22);
+        sceneRef.beachGraphics.fillStyle(0xFFA07A, 0.5);
+        sceneRef.beachGraphics.fillEllipse(500, 40, 55, 22);
+
+        // === CASTILLO DE ARENA ===
+        const castleX = waterStartX - 120;
+        const castleY = groundY;
+        // Base
+        sceneRef.beachGraphics.fillStyle(0xD2B48C, 1);
+        sceneRef.beachGraphics.fillRect(castleX - 35, castleY - 30, 70, 30);
+        // Torres
+        sceneRef.beachGraphics.fillStyle(0xDEB887, 1);
+        sceneRef.beachGraphics.fillRect(castleX - 35, castleY - 55, 18, 25);
+        sceneRef.beachGraphics.fillRect(castleX + 17, castleY - 55, 18, 25);
+        sceneRef.beachGraphics.fillRect(castleX - 9, castleY - 65, 18, 35);
+        // Almenas
+        sceneRef.beachGraphics.fillStyle(0xC4A67C, 1);
+        for (let a = 0; a < 3; a++) {
+            sceneRef.beachGraphics.fillRect(castleX - 35 + a * 7, castleY - 60, 5, 5);
+            sceneRef.beachGraphics.fillRect(castleX + 17 + a * 7, castleY - 60, 5, 5);
+        }
+        sceneRef.beachGraphics.fillRect(castleX - 9, castleY - 70, 5, 5);
+        sceneRef.beachGraphics.fillRect(castleX + 4, castleY - 70, 5, 5);
+        // Puerta
+        sceneRef.beachGraphics.fillStyle(0x8B7355, 1);
+        sceneRef.beachGraphics.fillRect(castleX - 5, castleY - 20, 10, 20);
+        // Bandera
+        const flagWave = Math.sin(Date.now()/200) * 3;
+        sceneRef.beachGraphics.lineStyle(2, 0x8B4513, 1);
+        sceneRef.beachGraphics.lineBetween(castleX, castleY - 65, castleX, castleY - 85);
+        sceneRef.beachGraphics.fillStyle(0xFF0000, 1);
+        sceneRef.beachGraphics.fillTriangle(castleX, castleY - 85, castleX + 15 + flagWave, castleY - 80, castleX, castleY - 75);
+
+        // === SOMBRILLA DE PLAYA ===
+        const umbrellaX = 350;
+        const umbrellaY = groundY;
+        // Poste
+        sceneRef.beachGraphics.lineStyle(4, 0x8B4513, 1);
+        sceneRef.beachGraphics.lineBetween(umbrellaX, umbrellaY - 5, umbrellaX, umbrellaY - 80);
+        // Sombrilla (rayas)
+        const colors = [0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF];
+        colors.forEach((color, i) => {
+            sceneRef.beachGraphics.fillStyle(color, 1);
+            sceneRef.beachGraphics.slice(umbrellaX, umbrellaY - 80, 50, Math.PI + i * (Math.PI / 6), Math.PI + (i + 1) * (Math.PI / 6), false);
+            sceneRef.beachGraphics.fillPath();
+        });
+
+        // === PECES EN EL AGUA ===
+        for (let f = 0; f < 5; f++) {
+            const fishX = waterStartX + 40 + ((f * 80 + Date.now()/15) % (w - waterStartX - 60));
+            const fishY = waterY + 50 + f * 35 + Math.sin(Date.now()/400 + f) * 10;
+            const fishColors = [0xFF6B35, 0xFFD700, 0x00CED1, 0xFF69B4, 0x32CD32];
+            sceneRef.beachGraphics.fillStyle(fishColors[f], 0.9);
+            // Cuerpo
+            sceneRef.beachGraphics.fillEllipse(fishX, fishY, 12, 6);
+            // Cola
+            sceneRef.beachGraphics.fillTriangle(fishX - 12, fishY, fishX - 20, fishY - 6, fishX - 20, fishY + 6);
+            // Ojo
+            sceneRef.beachGraphics.fillStyle(0x000000, 1);
+            sceneRef.beachGraphics.fillCircle(fishX + 5, fishY - 1, 2);
+        }
+
+        // === ESTRELLAS DE MAR EN LA ARENA ===
+        const starPositions = [{x: 260, y: groundY - 8}, {x: 420, y: groundY - 6}, {x: waterStartX - 30, y: groundY - 10}];
+        starPositions.forEach((star, i) => {
+            const starColors = [0xFF6347, 0xFFA500, 0xFF69B4];
+            sceneRef.beachGraphics.fillStyle(starColors[i], 1);
+            for (let p = 0; p < 5; p++) {
+                const angle = (p * 72 - 90) * Math.PI / 180;
+                const innerAngle = ((p * 72) + 36 - 90) * Math.PI / 180;
+                const outerR = 10, innerR = 4;
+                sceneRef.beachGraphics.fillTriangle(
+                    star.x, star.y,
+                    star.x + Math.cos(angle) * outerR, star.y + Math.sin(angle) * outerR,
+                    star.x + Math.cos(innerAngle) * innerR, star.y + Math.sin(innerAngle) * innerR
+                );
+            }
+        });
+
+        // === CANGREJOS CAMINANDO ===
         const crab1X = waterStartX - 50 + Math.sin(Date.now()/2000) * 30;
         const crab1Y = groundY - 15;
         drawCrab(sceneRef.beachGraphics, crab1X, crab1Y, 0xFF6347);
 
-        // Cangrejo 2 - más a la izquierda, va en dirección opuesta
         const crab2X = 280 + Math.sin(Date.now()/2500 + 2) * 40;
         const crab2Y = groundY - 12;
         drawCrab(sceneRef.beachGraphics, crab2X, crab2Y, 0xFF4500);
 
-        // Cangrejo 3 - pequeño cerca de las palmeras
         const crab3X = 120 + Math.sin(Date.now()/3000 + 4) * 25;
         const crab3Y = groundY - 10;
         drawCrab(sceneRef.beachGraphics, crab3X, crab3Y, 0xE9967A, 0.7);
+
+        // === CONCHAS EN LA ARENA ===
+        sceneRef.beachGraphics.fillStyle(0xFFF5EE, 0.9);
+        sceneRef.beachGraphics.fillEllipse(310, groundY - 5, 6, 4);
+        sceneRef.beachGraphics.fillEllipse(480, groundY - 4, 5, 3);
+        sceneRef.beachGraphics.fillStyle(0xFFE4C4, 0.9);
+        sceneRef.beachGraphics.fillEllipse(220, groundY - 6, 7, 4);
 
     } else if (sceneRef.beachGraphics) {
         sceneRef.beachGraphics.clear();
