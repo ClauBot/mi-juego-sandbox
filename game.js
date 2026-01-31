@@ -3700,12 +3700,60 @@ function changeMap(mapId) {
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
             clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
-            // Cielo del desierto - amarillo brillante muy visible
+            // Cielo del desierto - amarillo brillante
             sceneRef.mapOverlay.fillStyle(0xFFCC00, 0.5);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
-            // Degradado naranja intenso arriba
             sceneRef.mapOverlay.fillStyle(0xFF8C00, 0.4);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
+            break;
+        case 'bosque':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Bosque: muchos árboles, cielo verde oscuro
+            if (sun) sun.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(true); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo verde bosque
+            sceneRef.mapOverlay.fillStyle(0x228B22, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'noche':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Noche: oscuro con estrellas
+            if (sun) sun.setVisible(false);
+            if (starsGraphics) starsGraphics.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo nocturno azul oscuro
+            sceneRef.mapOverlay.fillStyle(0x0a0a2a, 0.8);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'arcoiris':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Arcoíris: colores brillantes
+            if (sun) sun.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(true); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Arcoíris en el cielo
+            const colors = [0xFF0000, 0xFF7F00, 0xFFFF00, 0x00FF00, 0x0000FF, 0x4B0082, 0x9400D3];
+            const bandHeight = game.scale.height / 7;
+            colors.forEach((color, i) => {
+                sceneRef.mapOverlay.fillStyle(color, 0.2);
+                sceneRef.mapOverlay.fillRect(0, i * bandHeight, game.scale.width, bandHeight);
+            });
+            break;
+        case 'ciudad':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Ciudad: sin naturaleza, cielo gris
+            if (sun) sun.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo gris urbano
+            sceneRef.mapOverlay.fillStyle(0x708090, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
         case 'playa':
             sceneRef.matter.world.setGravity(0, 0.8);
