@@ -567,6 +567,12 @@ function initGameContent(scene) {
             const isWeaponHit = (bodyA.collisionFilter?.category === 0x0004) ||
                                (bodyB.collisionFilter?.category === 0x0004);
 
+            // Verificar si es colisión NPC con suelo (no hacer sonido)
+            const catA = bodyA.collisionFilter?.category || 0;
+            const catB = bodyB.collisionFilter?.category || 0;
+            const isGroundCollision = (catA === 0x0001 && catB === 0x0002) ||
+                                      (catA === 0x0002 && catB === 0x0001);
+
             if (vel > 12 || (isWeaponHit && vel > 5)) {
                 lastCollisionTime = now;
                 const x = pair.collision.supports[0]?.x || bodyA.position.x;
@@ -587,14 +593,16 @@ function initGameContent(scene) {
                 if (isWeaponHit) {
                     spawnBlood(x, y, Math.min(8, Math.floor(vel / 4)));
                     playHitSound(vel / 20);
-                } else {
+                } else if (!isGroundCollision) {
+                    // Solo hacer sonido y sangre si NO es colisión con suelo
                     const bloodChance = isLowPerf ? 0.15 : 0.25;
                     if (Math.random() < bloodChance) {
                         spawnBlood(x, y, Math.min(isLowPerf ? 3 : 5, Math.floor(vel / 8)));
                     }
                     playHitSound(vel / 30);
                 }
-            } else if (vel > 6) {
+            } else if (vel > 6 && !isGroundCollision) {
+                // Solo hacer sonido si NO es colisión con suelo
                 playHitSound(vel / 40);
             }
         });
