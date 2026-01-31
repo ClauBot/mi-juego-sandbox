@@ -250,10 +250,10 @@ const shopItems = {
     ]
 };
 
-// Calcular precio con descuento: mitad de precio, gratis si < 50 (pero 50 no es gratis)
+// Calcular precio con descuento: mitad de precio redondeado, gratis si < 50 (pero 50 no es gratis)
 function getDiscountedPrice(originalPrice) {
     if (originalPrice === 0) return 0;
-    const halfPrice = Math.floor(originalPrice / 2);
+    const halfPrice = Math.round(originalPrice / 2); // Redondear
     if (halfPrice < 50) return 0; // Gratis si es menos de 50
     return halfPrice; // 50 o más se mantiene
 }
@@ -1710,7 +1710,16 @@ function onPointerDown(pointer) {
             'iman': createIman,
             'lanzallamas': createLanzallamas,
             'portal': createPortal,
-            'ventilador': createVentilador
+            'ventilador': createVentilador,
+            'hacha': createHacha,
+            'martillo': createMartillo,
+            'dinamita': createDinamita,
+            'laser': createLaser,
+            'escudo': createEscudo,
+            'boomerang': createBoomerang,
+            'piedra': createPiedra,
+            'cactus': createCactus,
+            'yunque': createYunque
         };
 
         if (weaponCreators[currentWeapon]) {
@@ -2296,12 +2305,12 @@ function createGround(scene) {
     groundGraphics.setDepth(-9);
 
     // Crear gráficos alternativos de suelo (ocultos inicialmente)
-    // Suelo lunar
+    // Suelo lunar - gris claro
     const lunarGround = scene.add.graphics();
-    lunarGround.fillStyle(0x888888, 1);
+    lunarGround.fillStyle(0xCCCCCC, 1); // Gris claro
     lunarGround.fillRect(0, groundY, w, 50);
-    // Cráteres
-    lunarGround.fillStyle(0x666666, 1);
+    // Cráteres más oscuros
+    lunarGround.fillStyle(0x999999, 1);
     for (let x = 50; x < w; x += 100) {
         lunarGround.fillCircle(x, groundY + 10, 15);
         lunarGround.fillCircle(x + 30, groundY + 25, 10);
@@ -2501,6 +2510,8 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
 
     const isSkeleton = (npcType === 'esqueleto');
     const isNinja = (npcType === 'ninja');
+    const isPirate = (npcType === 'pirata');
+    const isClown = (npcType === 'clown');
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -2530,7 +2541,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     // Ninja es 25% más ligero (cae más rápido por menos resistencia al aire)
     const densityMult = isNinja ? 0.75 : 1;
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2568,7 +2579,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2576,7 +2587,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja);
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2584,7 +2595,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2592,7 +2603,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2600,7 +2611,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2649,11 +2660,114 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false) {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
-    if (isSkeleton) {
+    if (isClown) {
+        // PENNYWISE - Payaso de IT
+        if (isHead) {
+            // Cara blanca de payaso
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Pelo rojo a los lados
+            graphics.fillStyle(0xFF2200, 1);
+            graphics.fillEllipse(2, height/2 - 2, 6, 8);
+            graphics.fillEllipse(width - 2, height/2 - 2, 6, 8);
+            graphics.fillEllipse(4, height/2 - 6, 5, 6);
+            graphics.fillEllipse(width - 4, height/2 - 6, 5, 6);
+            // Frente calva
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2, 3, 10, 5);
+            // Ojos amarillos malvados
+            graphics.fillStyle(0xFFFF00, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 2, 4, 3);
+            graphics.fillEllipse(width/2 + 4, height/2 - 2, 4, 3);
+            // Pupilas rojas
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 2, 1.5);
+            graphics.fillCircle(width/2 + 4, height/2 - 2, 1.5);
+            // Nariz roja
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, height/2 + 2, 3);
+            // Sonrisa siniestra roja
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRect(width/2 - 6, height/2 + 6, 12, 3);
+            // Líneas rojas de la boca hacia arriba
+            graphics.lineStyle(2, 0xCC0000, 1);
+            graphics.lineBetween(width/2 - 6, height/2 + 6, width/2 - 8, height/2 + 2);
+            graphics.lineBetween(width/2 + 6, height/2 + 6, width/2 + 8, height/2 + 2);
+        } else if (name === 'torso') {
+            // Traje de payaso gris con pompones rojos
+            graphics.fillStyle(0x888888, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Pompones rojos
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, 6, 4);
+            graphics.fillCircle(width/2, 16, 4);
+            graphics.fillCircle(width/2, 26, 4);
+            // Cuello con volantes
+            graphics.fillStyle(0xCCCCCC, 1);
+            graphics.fillEllipse(width/2, 2, width - 4, 6);
+        } else {
+            // Pantalones/brazos grises
+            graphics.fillStyle(0x666666, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (isPirate) {
+        // JACK SPARROW - Pirata
+        if (isHead) {
+            // Cara bronceada
+            graphics.fillStyle(0xDEB887, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Bandana roja
+            graphics.fillStyle(0x8B0000, 1);
+            graphics.fillRect(0, 0, width, 6);
+            graphics.fillEllipse(width/2, 3, width, 6);
+            // Pelo negro con rastas
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillEllipse(1, height/2 + 2, 4, 10);
+            graphics.fillEllipse(width - 1, height/2 + 2, 4, 10);
+            graphics.fillEllipse(3, height/2 + 4, 3, 8);
+            graphics.fillEllipse(width - 3, height/2 + 4, 3, 8);
+            // Ojos con delineador
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 4, 3);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 4, 3);
+            graphics.fillStyle(0x4a3728, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 1.5);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 1.5);
+            // Barba y bigote
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillRect(width/2 - 2, height/2 + 4, 4, 2); // bigote
+            graphics.fillEllipse(width/2, height/2 + 8, 6, 4); // barba
+            // Perilla con cuentas
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillRect(width/2 - 1, height/2 + 10, 2, 3);
+        } else if (name === 'torso') {
+            // Camisa blanca abierta con chaleco
+            graphics.fillStyle(0xF5F5DC, 1); // Camisa beige
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Chaleco marrón
+            graphics.fillStyle(0x4a3728, 1);
+            graphics.fillRoundedRect(0, 0, 8, height, 2);
+            graphics.fillRoundedRect(width - 8, 0, 8, height, 2);
+            // Cinturón con hebilla
+            graphics.fillStyle(0x2a1a0a, 1);
+            graphics.fillRect(0, height - 8, width, 6);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(width/2 - 3, height - 7, 6, 4);
+        } else {
+            // Pantalones/brazos marrones
+            graphics.fillStyle(0x3a2a1a, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Botas en piernas
+            if (name.includes('leg')) {
+                graphics.fillStyle(0x1a1a0a, 1);
+                graphics.fillRoundedRect(0, height - 10, width, 10, 2);
+            }
+        }
+    } else if (isSkeleton) {
         // Dibujar huesos de esqueleto
         const boneColor = 0xF5F5DC; // Hueso beige
         const darkBone = 0xCCCCBB; // Sombra del hueso
@@ -4177,6 +4291,142 @@ function createPortal(scene, x, y) {
         })
     };
     portals.push(weapon);
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createHacha(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x4a3728, 1);
+    g.fillRect(-3, -20, 6, 40); // Mango
+    g.fillStyle(0x888888, 1);
+    g.fillRect(-15, -20, 20, 15); // Cabeza
+    g.fillTriangle(-15, -20, -15, -5, -20, -12); // Filo
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'hacha', x, y,
+        body: scene.matter.add.rectangle(x, y, 30, 40, { friction: 0.3, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createMartillo(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x4a3728, 1);
+    g.fillRect(-3, -5, 6, 35); // Mango
+    g.fillStyle(0x555555, 1);
+    g.fillRect(-12, -15, 24, 12); // Cabeza
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'martillo', x, y,
+        body: scene.matter.add.rectangle(x, y, 24, 35, { friction: 0.3, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createDinamita(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0xCC0000, 1);
+    g.fillRect(-5, -15, 10, 30); // Cartucho rojo
+    g.fillStyle(0xFFFF00, 1);
+    g.fillRect(-2, -18, 4, 5); // Mecha
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'dinamita', x, y, timer: 3, timerStarted: false,
+        body: scene.matter.add.rectangle(x, y, 10, 30, { friction: 0.3, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createLaser(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x333333, 1);
+    g.fillRect(-25, -8, 50, 16); // Cuerpo
+    g.fillStyle(0xFF0000, 1);
+    g.fillCircle(25, 0, 5); // Punta láser
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'laser', x, y,
+        body: scene.matter.add.rectangle(x, y, 50, 16, { friction: 0.3, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createEscudo(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x8B4513, 1);
+    g.fillRoundedRect(-15, -20, 30, 40, 10); // Escudo madera
+    g.fillStyle(0xFFD700, 1);
+    g.fillCircle(0, 0, 8); // Centro dorado
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'escudo', x, y,
+        body: scene.matter.add.rectangle(x, y, 30, 40, { friction: 0.5, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createBoomerang(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x8B4513, 1);
+    g.fillRoundedRect(-20, -3, 20, 6, 3);
+    g.fillRoundedRect(-3, -20, 6, 20, 3);
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'boomerang', x, y,
+        body: scene.matter.add.rectangle(x, y, 25, 25, { friction: 0.1, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createPiedra(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x777777, 1);
+    g.fillCircle(0, 0, 12);
+    g.fillStyle(0x666666, 1);
+    g.fillCircle(-3, -3, 5);
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'piedra', x, y,
+        body: scene.matter.add.circle(x, y, 12, { friction: 0.5, restitution: 0.3, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createCactus(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x228B22, 1);
+    g.fillRoundedRect(-8, -25, 16, 50, 5); // Cuerpo
+    g.fillRoundedRect(-20, -10, 15, 8, 3); // Brazo izq
+    g.fillRoundedRect(5, 0, 15, 8, 3); // Brazo der
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'cactus', x, y,
+        body: scene.matter.add.rectangle(x, y, 30, 50, { isStatic: true, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createYunque(scene, x, y) {
+    const g = scene.add.graphics();
+    g.setDepth(10);
+    g.fillStyle(0x444444, 1);
+    g.fillRect(-20, -10, 40, 20); // Base
+    g.fillRect(-15, -20, 30, 12); // Arriba
+    g.fillStyle(0x333333, 1);
+    g.fillRect(-25, -12, 10, 8); // Cuerno izq
+    g.setPosition(x, y);
+    const weapon = { graphics: g, type: 'yunque', x, y,
+        body: scene.matter.add.rectangle(x, y, 40, 25, { friction: 0.8, density: 0.01, collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }})
+    };
     weapons.push(weapon);
     return weapon;
 }
