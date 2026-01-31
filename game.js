@@ -2359,6 +2359,25 @@ function createGround(scene) {
     sandGround.setVisible(false);
     groundGraphics.sandGround = sandGround;
 
+    // Suelo de arena para playa (más cálido y con olas)
+    const beachGround = scene.add.graphics();
+    beachGround.fillStyle(0xF4D03F, 1); // Arena dorada
+    beachGround.fillRect(0, groundY, w, 50);
+    // Textura de arena
+    beachGround.fillStyle(0xE5BE3D, 1);
+    for (let x = 0; x < w; x += 30) {
+        beachGround.fillEllipse(x + 15, groundY + 3, 20, 6);
+    }
+    // Conchas decorativas
+    beachGround.fillStyle(0xFFF5EE, 1);
+    for (let x = 50; x < w * 0.6; x += 120) {
+        beachGround.fillCircle(x, groundY + 12, 4);
+        beachGround.fillEllipse(x + 30, groundY + 15, 6, 4);
+    }
+    beachGround.setDepth(-9);
+    beachGround.setVisible(false);
+    groundGraphics.beachGround = beachGround;
+
     // Suelo de roca volcánica para lava
     const rockGround = scene.add.graphics();
     rockGround.fillStyle(0x4A4A4A, 1);
@@ -3607,6 +3626,19 @@ function changeMap(mapId) {
             }
             // Crear un esqueleto al entrar al mapa
             createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0x666666, 'esqueleto');
+            break;
+        case 'playa':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Playa: mostrar sol, ocultar árboles normales, mostrar suelo de arena
+            if (sun) sun.setVisible(true);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.beachGround) groundGraphics.beachGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo azul tropical
+            sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
@@ -4962,6 +4994,196 @@ function updateMapEffects() {
         }));
     } else if (sceneRef.iceGraphics) {
         sceneRef.iceGraphics.clear();
+    }
+
+    // Playa - palmeras con cocos y agua con fisica
+    if (currentMap === 'playa') {
+        if (!sceneRef.beachGraphics) {
+            sceneRef.beachGraphics = sceneRef.add.graphics();
+            sceneRef.beachGraphics.setDepth(-6);
+        }
+        sceneRef.beachGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+        const waterStartX = w * 0.65; // El agua empieza a 2/3 de la pantalla
+
+        // === PALMERAS CON COCOS (fondo, no caen) ===
+        const palmPositions = [80, 180, w * 0.45];
+        palmPositions.forEach((palmX, idx) => {
+            const sway = Math.sin(Date.now()/1500 + idx) * 5;
+
+            // Tronco de palmera (curvo)
+            sceneRef.beachGraphics.lineStyle(18, 0x8B4513, 1);
+            sceneRef.beachGraphics.beginPath();
+            sceneRef.beachGraphics.moveTo(palmX, groundY - 10);
+            sceneRef.beachGraphics.quadraticCurveTo(
+                palmX + 15 + sway, groundY - 80,
+                palmX + 10 + sway, groundY - 150
+            );
+            sceneRef.beachGraphics.strokePath();
+
+            // Textura del tronco (anillos)
+            sceneRef.beachGraphics.lineStyle(2, 0x6B3410, 0.5);
+            for (let ring = 0; ring < 8; ring++) {
+                const ringY = groundY - 20 - ring * 18;
+                const ringX = palmX + 5 + (ring / 8) * (10 + sway);
+                sceneRef.beachGraphics.lineBetween(ringX - 8, ringY, ringX + 8, ringY);
+            }
+
+            // Hojas de palmera
+            const leafTopX = palmX + 10 + sway;
+            const leafTopY = groundY - 150;
+            const leafAngles = [-2.5, -1.8, -1, -0.3, 0.3, 1, 1.8, 2.5];
+            leafAngles.forEach((angle, i) => {
+                const leafSway = Math.sin(Date.now()/800 + idx + i) * 3;
+                const leafLen = 60 + (i % 3) * 15;
+                const endX = leafTopX + Math.cos(angle) * leafLen + leafSway;
+                const endY = leafTopY + Math.sin(angle) * leafLen * 0.5 - 20;
+
+                // Hoja principal
+                sceneRef.beachGraphics.lineStyle(4, 0x228B22, 0.9);
+                sceneRef.beachGraphics.beginPath();
+                sceneRef.beachGraphics.moveTo(leafTopX, leafTopY);
+                sceneRef.beachGraphics.quadraticCurveTo(
+                    leafTopX + Math.cos(angle) * leafLen * 0.5 + leafSway,
+                    leafTopY + Math.sin(angle) * leafLen * 0.3 - 30,
+                    endX, endY
+                );
+                sceneRef.beachGraphics.strokePath();
+
+                // Segmentos de la hoja
+                sceneRef.beachGraphics.lineStyle(2, 0x32CD32, 0.7);
+                for (let seg = 0.3; seg < 1; seg += 0.15) {
+                    const segX = leafTopX + (endX - leafTopX) * seg;
+                    const segY = leafTopY + (endY - leafTopY) * seg - 10 * (1 - seg);
+                    sceneRef.beachGraphics.lineBetween(segX, segY, segX + 8, segY + 6);
+                    sceneRef.beachGraphics.lineBetween(segX, segY, segX - 8, segY + 6);
+                }
+            });
+
+            // Cocos (no caen, son decorativos)
+            const cocoPositions = [
+                { x: leafTopX - 8, y: leafTopY + 5 },
+                { x: leafTopX + 5, y: leafTopY + 8 },
+                { x: leafTopX - 2, y: leafTopY + 12 }
+            ];
+            cocoPositions.forEach(coco => {
+                // Coco marrón
+                sceneRef.beachGraphics.fillStyle(0x8B4513, 1);
+                sceneRef.beachGraphics.fillCircle(coco.x + sway * 0.5, coco.y, 8);
+                // Brillo
+                sceneRef.beachGraphics.fillStyle(0xA0522D, 0.6);
+                sceneRef.beachGraphics.fillCircle(coco.x + sway * 0.5 - 2, coco.y - 2, 3);
+            });
+        });
+
+        // === AGUA EN 1/3 DERECHA INFERIOR ===
+        const waterHeight = h / 3;
+        const waterY = h - waterHeight;
+
+        // Fondo del agua (azul profundo)
+        sceneRef.beachGraphics.fillStyle(0x1E90FF, 0.7);
+        sceneRef.beachGraphics.fillRect(waterStartX, waterY, w - waterStartX, waterHeight);
+
+        // Gradiente más claro arriba
+        sceneRef.beachGraphics.fillStyle(0x87CEEB, 0.4);
+        sceneRef.beachGraphics.fillRect(waterStartX, waterY, w - waterStartX, waterHeight * 0.3);
+
+        // Olas animadas en la superficie
+        const waveTime = Date.now() / 500;
+        sceneRef.beachGraphics.fillStyle(0xADD8E6, 0.8);
+        sceneRef.beachGraphics.beginPath();
+        sceneRef.beachGraphics.moveTo(waterStartX - 20, waterY + 15);
+        for (let wx = waterStartX - 20; wx <= w; wx += 10) {
+            const waveY = waterY + Math.sin(waveTime + wx * 0.02) * 8;
+            sceneRef.beachGraphics.lineTo(wx, waveY);
+        }
+        sceneRef.beachGraphics.lineTo(w, h);
+        sceneRef.beachGraphics.lineTo(waterStartX - 20, h);
+        sceneRef.beachGraphics.closePath();
+        sceneRef.beachGraphics.fillPath();
+
+        // Espuma de las olas
+        sceneRef.beachGraphics.fillStyle(0xFFFFFF, 0.7);
+        for (let foam = 0; foam < 5; foam++) {
+            const foamX = waterStartX + foam * 30 + Math.sin(waveTime + foam) * 10;
+            const foamY = waterY + Math.sin(waveTime + foam * 0.5) * 5;
+            sceneRef.beachGraphics.fillEllipse(foamX, foamY, 15 + foam * 2, 5);
+        }
+
+        // Brillos en el agua
+        sceneRef.beachGraphics.fillStyle(0xFFFFFF, 0.4);
+        for (let sparkle = 0; sparkle < 8; sparkle++) {
+            const sx = waterStartX + 30 + (sparkle * 50 + Date.now()/100) % (w - waterStartX - 30);
+            const sy = waterY + 30 + (sparkle * 40) % (waterHeight - 50);
+            const sparkleSize = 2 + Math.sin(Date.now()/200 + sparkle) * 1;
+            sceneRef.beachGraphics.fillCircle(sx, sy, sparkleSize);
+        }
+
+        // === FISICA DEL AGUA ===
+        // Ragdolls flotan cuando estan en el agua
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.body) {
+                const inWater = p.x > waterStartX && p.y > waterY;
+                if (inWater) {
+                    // Flotar (empujar hacia arriba)
+                    const floatForce = -0.4;
+                    const drag = 0.95; // Resistencia del agua
+                    p.setVelocity(
+                        p.body.velocity.x * drag,
+                        p.body.velocity.y * drag + floatForce
+                    );
+
+                    // Burbujas ocasionales
+                    if (Math.random() < 0.02) {
+                        sceneRef.beachGraphics.fillStyle(0xADD8E6, 0.6);
+                        sceneRef.beachGraphics.fillCircle(p.x + (Math.random() - 0.5) * 10, p.y - 10, 3);
+                    }
+                }
+            }
+        }));
+
+        // Armas tambien flotan
+        weapons.forEach(weapon => {
+            if (weapon.body) {
+                const inWater = weapon.x > waterStartX && weapon.y > waterY;
+                if (inWater) {
+                    sceneRef.matter.body.setVelocity(weapon.body, {
+                        x: weapon.body.velocity.x * 0.95,
+                        y: weapon.body.velocity.y * 0.95 - 0.2
+                    });
+                }
+            }
+        });
+
+        // Cangrejo caminando (decorativo)
+        const crabX = waterStartX - 50 + Math.sin(Date.now()/2000) * 30;
+        const crabY = groundY - 15;
+        // Cuerpo
+        sceneRef.beachGraphics.fillStyle(0xFF6347, 1);
+        sceneRef.beachGraphics.fillEllipse(crabX, crabY, 12, 8);
+        // Ojos
+        sceneRef.beachGraphics.fillStyle(0x000000, 1);
+        sceneRef.beachGraphics.fillCircle(crabX - 5, crabY - 8, 2);
+        sceneRef.beachGraphics.fillCircle(crabX + 5, crabY - 8, 2);
+        // Pinzas
+        const pinzaAnim = Math.sin(Date.now()/300) * 0.3;
+        sceneRef.beachGraphics.fillStyle(0xFF6347, 1);
+        sceneRef.beachGraphics.fillEllipse(crabX - 18, crabY - 3, 8, 5);
+        sceneRef.beachGraphics.fillEllipse(crabX + 18, crabY - 3, 8, 5);
+        // Patas
+        sceneRef.beachGraphics.lineStyle(2, 0xFF6347, 1);
+        for (let leg = -1; leg <= 1; leg += 2) {
+            for (let i = 0; i < 3; i++) {
+                const legX = crabX + leg * (4 + i * 3);
+                sceneRef.beachGraphics.lineBetween(legX, crabY + 3, legX + leg * 5, crabY + 8);
+            }
+        }
+
+    } else if (sceneRef.beachGraphics) {
+        sceneRef.beachGraphics.clear();
     }
 
     // === EFECTOS DE NUEVAS ARMAS ===
