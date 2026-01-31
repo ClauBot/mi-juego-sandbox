@@ -160,6 +160,7 @@ let shopMenu;
 let creatorOpen = false;
 let creatorMenu;
 let mayhemsText;
+let secretCode = '';
 let unlockedItems = {
     npcs: ['normal', 'esqueleto'],
     weapons: ['pistola', 'cuchillo', 'granada'],
@@ -231,6 +232,7 @@ const shopItems = {
     ],
     worlds: [
         { id: 'normal', name: 'Normal', emoji: '🌳', price: 0 },
+        { id: 'volcan', name: 'Volcán', emoji: '🌋', price: 0 },
         { id: 'tornado', name: 'Tornado', emoji: '🌪️', price: 50 },
         { id: 'rayos', name: 'Rayos', emoji: '⚡', price: 50 },
         { id: 'lunar', name: 'Lunar', emoji: '🌙', price: 75 },
@@ -246,7 +248,16 @@ const shopItems = {
         { id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 125 },
         { id: 'playa', name: 'Playa', emoji: '🏖️', price: 75 },
         { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 60 },
-        { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 100 }
+        { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 100 },
+        { id: 'jungla', name: 'Jungla', emoji: '🌴', price: 80 },
+        { id: 'oceano', name: 'Océano', emoji: '🐋', price: 90 },
+        { id: 'apocalipsis', name: 'Apocalipsis', emoji: '☠️', price: 150 },
+        { id: 'dulces', name: 'Dulces', emoji: '🍭', price: 100 },
+        { id: 'montanas', name: 'Montañas', emoji: '🏔️', price: 85 },
+        { id: 'pantano', name: 'Pantano', emoji: '🐊', price: 70 },
+        { id: 'cristales', name: 'Cristales', emoji: '💎', price: 120 },
+        { id: 'ruinas', name: 'Ruinas', emoji: '🏛️', price: 110 },
+        { id: 'tormenta', name: 'Tormenta', emoji: '⛈️', price: 95 }
     ]
 };
 
@@ -262,7 +273,7 @@ function getDiscountedPrice(originalPrice) {
 const defaultUnlocked = {
     npcs: ['normal', 'esqueleto'],
     weapons: ['pistola', 'cuchillo', 'granada'],
-    worlds: ['normal', 'desierto']
+    worlds: ['normal', 'volcan', 'desierto']
 };
 
 // Cargar datos guardados
@@ -504,6 +515,18 @@ function showFirstVisitorPrize(scene) {
 function initGameContent(scene) {
     // Cargar datos guardados (mayhems, items desbloqueados, etc.)
     loadSaveData();
+
+    // Código secreto: 1119 = 1000 mayhems
+    document.addEventListener('keydown', (e) => {
+        secretCode += e.key;
+        if (secretCode.length > 4) secretCode = secretCode.slice(-4);
+        if (secretCode === '1119') {
+            mayhems += 1000;
+            saveSaveData();
+            if (mayhemsText) mayhemsText.setText('💎 ' + mayhems);
+            secretCode = '';
+        }
+    });
 
     // Contar visitante
     checkVisitorCount();
@@ -2968,46 +2991,11 @@ function createUI(scene) {
     const screenW = game.scale.width;
 
     // === BARRA SUPERIOR DERECHA (horizontal, compacta) ===
-    // Orden de derecha a izquierda: [X] [Color] [+]
+    // Orden de derecha a izquierda: [Color] [NPC] [Armas] [Mapa]
+    // (Botón X movido al menú hamburguesa para evitar borrados accidentales)
 
-    // Botón limpiar (X) - más a la derecha
-    const clearX = screenW - margin - btnSize;
-    const clearButton = scene.add.graphics();
-    clearButton.fillStyle(0xAA4444, 1);
-    clearButton.fillRoundedRect(clearX, topY, btnSize, btnSize, 8);
-    clearButton.fillStyle(0xFFFFFF, 1);
-    // Dibujar X
-    clearButton.lineStyle(4, 0xFFFFFF, 1);
-    clearButton.lineBetween(clearX + 12, topY + 12, clearX + btnSize - 12, topY + btnSize - 12);
-    clearButton.lineBetween(clearX + btnSize - 12, topY + 12, clearX + 12, topY + btnSize - 12);
-
-    const clearZone = scene.add.zone(clearX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
-    clearZone.setInteractive();
-    clearZone.on('pointerdown', () => {
-        bloodParticles.forEach(blood => blood.graphics.destroy());
-        bloodParticles = [];
-        ragdolls.forEach(ragdoll => {
-            ragdoll.constraints.forEach(c => {
-                if (c) sceneRef.matter.world.removeConstraint(c);
-            });
-            ragdoll.parts.forEach(p => {
-                if (p) p.destroy();
-            });
-            if (ragdoll.eyelids) ragdoll.eyelids.destroy();
-            if (ragdoll.brainGraphics) ragdoll.brainGraphics.destroy();
-        });
-        ragdolls = [];
-        weapons.forEach(w => {
-            if (w.graphics) w.graphics.destroy();
-            if (w.body) sceneRef.matter.world.remove(w.body);
-        });
-        weapons = [];
-        currentWeapon = null;
-        drawWeaponButton();
-    });
-
-    // Botón equipo (color) - segundo desde la derecha
-    const teamX = clearX - margin - btnSize;
+    // Botón equipo (color) - más a la derecha
+    const teamX = screenW - margin - btnSize;
     teamButton = scene.add.graphics();
     drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
 
@@ -3127,13 +3115,13 @@ function createUI(scene) {
     exitZone.setDepth(100);
     exitZone.on('pointerdown', () => toggleExitMenu());
 
-    // === INDICADOR DE MAYHEMS (junto al botón de salir) ===
-    mayhemsText = scene.add.text(exitX + btnSize + 10, topY + btnSize/2, '💎 ' + mayhems, {
-        font: 'bold 16px Arial',
+    // === INDICADOR DE MAYHEMS (centrado arriba, más visible) ===
+    mayhemsText = scene.add.text(screenW / 2, topY + btnSize/2, '💎 ' + formatNumber(mayhems), {
+        font: 'bold 22px Arial',
         fill: '#FFD700',
         stroke: '#000000',
-        strokeThickness: 2
-    }).setOrigin(0, 0.5).setDepth(100);
+        strokeThickness: 3
+    }).setOrigin(0.5, 0.5).setDepth(100);
 
     // === MENÚ DE SALIR ===
     const exitMenuX = exitX + btnSize/2;
@@ -3143,7 +3131,7 @@ function createUI(scene) {
     exitMenu.setVisible(false);
 
     const exitMenuW = 180;
-    const exitMenuH = 110;
+    const exitMenuH = 160;
     const exitMenuBg = scene.add.graphics();
     exitMenuBg.fillStyle(0x2C3E50, 0.98);
     exitMenuBg.fillRoundedRect(0, 0, exitMenuW, exitMenuH, 10);
@@ -3183,6 +3171,47 @@ function createUI(scene) {
         exitMenu.setVisible(false);
         exitMenuOpen = false;
         openCreator();
+    });
+
+    // Botón Limpiar Todo
+    const clearBtn = scene.add.graphics();
+    clearBtn.fillStyle(0xE74C3C, 1);
+    clearBtn.fillRoundedRect(10, 110, exitMenuW - 20, 40, 8);
+    exitMenu.add(clearBtn);
+    const clearTxt = scene.add.text(exitMenuW/2, 130, '🗑️ Limpiar Todo', {
+        font: 'bold 18px Arial', fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    exitMenu.add(clearTxt);
+    const clearRect = scene.add.rectangle(exitMenuW/2, 130, exitMenuW - 20, 40, 0x000000, 0);
+    clearRect.setInteractive();
+    exitMenu.add(clearRect);
+    clearRect.on('pointerdown', () => {
+        // Limpiar sangre
+        bloodParticles.forEach(blood => blood.graphics.destroy());
+        bloodParticles = [];
+        // Limpiar ragdolls
+        ragdolls.forEach(ragdoll => {
+            ragdoll.constraints.forEach(c => {
+                if (c) sceneRef.matter.world.removeConstraint(c);
+            });
+            ragdoll.parts.forEach(p => {
+                if (p) p.destroy();
+            });
+            if (ragdoll.eyelids) ragdoll.eyelids.destroy();
+            if (ragdoll.brainGraphics) ragdoll.brainGraphics.destroy();
+        });
+        ragdolls = [];
+        // Limpiar armas
+        weapons.forEach(w => {
+            if (w.graphics) w.graphics.destroy();
+            if (w.body) sceneRef.matter.world.remove(w.body);
+        });
+        weapons = [];
+        currentWeapon = null;
+        drawWeaponButton();
+        // Cerrar menú
+        exitMenu.setVisible(false);
+        exitMenuOpen = false;
     });
 
     // === MENÚ DE TIENDA (pantalla completa) ===
@@ -5902,6 +5931,15 @@ function updateAllHealthBars() {
 // SISTEMA DE TIENDA Y CREADOR
 // ============================================
 
+// Formatear números grandes (1K, 1M, 1B, etc.)
+function formatNumber(num) {
+    if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+    return num.toString();
+}
+
 function toggleExitMenu() {
     exitMenuOpen = !exitMenuOpen;
     exitMenu.setVisible(exitMenuOpen);
@@ -5917,7 +5955,7 @@ function toggleExitMenu() {
 
 function updateMayhemsDisplay() {
     if (mayhemsText) {
-        mayhemsText.setText('💎 ' + mayhems);
+        mayhemsText.setText('💎 ' + formatNumber(mayhems));
     }
 }
 

@@ -25,7 +25,7 @@ Juego sandbox estilo Melon Playground. Arrastra, lanza y destruye ragdolls.
 ## Funcionalidades
 - Ragdolls con fisica realista (parpadean cada 30s)
 - 16 armas: pistola, cuchillo, granada, espada, bat, cohete, barril, trampolin, katana, motosierra, arco, nuke, iman, lanzallamas, portal, ventilador
-- 10 mapas: normal, tornado, tormenta, luna, zombie, agujero negro, agua, lava, hielo, espacio
+- 20 mapas: normal, volcan, tornado, rayos, lunar, zombie, agujero negro, agua, lava, hielo, desierto, bosque, noche, arcoiris, ciudad, playa, niebla, espacio, jungla, oceano
 - 8 colores de equipo
 - Camara lenta (boton abajo derecha)
 - Musica tecno generativa (sintetizada en tiempo real)
@@ -120,3 +120,17 @@ git add -A && git commit -m "mensaje" && git push origin master
 - Menus de armas y mapas con grid compacto
 - Arma se deselecciona despues de colocar
 - Efectos visuales por mapa (overlay de color, particulas)
+
+### 2026-01-30 (sesion 3)
+- Codigo secreto: teclear "1119" durante el juego da 1000 mayhems
+- Mejora mapa de playa:
+  - Cielo tropical con gradiente (turquesa arriba, azul abajo)
+  - Palmeras animadas con cocos
+  - Agua con olas y fisica (ragdolls flotan)
+  - Cangrejos caminando
+  - Arena dorada con conchas
+
+## Reglas de desarrollo
+- **NO ROMPER NADA**: Al hacer cambios, asegurar que toda la funcionalidad existente siga funcionando
+- Los mundos/mapas siempre deben funcionar correctamente
+- Los botones del menu deben seguir funcionando despues de cambiar de mapa
