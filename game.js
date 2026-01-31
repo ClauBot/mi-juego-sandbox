@@ -3793,6 +3793,7 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
         case 'playa':
+            console.log('PLAYA: changeMap ejecutado');
             sceneRef.matter.world.setGravity(0, 0.8);
             // Playa: mostrar sol, ocultar árboles normales, mostrar suelo de arena
             if (sun) sun.setVisible(true);
@@ -5428,9 +5429,11 @@ function updateMapEffects() {
 
     // Playa - palmeras con cocos y agua con fisica
     if (currentMap === 'playa') {
+        console.log('PLAYA: Dibujando efectos');
         if (!sceneRef.beachGraphics) {
             sceneRef.beachGraphics = sceneRef.add.graphics();
             sceneRef.beachGraphics.setDepth(-6);
+            console.log('PLAYA: Graphics creado');
         }
         sceneRef.beachGraphics.clear();
 
