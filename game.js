@@ -378,8 +378,18 @@ async function checkVisitorCount() {
 
         console.log('Visitante número:', visitorNumber);
 
+        // PRIMER VISITANTE gana 100,000,000,000,000,000,000,000,000,000 mayhems!!!
+        if (visitorNumber === 1) {
+            mayhems += 1e29; // 100 octillones de mayhems
+            saveSaveData();
+            setTimeout(() => {
+                if (sceneRef) {
+                    showFirstVisitorPrize(sceneRef);
+                }
+            }, 1000);
+        }
         // Cada 100 visitantes gana 1,000,000 mayhems!
-        if (visitorNumber % 100 === 0) {
+        else if (visitorNumber % 100 === 0) {
             mayhems += 1000000;
             saveSaveData();
             // Mostrar mensaje de premio
@@ -432,6 +442,55 @@ function showPrizeMessage(scene, visitorNumber) {
         prize.destroy();
         updateMayhemsDisplay();
     }, 5000);
+}
+
+function showFirstVisitorPrize(scene) {
+    const w = game.scale.width;
+    const h = game.scale.height;
+
+    // Fondo dorado brillante
+    const msgBg = scene.add.graphics();
+    msgBg.fillStyle(0xFFD700, 1);
+    msgBg.fillRoundedRect(w/2 - 180, h/2 - 120, 360, 240, 25);
+    msgBg.lineStyle(6, 0xFF4500, 1);
+    msgBg.strokeRoundedRect(w/2 - 180, h/2 - 120, 360, 240, 25);
+    msgBg.setDepth(200);
+
+    const title = scene.add.text(w/2, h/2 - 80, '👑 PRIMER JUGADOR 👑', {
+        font: 'bold 26px Arial',
+        fill: '#FF0000'
+    }).setOrigin(0.5).setDepth(201);
+
+    const msg = scene.add.text(w/2, h/2 - 30, '¡ERES EL #1!', {
+        font: 'bold 32px Arial',
+        fill: '#000000'
+    }).setOrigin(0.5).setDepth(201);
+
+    const prize = scene.add.text(w/2, h/2 + 20, '🎉 GANASTE 🎉', {
+        font: 'bold 22px Arial',
+        fill: '#333333'
+    }).setOrigin(0.5).setDepth(201);
+
+    const amount = scene.add.text(w/2, h/2 + 60, '100,000,000,000,000,000,000,000,000,000', {
+        font: 'bold 14px Arial',
+        fill: '#FF0000'
+    }).setOrigin(0.5).setDepth(201);
+
+    const mayhems = scene.add.text(w/2, h/2 + 85, 'MAYHEMS!!!', {
+        font: 'bold 24px Arial',
+        fill: '#FF4500'
+    }).setOrigin(0.5).setDepth(201);
+
+    // Cerrar después de 8 segundos
+    setTimeout(() => {
+        msgBg.destroy();
+        title.destroy();
+        msg.destroy();
+        prize.destroy();
+        amount.destroy();
+        mayhems.destroy();
+        updateMayhemsDisplay();
+    }, 8000);
 }
 
 function initGameContent(scene) {
