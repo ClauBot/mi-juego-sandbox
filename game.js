@@ -2372,15 +2372,38 @@ function createGround(scene) {
     groundGraphics.setDepth(-9);
 
     // Crear gráficos alternativos de suelo (ocultos inicialmente)
-    // Suelo lunar - gris claro
+    // Suelo lunar - gris medio con cráteres contrastantes
     const lunarGround = scene.add.graphics();
-    lunarGround.fillStyle(0xCCCCCC, 1); // Gris claro
+    lunarGround.fillStyle(0x696969, 1); // Gris oscuro base
     lunarGround.fillRect(0, groundY, w, 50);
-    // Cráteres más oscuros
-    lunarGround.fillStyle(0x999999, 1);
-    for (let x = 50; x < w; x += 100) {
-        lunarGround.fillCircle(x, groundY + 10, 15);
-        lunarGround.fillCircle(x + 30, groundY + 25, 10);
+    // Textura de polvo lunar
+    lunarGround.fillStyle(0x808080, 1);
+    for (let x = 0; x < w; x += 15) {
+        lunarGround.fillCircle(x + Math.random() * 10, groundY + 5 + Math.random() * 10, 3);
+    }
+    // Cráteres grandes con borde claro y centro oscuro
+    for (let x = 60; x < w; x += 120) {
+        // Borde exterior claro
+        lunarGround.fillStyle(0x909090, 1);
+        lunarGround.fillCircle(x, groundY + 15, 20);
+        // Centro oscuro del cráter
+        lunarGround.fillStyle(0x3d3d3d, 1);
+        lunarGround.fillCircle(x, groundY + 15, 14);
+        // Sombra interior
+        lunarGround.fillStyle(0x2a2a2a, 1);
+        lunarGround.fillCircle(x + 3, groundY + 18, 8);
+    }
+    // Cráteres pequeños
+    for (let x = 30; x < w; x += 80) {
+        lunarGround.fillStyle(0x888888, 1);
+        lunarGround.fillCircle(x + 40, groundY + 30, 10);
+        lunarGround.fillStyle(0x4a4a4a, 1);
+        lunarGround.fillCircle(x + 40, groundY + 30, 6);
+    }
+    // Rocas dispersas
+    lunarGround.fillStyle(0x505050, 1);
+    for (let x = 20; x < w; x += 60) {
+        lunarGround.fillEllipse(x, groundY + 8, 8, 5);
     }
     lunarGround.setDepth(-9);
     lunarGround.setVisible(false);
