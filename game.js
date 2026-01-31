@@ -250,6 +250,13 @@ const shopItems = {
     ]
 };
 
+// Items por defecto que siempre deben estar desbloqueados
+const defaultUnlocked = {
+    npcs: ['normal', 'esqueleto'],
+    weapons: ['pistola', 'cuchillo', 'granada'],
+    worlds: ['normal']
+};
+
 // Cargar datos guardados
 function loadSaveData() {
     try {
@@ -262,6 +269,16 @@ function loadSaveData() {
             customItems = data.customItems || customItems;
             publishedItems = data.publishedItems || publishedItems;
         }
+        // Asegurar que los items por defecto siempre estén desbloqueados
+        defaultUnlocked.npcs.forEach(item => {
+            if (!unlockedItems.npcs.includes(item)) unlockedItems.npcs.push(item);
+        });
+        defaultUnlocked.weapons.forEach(item => {
+            if (!unlockedItems.weapons.includes(item)) unlockedItems.weapons.push(item);
+        });
+        defaultUnlocked.worlds.forEach(item => {
+            if (!unlockedItems.worlds.includes(item)) unlockedItems.worlds.push(item);
+        });
         // Verificar recompensa diaria
         checkDailyReward();
     } catch (e) {
