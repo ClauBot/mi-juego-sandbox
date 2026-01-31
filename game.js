@@ -2629,6 +2629,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const isNinja = (npcType === 'ninja');
     const isPirate = (npcType === 'pirata');
     const isClown = (npcType === 'clown');
+    const isKnight = (npcType === 'knight');
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -2658,7 +2659,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     // Ninja es 25% más ligero (cae más rápido por menos resistencia al aire)
     const densityMult = isNinja ? 0.75 : 1;
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2696,7 +2697,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2704,7 +2705,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown);
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2712,7 +2713,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2720,7 +2721,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2728,7 +2729,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2777,11 +2778,87 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false, isKnight = false) {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
-    if (isClown) {
+    if (isKnight) {
+        // CABALLERO CON ARMADURA
+        if (isHead) {
+            // Yelmo de caballero
+            graphics.fillStyle(0x708090, 1); // Gris metálico
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Visera del yelmo
+            graphics.fillStyle(0x4a4a4a, 1);
+            graphics.fillRect(2, height/2 - 2, width - 4, 8);
+            // Ranura para los ojos
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillRect(4, height/2, width - 8, 3);
+            // Respiraderos
+            graphics.fillStyle(0x2a2a2a, 1);
+            graphics.fillCircle(width/2 - 3, height/2 + 5, 1);
+            graphics.fillCircle(width/2, height/2 + 5, 1);
+            graphics.fillCircle(width/2 + 3, height/2 + 5, 1);
+            // Cresta/penacho del yelmo
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRect(width/2 - 2, 0, 4, 5);
+            graphics.fillEllipse(width/2, 2, 6, 4);
+            // Brillo metálico
+            graphics.fillStyle(0xAAAAAA, 0.5);
+            graphics.fillEllipse(width/2 - 3, height/2 - 5, 4, 3);
+            // Borde dorado
+            graphics.lineStyle(1, 0xDAA520, 1);
+            graphics.strokeCircle(width/2, height/2, width/2 - 1);
+        } else if (name === 'torso') {
+            // Peto de armadura
+            graphics.fillStyle(0x708090, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Placa central
+            graphics.fillStyle(0x808080, 1);
+            graphics.fillRect(width/4, 2, width/2, height - 4);
+            // Cruz o emblema
+            graphics.fillStyle(0xDAA520, 1);
+            graphics.fillRect(width/2 - 1, 6, 3, 16);
+            graphics.fillRect(width/2 - 5, 12, 11, 3);
+            // Líneas de las placas
+            graphics.lineStyle(1, 0x4a4a4a, 1);
+            graphics.lineBetween(width/4, 0, width/4, height);
+            graphics.lineBetween(width*3/4, 0, width*3/4, height);
+            graphics.lineBetween(0, height/3, width, height/3);
+            graphics.lineBetween(0, height*2/3, width, height*2/3);
+            // Brillo
+            graphics.fillStyle(0xAAAAAA, 0.4);
+            graphics.fillRect(2, 2, 6, 10);
+        } else if (name.includes('arm')) {
+            // Brazales de armadura
+            graphics.fillStyle(0x708090, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 2);
+            // Segmentos del brazo
+            graphics.lineStyle(1, 0x4a4a4a, 1);
+            graphics.lineBetween(0, height/3, width, height/3);
+            graphics.lineBetween(0, height*2/3, width, height*2/3);
+            // Codo articulado
+            graphics.fillStyle(0x606060, 1);
+            graphics.fillEllipse(width/2, height/2, width - 2, 6);
+            // Brillo
+            graphics.fillStyle(0xAAAAAA, 0.3);
+            graphics.fillRect(1, 1, 3, 8);
+        } else {
+            // Grebas (piernas de armadura)
+            graphics.fillStyle(0x708090, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 2);
+            // Rodillera
+            graphics.fillStyle(0x808080, 1);
+            graphics.fillEllipse(width/2, 8, width - 2, 8);
+            // Segmentos
+            graphics.lineStyle(1, 0x4a4a4a, 1);
+            graphics.lineBetween(0, height/3, width, height/3);
+            graphics.lineBetween(0, height*2/3, width, height*2/3);
+            // Brillo
+            graphics.fillStyle(0xAAAAAA, 0.3);
+            graphics.fillRect(1, 12, 3, 10);
+        }
+    } else if (isClown) {
         // PENNYWISE - Payaso de IT
         if (isHead) {
             // Cara blanca de payaso
