@@ -136,12 +136,6 @@ function create() {
 
     createUI(this);
 
-    const instructionText = isMobile ? 'Toca un muñeco!' : 'Toca un muñeco para que se caiga!';
-    this.add.text(10, 10, instructionText, {
-        font: '14px Arial',
-        fill: '#333333'
-    });
-
     this.input.on('pointerdown', onPointerDown, this);
     this.input.on('pointermove', onPointerMove, this);
     this.input.on('pointerup', onPointerUp, this);
@@ -860,36 +854,32 @@ function updateMusicButton() {
     if (!musicButton) return;
     musicButton.clear();
 
-    // Botón grande en esquina inferior izquierda
-    const btnX = 15;
-    const btnY = game.scale.height - 85;
-    const btnW = 70;
-    const btnH = 70;
+    // Botón compacto en esquina inferior izquierda
+    const btnSize = isMobile ? 50 : 45;
+    const margin = 8;
+    const btnX = margin;
+    const btnY = game.scale.height - margin - btnSize;
 
     // Fondo con sombra
-    musicButton.fillStyle(0x000000, 0.3);
-    musicButton.fillRoundedRect(btnX + 3, btnY + 3, btnW, btnH, 15);
+    musicButton.fillStyle(0x000000, 0.2);
+    musicButton.fillRoundedRect(btnX + 2, btnY + 2, btnSize, btnSize, 10);
 
     // Botón principal
-    musicButton.fillStyle(musicPlaying ? 0x44DD44 : 0x888888, 1);
-    musicButton.fillRoundedRect(btnX, btnY, btnW, btnH, 15);
+    musicButton.fillStyle(musicPlaying ? 0x44DD44 : 0x666666, 1);
+    musicButton.fillRoundedRect(btnX, btnY, btnSize, btnSize, 10);
 
-    // Borde
-    musicButton.lineStyle(3, musicPlaying ? 0x22AA22 : 0x555555, 1);
-    musicButton.strokeRoundedRect(btnX, btnY, btnW, btnH, 15);
-
-    // Icono grande
+    // Icono
     musicButton.fillStyle(0xFFFFFF, 1);
     if (musicPlaying) {
         // Pausa - dos barras
-        musicButton.fillRect(btnX + 22, btnY + 18, 10, 34);
-        musicButton.fillRect(btnX + 38, btnY + 18, 10, 34);
+        musicButton.fillRect(btnX + btnSize*0.3, btnY + btnSize*0.25, btnSize*0.12, btnSize*0.5);
+        musicButton.fillRect(btnX + btnSize*0.55, btnY + btnSize*0.25, btnSize*0.12, btnSize*0.5);
     } else {
         // Play - triángulo
         musicButton.fillTriangle(
-            btnX + 22, btnY + 15,
-            btnX + 22, btnY + 55,
-            btnX + 55, btnY + 35
+            btnX + btnSize*0.3, btnY + btnSize*0.2,
+            btnX + btnSize*0.3, btnY + btnSize*0.8,
+            btnX + btnSize*0.75, btnY + btnSize*0.5
         );
     }
 }
@@ -1823,69 +1813,26 @@ function createPartTexture(scene, name, width, height, color, isHead = false) {
 }
 
 function createUI(scene) {
-    const btnSize = isMobile ? 60 : 50;
-    const panelX = game.scale.width - btnSize - 20;
+    const btnSize = isMobile ? 50 : 45;
+    const margin = 8;
+    const topY = margin;
+    const screenW = game.scale.width;
 
-    const uiPanel = scene.add.graphics();
-    uiPanel.fillStyle(0x000000, 0.4);
-    uiPanel.fillRoundedRect(panelX - 5, 5, btnSize + 20, 220, 12);
+    // === BARRA SUPERIOR DERECHA (horizontal, compacta) ===
+    // Orden de derecha a izquierda: [X] [Color] [+]
 
-    // Botón +
-    const spawnButton = scene.add.graphics();
-    spawnButton.fillStyle(0x44AA44, 1);
-    spawnButton.fillRoundedRect(panelX, 15, btnSize, btnSize, 10);
-    spawnButton.fillStyle(0xFFFFFF, 1);
-    spawnButton.fillRect(panelX + btnSize/2 - 2, 15 + 12, 4, btnSize - 24);
-    spawnButton.fillRect(panelX + 12, 15 + btnSize/2 - 2, btnSize - 24, 4);
-
-    const spawnZone = scene.add.zone(panelX + btnSize/2, 15 + btnSize/2, btnSize, btnSize);
-    spawnZone.setInteractive();
-    spawnZone.on('pointerdown', () => {
-        // Limitar cantidad de ragdolls
-        if (ragdolls.length >= MAX_RAGDOLLS) {
-            // Mostrar mensaje
-            const maxText = sceneRef.add.text(game.scale.width / 2, 100, 'Máximo ' + MAX_RAGDOLLS + ' muñecos', {
-                font: 'bold 16px Arial',
-                fill: '#FF4444',
-                stroke: '#FFFFFF',
-                strokeThickness: 2
-            }).setOrigin(0.5).setDepth(100);
-            sceneRef.tweens.add({
-                targets: maxText,
-                alpha: 0,
-                y: 80,
-                duration: 1000,
-                onComplete: () => maxText.destroy()
-            });
-            return;
-        }
-        const newX = Phaser.Math.Between(100, game.scale.width - 100);
-        createRagdoll(sceneRef, newX, game.scale.height - 200, teamColors[currentTeam]);
-    });
-
-    // Botón equipo
-    teamButton = scene.add.graphics();
-    drawTeamButton(teamButton, teamColors[currentTeam], panelX, btnSize);
-
-    const teamZone = scene.add.zone(panelX + btnSize/2, 85 + btnSize/2, btnSize, btnSize);
-    teamZone.setInteractive();
-    teamZone.on('pointerdown', () => {
-        currentTeam = (currentTeam + 1) % 4;
-        teamButton.clear();
-        drawTeamButton(teamButton, teamColors[currentTeam], panelX, btnSize);
-    });
-
-    // Botón limpiar
+    // Botón limpiar (X) - más a la derecha
+    const clearX = screenW - margin - btnSize;
     const clearButton = scene.add.graphics();
     clearButton.fillStyle(0xAA4444, 1);
-    clearButton.fillRoundedRect(panelX, 165, btnSize, 40, 8);
+    clearButton.fillRoundedRect(clearX, topY, btnSize, btnSize, 8);
+    clearButton.fillStyle(0xFFFFFF, 1);
+    // Dibujar X
+    clearButton.lineStyle(4, 0xFFFFFF, 1);
+    clearButton.lineBetween(clearX + 12, topY + 12, clearX + btnSize - 12, topY + btnSize - 12);
+    clearButton.lineBetween(clearX + btnSize - 12, topY + 12, clearX + 12, topY + btnSize - 12);
 
-    scene.add.text(panelX + btnSize/2, 185, 'X', {
-        font: 'bold 20px Arial',
-        fill: '#FFFFFF'
-    }).setOrigin(0.5);
-
-    const clearZone = scene.add.zone(panelX + btnSize/2, 185, btnSize, 40);
+    const clearZone = scene.add.zone(clearX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
     clearZone.setInteractive();
     clearZone.on('pointerdown', () => {
         bloodParticles.forEach(blood => blood.graphics.destroy());
@@ -1901,8 +1848,6 @@ function createUI(scene) {
             if (ragdoll.healthBg) ragdoll.healthBg.destroy();
         });
         ragdolls = [];
-
-        // Limpiar armas
         weapons.forEach(w => {
             if (w.graphics) w.graphics.destroy();
             if (w.body) sceneRef.matter.world.remove(w.body);
@@ -1912,14 +1857,73 @@ function createUI(scene) {
         drawWeaponButton();
     });
 
-    // Botón de música (abajo izquierda) - GRANDE
+    // Botón equipo (color) - segundo desde la derecha
+    const teamX = clearX - margin - btnSize;
+    teamButton = scene.add.graphics();
+    drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
+
+    const teamZone = scene.add.zone(teamX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    teamZone.setInteractive();
+    teamZone.on('pointerdown', () => {
+        currentTeam = (currentTeam + 1) % 4;
+        teamButton.clear();
+        drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
+    });
+
+    // Botón agregar (+) - tercero desde la derecha
+    const spawnX = teamX - margin - btnSize;
+    const spawnButton = scene.add.graphics();
+    spawnButton.fillStyle(0x44AA44, 1);
+    spawnButton.fillRoundedRect(spawnX, topY, btnSize, btnSize, 8);
+    spawnButton.fillStyle(0xFFFFFF, 1);
+    spawnButton.fillRect(spawnX + btnSize/2 - 2, topY + 10, 4, btnSize - 20);
+    spawnButton.fillRect(spawnX + 10, topY + btnSize/2 - 2, btnSize - 20, 4);
+
+    const spawnZone = scene.add.zone(spawnX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    spawnZone.setInteractive();
+    spawnZone.on('pointerdown', () => {
+        if (ragdolls.length >= MAX_RAGDOLLS) {
+            const maxText = sceneRef.add.text(game.scale.width / 2, 80, 'Máx ' + MAX_RAGDOLLS, {
+                font: 'bold 14px Arial',
+                fill: '#FF4444',
+                stroke: '#FFFFFF',
+                strokeThickness: 2
+            }).setOrigin(0.5).setDepth(100);
+            sceneRef.tweens.add({
+                targets: maxText,
+                alpha: 0,
+                y: 60,
+                duration: 800,
+                onComplete: () => maxText.destroy()
+            });
+            return;
+        }
+        const newX = Phaser.Math.Between(80, game.scale.width - 80);
+        createRagdoll(sceneRef, newX, game.scale.height - 150, teamColors[currentTeam]);
+    });
+
+    // Botón de armas - cuarto desde la derecha
+    const weaponX = spawnX - margin - btnSize;
+    weaponButton = scene.add.graphics();
+    weaponButton.setDepth(100);
+    drawWeaponButton(weaponX, topY, btnSize);
+
+    const weaponZone = scene.add.zone(weaponX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    weaponZone.setInteractive();
+    weaponZone.setDepth(100);
+    weaponZone.on('pointerdown', () => {
+        toggleWeaponMenu();
+    });
+
+    // === BOTÓN MÚSICA (abajo izquierda, más pequeño) ===
     musicButton = scene.add.graphics();
     musicButton.setDepth(100);
     updateMusicButton();
 
-    const musicBtnX = 15 + 35;  // centro del botón
-    const musicBtnY = game.scale.height - 85 + 35;
-    const musicZone = scene.add.zone(musicBtnX, musicBtnY, 80, 80);
+    const musicBtnSize = isMobile ? 50 : 45;
+    const musicBtnX = margin + musicBtnSize/2;
+    const musicBtnY = game.scale.height - margin - musicBtnSize/2;
+    const musicZone = scene.add.zone(musicBtnX, musicBtnY, musicBtnSize + 10, musicBtnSize + 10);
     musicZone.setInteractive();
     musicZone.setDepth(100);
     musicZone.on('pointerdown', (pointer) => {
@@ -1927,41 +1931,32 @@ function createUI(scene) {
         toggleMusic();
     });
 
-    // Botón de armas (arriba centro)
-    weaponButton = scene.add.graphics();
-    weaponButton.setDepth(100);
-    drawWeaponButton();
-
-    const weaponZone = scene.add.zone(400, 25, 100, 40);
-    weaponZone.setInteractive();
-    weaponZone.setDepth(100);
-    weaponZone.on('pointerdown', () => {
-        toggleWeaponMenu();
-    });
-
     // Menú de armas (oculto inicialmente)
-    weaponMenu = scene.add.container(400, 70);
+    // Menú de armas - posicionado debajo del botón de armas
+    const menuX = weaponX + btnSize/2;
+    const menuY = topY + btnSize + 5;
+    weaponMenu = scene.add.container(menuX, menuY);
     weaponMenu.setDepth(101);
     weaponMenu.setVisible(false);
 
     const menuBg = scene.add.graphics();
     menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-80, 0, 160, 90, 10);
+    menuBg.fillRoundedRect(-60, 0, 120, 80, 8);
     weaponMenu.add(menuBg);
 
     // Opción Pistola
     const pistolaBtn = scene.add.graphics();
     pistolaBtn.fillStyle(0x555555, 1);
-    pistolaBtn.fillRoundedRect(-70, 10, 140, 35, 8);
+    pistolaBtn.fillRoundedRect(-55, 5, 110, 32, 6);
     weaponMenu.add(pistolaBtn);
 
-    const pistolaText = scene.add.text(0, 27, '🔫 Pistola', {
-        font: 'bold 16px Arial',
+    const pistolaText = scene.add.text(0, 21, '🔫 Pistola', {
+        font: 'bold 14px Arial',
         fill: '#FFFFFF'
     }).setOrigin(0.5);
     weaponMenu.add(pistolaText);
 
-    const pistolaZone = scene.add.zone(400, 97, 140, 35);
+    const pistolaZone = scene.add.zone(menuX, menuY + 21, 110, 32);
     pistolaZone.setInteractive();
     pistolaZone.setDepth(102);
     pistolaZone.on('pointerdown', () => {
@@ -1974,16 +1969,16 @@ function createUI(scene) {
     // Opción Cuchillo
     const cuchilloBtn = scene.add.graphics();
     cuchilloBtn.fillStyle(0x555555, 1);
-    cuchilloBtn.fillRoundedRect(-70, 50, 140, 35, 8);
+    cuchilloBtn.fillRoundedRect(-55, 42, 110, 32, 6);
     weaponMenu.add(cuchilloBtn);
 
-    const cuchilloText = scene.add.text(0, 67, '🔪 Cuchillo', {
-        font: 'bold 16px Arial',
+    const cuchilloText = scene.add.text(0, 58, '🔪 Cuchillo', {
+        font: 'bold 14px Arial',
         fill: '#FFFFFF'
     }).setOrigin(0.5);
     weaponMenu.add(cuchilloText);
 
-    const cuchilloZone = scene.add.zone(400, 137, 140, 35);
+    const cuchilloZone = scene.add.zone(menuX, menuY + 58, 110, 32);
     cuchilloZone.setInteractive();
     cuchilloZone.setDepth(102);
     cuchilloZone.on('pointerdown', () => {
@@ -1994,30 +1989,37 @@ function createUI(scene) {
     });
 }
 
-function drawWeaponButton() {
+// Posición del botón de armas (se actualiza en createUI)
+let weaponBtnPos = { x: 0, y: 0, size: 50 };
+
+function drawWeaponButton(x, y, size) {
+    // Guardar posición si se pasa
+    if (x !== undefined) {
+        weaponBtnPos = { x, y, size };
+    }
+    const { x: bx, y: by, size: bs } = weaponBtnPos;
+
     weaponButton.clear();
     weaponButton.fillStyle(0x666666, 1);
-    weaponButton.fillRoundedRect(350, 5, 100, 40, 10);
+    weaponButton.fillRoundedRect(bx, by, bs, bs, 8);
 
     weaponButton.fillStyle(0xFFFFFF, 1);
 
     if (currentWeapon === 'pistola') {
         // Dibujar pistola simple
-        weaponButton.fillRect(370, 18, 25, 8);
-        weaponButton.fillRect(365, 22, 10, 15);
-        weaponButton.fillRect(395, 15, 8, 5);
+        weaponButton.fillRect(bx + 8, by + bs/2 - 4, 20, 8);
+        weaponButton.fillRect(bx + 5, by + bs/2, 8, 12);
     } else if (currentWeapon === 'cuchillo') {
         // Dibujar cuchillo simple
-        weaponButton.fillRect(365, 22, 15, 8);
+        weaponButton.fillRect(bx + 5, by + bs/2 - 3, 12, 6);
         weaponButton.fillStyle(0xCCCCCC, 1);
-        weaponButton.fillRect(380, 20, 35, 4);
-        weaponButton.fillTriangle(415, 22, 425, 22, 415, 18);
+        weaponButton.fillRect(bx + 17, by + bs/2 - 2, 25, 4);
     } else {
-        // Sin arma - mostrar texto
-        sceneRef.add.text(400, 25, 'ARMAS', {
-            font: 'bold 14px Arial',
-            fill: '#FFFFFF'
-        }).setOrigin(0.5).setDepth(101);
+        // Sin arma - mostrar icono de arma
+        weaponButton.fillRect(bx + 10, by + bs/2 - 3, 15, 6);
+        weaponButton.fillRect(bx + 8, by + bs/2 + 3, 8, 10);
+        weaponButton.fillStyle(0x888888, 1);
+        weaponButton.fillRect(bx + 25, by + bs/2 - 2, 12, 4);
     }
 }
 
@@ -2026,11 +2028,11 @@ function toggleWeaponMenu() {
     weaponMenu.setVisible(weaponMenuOpen);
 }
 
-function drawTeamButton(graphics, color, panelX, btnSize) {
+function drawTeamButton(graphics, color, x, y, btnSize) {
     graphics.fillStyle(0x555555, 1);
-    graphics.fillRoundedRect(panelX, 85, btnSize, btnSize, 10);
+    graphics.fillRoundedRect(x, y, btnSize, btnSize, 8);
     graphics.fillStyle(color, 1);
-    graphics.fillCircle(panelX + btnSize/2, 85 + btnSize/2, btnSize/2 - 8);
+    graphics.fillCircle(x + btnSize/2, y + btnSize/2, btnSize/2 - 6);
 }
 
 // ============ ARMAS ============
