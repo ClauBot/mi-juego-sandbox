@@ -165,6 +165,13 @@ let customItems = {
     worlds: []
 };
 
+// Items publicados en la tienda por la comunidad
+let publishedItems = {
+    npcs: [],
+    weapons: [],
+    worlds: []
+};
+
 // Items de la tienda
 const shopItems = {
     npcs: [
@@ -218,6 +225,7 @@ function loadSaveData() {
             lastDailyReward = data.lastDailyReward || null;
             unlockedItems = data.unlockedItems || unlockedItems;
             customItems = data.customItems || customItems;
+            publishedItems = data.publishedItems || publishedItems;
         }
         // Verificar recompensa diaria
         checkDailyReward();
@@ -232,7 +240,8 @@ function saveSaveData() {
             mayhems,
             lastDailyReward,
             unlockedItems,
-            customItems
+            customItems,
+            publishedItems
         }));
     } catch (e) {
         console.error('Error saving:', e);
@@ -4962,30 +4971,65 @@ function updateCreatedItemsList() {
     }
 
     const w = game.scale.width;
-    const cols = isMobile ? 2 : 4;
-    const itemW = isMobile ? (w - 40) / 2 : 120;
+    const cols = isMobile ? 1 : 2;
+    const itemW = isMobile ? (w - 40) : (w - 60) / 2;
+    const itemH = 70;
 
     allItems.forEach((item, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const x = 20 + col * itemW;
-        const y = row * 60;
+        const x = 20 + col * (itemW + 10);
+        const y = row * (itemH + 10);
+
+        const isPublished = item.isPublished || false;
 
         const itemBg = sceneRef.add.graphics();
-        itemBg.fillStyle(0x3498DB, 1);
-        itemBg.fillRoundedRect(x, y, itemW - 10, 50, 6);
+        itemBg.fillStyle(isPublished ? 0x27AE60 : 0x3498DB, 1);
+        itemBg.fillRoundedRect(x, y, itemW, itemH, 8);
         container.add(itemBg);
 
-        const emoji = sceneRef.add.text(x + 25, y + 25, item.emoji || '✨', {
-            font: '20px Arial'
+        const emoji = sceneRef.add.text(x + 30, y + 35, item.emoji || '✨', {
+            font: '24px Arial'
         }).setOrigin(0.5);
         container.add(emoji);
 
-        const name = sceneRef.add.text(x + 50, y + 25, item.name, {
-            font: '12px Arial',
-            fill: '#FFFFFF'
-        }).setOrigin(0, 0.5);
+        const name = sceneRef.add.text(x + 60, y + 20, item.name, {
+            font: 'bold 14px Arial',
+            fill: '#FFFFFF',
+            wordWrap: { width: itemW - 120 }
+        });
         container.add(name);
+
+        const typeLabel = sceneRef.add.text(x + 60, y + 40, item.type.toUpperCase(), {
+            font: '10px Arial',
+            fill: '#AAAAAA'
+        });
+        container.add(typeLabel);
+
+        // Botón de publicar (si no está publicado)
+        if (!isPublished) {
+            const pubBtn = sceneRef.add.graphics();
+            pubBtn.fillStyle(0xE67E22, 1);
+            pubBtn.fillRoundedRect(x + itemW - 75, y + 15, 65, 40, 6);
+            container.add(pubBtn);
+
+            const pubTxt = sceneRef.add.text(x + itemW - 42, y + 35, '📤 Subir', {
+                font: 'bold 11px Arial',
+                fill: '#FFFFFF'
+            }).setOrigin(0.5);
+            container.add(pubTxt);
+
+            const pubRect = sceneRef.add.rectangle(x + itemW - 42, y + 35, 65, 40, 0x000000, 0);
+            pubRect.setInteractive();
+            container.add(pubRect);
+            pubRect.on('pointerdown', () => openPublishPopup(item));
+        } else {
+            const pubStatus = sceneRef.add.text(x + itemW - 42, y + 35, '✓ En tienda', {
+                font: '11px Arial',
+                fill: '#AAFFAA'
+            }).setOrigin(0.5);
+            container.add(pubStatus);
+        }
     });
 }
 
@@ -5156,4 +5200,164 @@ function generateAIItem(type, description) {
     saveSaveData();
     updateCreatedItemsList();
     showNotification('✨ ' + description + ' creado!');
+}
+
+// === SISTEMA DE PUBLICACIÓN EN TIENDA ===
+let publishPopup = null;
+
+function openPublishPopup(item) {
+    const w = game.scale.width;
+    const h = game.scale.height;
+
+    if (publishPopup) {
+        publishPopup.destroy();
+    }
+
+    publishPopup = sceneRef.add.container(0, 0);
+    publishPopup.setDepth(300);
+
+    // Fondo semitransparente
+    const overlay = sceneRef.add.graphics();
+    overlay.fillStyle(0x000000, 0.85);
+    overlay.fillRect(0, 0, w, h);
+    publishPopup.add(overlay);
+
+    const popupW = Math.min(w - 30, 420);
+    const popupH = 320;
+    const popupX = (w - popupW) / 2;
+    const popupY = (h - popupH) / 2;
+
+    // Fondo del popup
+    const popup = sceneRef.add.graphics();
+    popup.fillStyle(0x2C3E50, 1);
+    popup.fillRoundedRect(popupX, popupY, popupW, popupH, 15);
+    publishPopup.add(popup);
+
+    // Título
+    const title = sceneRef.add.text(w/2, popupY + 30, '📤 Publicar en Tienda', {
+        font: 'bold 22px Arial',
+        fill: '#E67E22'
+    }).setOrigin(0.5);
+    publishPopup.add(title);
+
+    // Item info
+    const itemInfo = sceneRef.add.text(w/2, popupY + 65, item.emoji + ' ' + item.name, {
+        font: 'bold 18px Arial',
+        fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    publishPopup.add(itemInfo);
+
+    // Instrucciones
+    const instructions = sceneRef.add.text(w/2, popupY + 100, 'Escribe qué hace y cómo funciona:', {
+        font: '14px Arial',
+        fill: '#AAAAAA'
+    }).setOrigin(0.5);
+    publishPopup.add(instructions);
+
+    // Área de descripción (simulada)
+    const descBg = sceneRef.add.graphics();
+    descBg.fillStyle(0x1a1a2e, 1);
+    descBg.fillRoundedRect(popupX + 15, popupY + 120, popupW - 30, 80, 8);
+    publishPopup.add(descBg);
+
+    const placeholder = sceneRef.add.text(popupX + 25, popupY + 130,
+        'Ej: Un arma que congela a los enemigos por 3 segundos\n' +
+        'cuando los golpeas. Muy útil para combos.', {
+        font: '12px Arial',
+        fill: '#666666',
+        wordWrap: { width: popupW - 50 }
+    });
+    publishPopup.add(placeholder);
+
+    // Precio sugerido
+    const priceLabel = sceneRef.add.text(popupX + 20, popupY + 215, 'Precio (Mayhems):', {
+        font: '14px Arial',
+        fill: '#FFFFFF'
+    });
+    publishPopup.add(priceLabel);
+
+    const prices = [0, 25, 50, 100, 200];
+    let selectedPrice = 50;
+
+    prices.forEach((price, i) => {
+        const priceBtn = sceneRef.add.graphics();
+        priceBtn.fillStyle(price === selectedPrice ? 0xE67E22 : 0x555555, 1);
+        priceBtn.fillRoundedRect(popupX + 20 + i * 75, popupY + 235, 65, 30, 6);
+        publishPopup.add(priceBtn);
+
+        const priceTxt = sceneRef.add.text(popupX + 52 + i * 75, popupY + 250,
+            price === 0 ? 'GRATIS' : '💎' + price, {
+            font: '11px Arial',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5);
+        publishPopup.add(priceTxt);
+    });
+
+    // Botón publicar
+    const pubBtn = sceneRef.add.graphics();
+    pubBtn.fillStyle(0x27AE60, 1);
+    pubBtn.fillRoundedRect(popupX + 15, popupY + popupH - 55, popupW - 30, 45, 10);
+    publishPopup.add(pubBtn);
+
+    const pubTxt = sceneRef.add.text(w/2, popupY + popupH - 32, '✅ Publicar en la Tienda', {
+        font: 'bold 18px Arial',
+        fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    publishPopup.add(pubTxt);
+
+    const pubRect = sceneRef.add.rectangle(w/2, popupY + popupH - 32, popupW - 30, 45, 0x000000, 0);
+    pubRect.setInteractive();
+    publishPopup.add(pubRect);
+    pubRect.on('pointerdown', () => publishItem(item, selectedPrice));
+
+    // Botón cerrar
+    const closeBtn = sceneRef.add.text(popupX + popupW - 25, popupY + 15, '✕', {
+        font: 'bold 24px Arial',
+        fill: '#FFFFFF'
+    }).setOrigin(0.5);
+    closeBtn.setInteractive();
+    publishPopup.add(closeBtn);
+    closeBtn.on('pointerdown', () => closePublishPopup());
+}
+
+function closePublishPopup() {
+    if (publishPopup) {
+        publishPopup.destroy();
+        publishPopup = null;
+    }
+}
+
+function publishItem(item, price) {
+    // Marcar como publicado
+    item.isPublished = true;
+    item.publishedPrice = price;
+    item.publishedAt = Date.now();
+
+    // Agregar a items publicados
+    const publishedItem = {
+        ...item,
+        price: price,
+        author: 'Jugador',
+        downloads: 0
+    };
+
+    if (item.type === 'npc') {
+        publishedItems.npcs.push(publishedItem);
+    } else if (item.type === 'weapon') {
+        publishedItems.weapons.push(publishedItem);
+    } else {
+        publishedItems.worlds.push(publishedItem);
+    }
+
+    // Actualizar el item original en customItems
+    const cat = item.type === 'npc' ? 'npcs' : item.type === 'weapon' ? 'weapons' : 'worlds';
+    const idx = customItems[cat].findIndex(i => i.id === item.id);
+    if (idx > -1) {
+        customItems[cat][idx].isPublished = true;
+    }
+
+    saveSaveData();
+    closePublishPopup();
+    updateCreatedItemsList();
+    showNotification('📤 ¡' + item.name + ' publicado en la tienda!');
 }
