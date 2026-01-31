@@ -55,3 +55,31 @@ git add -A && git commit -m "mensaje" && git push origin master
 - Repo: ClauBot/mi-juego-sandbox
 - Branch: master
 - Deploy: automatico en push (Vercel)
+
+---
+
+## Historial
+
+### 2026-01-30
+- Correr juego en local (python3 -m http.server 3000)
+- Arreglar PWA para que sea instalable:
+  - Crear icon.svg (muñeco ragdoll)
+  - Actualizar manifest.json con iconos
+  - Mejorar sw.js con cache-first para offline
+- Pantalla completa en tablet/celular:
+  - Cambiar de 800x600 fijo a 100% pantalla
+  - Escala RESIZE para adaptarse a cualquier dispositivo
+  - Posiciones dinamicas para suelo, paredes, UI y ragdolls
+- Mejorar drag and drop en tablets:
+  - Area de deteccion mas grande (70px)
+  - Agregar pointerupoutside
+- Boton de musica mas grande (70x70px):
+  - Iconos play/pausa mas visibles
+  - Sombra y borde
+  - Posicion dinamica
+- Optimizaciones de rendimiento para movil:
+  - Deteccion de dispositivos de bajo rendimiento
+  - Limitar particulas de sangre y ragdolls
+  - FPS limitado a 30 en movil
+- Cambiar dominio a sandboxmayhem.vercel.app
+- Elegir nombre: Sandbox Mayhem
