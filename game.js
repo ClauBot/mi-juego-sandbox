@@ -34,10 +34,12 @@ function getGroundLimit() {
 
 const config = {
     type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.RESIZE
+        mode: Phaser.Scale.NONE
     },
     physics: {
         default: 'matter',
@@ -114,7 +116,19 @@ let selectedWeapon = null;
 let isDraggingWeapon = false;
 let scenarioElements = [];
 
-game = new Phaser.Game(config);
+// Esperar a que el DOM esté listo para tener dimensiones correctas
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        // Actualizar config con dimensiones reales
+        config.width = window.innerWidth;
+        config.height = window.innerHeight;
+        game = new Phaser.Game(config);
+    });
+} else {
+    config.width = window.innerWidth;
+    config.height = window.innerHeight;
+    game = new Phaser.Game(config);
+}
 
 function preload() {}
 
@@ -206,7 +220,8 @@ function create() {
         });
     });
 
-    this.scale.on('resize', onResize, this);
+    // NO usar resize listener - causa problemas en móvil
+    // this.scale.on('resize', onResize, this);
 }
 
 // ============ MÚSICA TECNO PEGAJOSA ============
@@ -1522,7 +1537,7 @@ function createAppleTree(scene, x) {
     const tree = scene.add.graphics();
     tree.setDepth(0);
 
-    const groundY = game.scale.height - 55;
+    const groundY = Math.max(game.scale.height, window.innerHeight) - 55;
 
     // Tronco
     tree.fillStyle(0x8B4513, 1);
@@ -1652,7 +1667,7 @@ function createGround(scene) {
         isStatic: true,
         collisionFilter: {
             category: 0x0001,
-            mask: 0x0002  // Colisiona con ragdolls
+            mask: 0x0002 | 0x0004  // Colisiona con ragdolls y armas
         }
     };
 
@@ -1660,9 +1675,9 @@ function createGround(scene) {
 
     scene.matter.add.rectangle(w / 2, groundY + 25, w, 50, {
         ...wallOptions,
-        friction: 1,
-        frictionStatic: 1,
-        restitution: 0.05,
+        friction: 0.3,
+        frictionStatic: 0.1,
+        restitution: 0.2,
         label: 'ground'
     });
 
@@ -1696,10 +1711,10 @@ function createRagdoll(scene, x, y, color) {
     // 0x0002 = ragdolls
     // Los ragdolls colisionan con suelo Y entre ellos
     const partOptions = {
-        friction: 0.8,
+        friction: 0.4,
         frictionAir: 0.03,
-        frictionStatic: 0.5,
-        restitution: 0.1,
+        frictionStatic: 0.1,
+        restitution: 0.15,
         collisionFilter: {
             group: myGroup,           // Partes del mismo ragdoll no colisionan entre sí
             category: 0x0002,         // Soy un ragdoll
