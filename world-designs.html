@@ -25,9 +25,9 @@
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
         .world-card {
@@ -38,45 +38,32 @@
         .world-card.implemented { border: 2px solid #44AA44; }
         .world-card.pending { border: 2px solid #FFAA00; }
         .world-preview {
-            height: 120px;
+            height: 180px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #111;
         }
-        .world-preview .emoji {
-            font-size: 3em;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        .world-preview canvas {
+            image-rendering: pixelated;
         }
         .world-info { padding: 15px; }
-        .world-name { font-size: 1.2em; font-weight: bold; margin-bottom: 5px; }
+        .world-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .world-emoji { font-size: 1.8em; }
+        .world-name { font-size: 1.2em; font-weight: bold; }
         .world-status {
             font-size: 0.7em;
             padding: 2px 8px;
             border-radius: 10px;
-            display: inline-block;
-            margin-bottom: 8px;
+            margin-left: auto;
         }
         .status-done { background: #44AA44; }
         .status-pending { background: #FFAA00; color: #000; }
         .world-price { color: #FFD700; font-size: 0.9em; margin: 5px 0; }
-        .world-desc {
-            font-size: 0.85em;
-            color: #AAA;
-            margin: 8px 0;
-        }
-        .world-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .feature {
-            background: rgba(255,255,255,0.2);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.75em;
-        }
+        .world-desc { font-size: 0.85em; color: #AAA; margin: 8px 0; }
+        .world-features { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .feature { background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px; font-size: 0.75em; }
         .world-physics {
             font-size: 0.8em;
             color: #88CCFF;
@@ -85,35 +72,6 @@
             padding: 5px 8px;
             border-radius: 5px;
         }
-
-        /* Preview backgrounds */
-        .preview-normal { background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 60%, #228B22 80%, #654321 100%); }
-        .preview-volcan { background: linear-gradient(180deg, #8B0000 0%, #FF4500 30%, #4a4a4a 70%, #2d2d2d 100%); }
-        .preview-tornado { background: linear-gradient(180deg, #4a5568 0%, #2d3748 50%, #1a202c 100%); }
-        .preview-rayos { background: linear-gradient(180deg, #1a1a2e 0%, #2d2d4a 50%, #4a4a6a 100%); }
-        .preview-lunar { background: linear-gradient(180deg, #000011 0%, #000022 60%, #606060 90%, #404040 100%); }
-        .preview-zombie { background: linear-gradient(180deg, #2d4a2d 0%, #1a2e1a 50%, #0d1a0d 100%); }
-        .preview-agujero { background: radial-gradient(circle, #000000 0%, #1a0033 30%, #330066 70%, #4a0080 100%); }
-        .preview-agua { background: linear-gradient(180deg, #87CEEB 0%, #4a90c2 40%, #2266aa 70%, #1a4a7a 100%); }
-        .preview-lava { background: linear-gradient(180deg, #4a2a1a 0%, #8B0000 50%, #FF4500 80%, #FF6600 100%); }
-        .preview-hielo { background: linear-gradient(180deg, #E0FFFF 0%, #B0E0E6 40%, #87CEEB 70%, #ADD8E6 100%); }
-        .preview-desierto { background: linear-gradient(180deg, #FFD700 0%, #F4A460 40%, #D2691E 70%, #8B4513 100%); }
-        .preview-bosque { background: linear-gradient(180deg, #228B22 0%, #006400 40%, #004400 70%, #003300 100%); }
-        .preview-noche { background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #2a2a3e 100%); }
-        .preview-arcoiris { background: linear-gradient(180deg, #FF0000 0%, #FF7F00 17%, #FFFF00 33%, #00FF00 50%, #0000FF 67%, #4B0082 83%, #8F00FF 100%); }
-        .preview-ciudad { background: linear-gradient(180deg, #4a5568 0%, #2d3748 60%, #1a202c 80%, #111111 100%); }
-        .preview-playa { background: linear-gradient(180deg, #40E0D0 0%, #48D1CC 40%, #F4A460 70%, #DEB887 100%); }
-        .preview-niebla { background: linear-gradient(180deg, #A0A0A0 0%, #808080 50%, #606060 100%); }
-        .preview-espacio { background: linear-gradient(180deg, #000011 0%, #000022 50%, #000033 100%); }
-        .preview-jungla { background: linear-gradient(180deg, #228B22 0%, #32CD32 30%, #006400 70%, #004400 100%); }
-        .preview-oceano { background: linear-gradient(180deg, #1E90FF 0%, #0000CD 40%, #000080 70%, #00004a 100%); }
-        .preview-apocalipsis { background: linear-gradient(180deg, #8B0000 0%, #2F4F4F 50%, #1C1C1C 100%); }
-        .preview-dulces { background: linear-gradient(180deg, #FFB6C1 0%, #FF69B4 30%, #FF1493 70%, #C71585 100%); }
-        .preview-montanas { background: linear-gradient(180deg, #87CEEB 0%, #B0C4DE 40%, #708090 70%, #2F4F4F 100%); }
-        .preview-pantano { background: linear-gradient(180deg, #556B2F 0%, #6B8E23 30%, #8B4513 70%, #2F4F4F 100%); }
-        .preview-cristales { background: linear-gradient(135deg, #E0FFFF 0%, #00CED1 25%, #4169E1 50%, #9400D3 75%, #FF1493 100%); }
-        .preview-ruinas { background: linear-gradient(180deg, #D2B48C 0%, #8B7355 40%, #696969 70%, #2F4F4F 100%); }
-        .preview-tormenta { background: linear-gradient(180deg, #2F2F2F 0%, #4A4A4A 30%, #696969 60%, #1C1C1C 100%); }
     </style>
 </head>
 <body>
@@ -127,174 +85,1280 @@
     <div class="grid" id="pending-grid"></div>
 
     <script>
+        const W = 320;
+        const H = 180;
+
         const worlds = [
             // IMPLEMENTADOS
-            {
-                id: 'normal', name: 'Normal', emoji: '🌳', price: 0, implemented: true,
-                desc: 'Escenario clasico con cielo azul, pasto verde y gravedad normal.',
-                features: ['🌳 Arboles', '🌸 Flores', '☀️ Sol', '☁️ Nubes'],
-                physics: 'Gravedad: 1.0 | Friccion: Normal'
-            },
-            {
-                id: 'volcan', name: 'Volcan', emoji: '🌋', price: 0, implemented: true,
-                desc: 'Volcan activo con lava cayendo, rocas voladoras y cielo rojo.',
-                features: ['🔥 Lava', '💨 Humo', '🪨 Rocas', '🔴 Cielo rojo'],
-                physics: 'Gravedad: 1.0 | Dano: Lava quema'
-            },
-            {
-                id: 'tornado', name: 'Tornado', emoji: '🌪️', price: 50, implemented: true,
-                desc: 'Tornado gigante en el centro que lanza todo lo que toca.',
-                features: ['🌪️ Tornado', '💨 Viento', '🍃 Hojas', '☁️ Cielo gris'],
-                physics: 'Vortice central | Empuje: Muy Alto'
-            },
-            {
-                id: 'rayos', name: 'Tormenta', emoji: '⚡', price: 50, implemented: true,
-                desc: 'Tormenta electrica con rayos frecuentes y lluvia intensa.',
-                features: ['⚡ Rayos', '🌧️ Lluvia', '🌩️ Nubes', '💨 Viento'],
-                physics: 'Rayos aleatorios | Dano: Electrico'
-            },
-            {
-                id: 'lunar', name: 'Luna', emoji: '🌙', price: 75, implemented: true,
-                desc: 'Superficie lunar con gravedad baja y cielo estrellado.',
-                features: ['🌙 Luna grande', '⭐ Estrellas', '🕳️ Crateres', '🌑 Cielo negro'],
-                physics: 'Gravedad: 0.3 | Saltos altos'
-            },
-            {
-                id: 'zombie', name: 'Zombie', emoji: '🧟', price: 100, implemented: true,
-                desc: 'Apocalipsis zombie. Los ragdolls persiguen con piel verde.',
-                features: ['🧟 Zombies', '🧠 Cerebros', '🌫️ Niebla', '🌲 Arboles muertos'],
-                physics: 'AI: Persigue | Velocidad: Lenta'
-            },
-            {
-                id: 'agujero', name: 'Agujero Negro', emoji: '🕳️', price: 150, implemented: true,
-                desc: 'Agujero negro en el centro que atrae todo.',
-                features: ['🕳️ Agujero negro', '✨ Particulas', '🌀 Distorsion', '⬛ Oscuridad'],
-                physics: 'Atraccion: Constante | Radio: Infinito'
-            },
-            {
-                id: 'agua', name: 'Agua', emoji: '🌊', price: 60, implemented: true,
-                desc: 'Mapa subacuatico. Los ragdolls flotan y hay burbujas.',
-                features: ['🫧 Burbujas', '🌊 Olas', '🐠 Peces', '🪸 Corales'],
-                physics: 'Gravedad: 0.2 | Flotacion: SI'
-            },
-            {
-                id: 'lava', name: 'Lava', emoji: '🌋', price: 80, implemented: true,
-                desc: 'Piso de lava burbujeante que quema al contacto.',
-                features: ['🔥 Lava', '💨 Vapor', '🪨 Rocas', '🟠 Cielo naranja'],
-                physics: 'Piso: Lava | Dano: Continuo'
-            },
-            {
-                id: 'hielo', name: 'Hielo', emoji: '❄️', price: 70, implemented: true,
-                desc: 'Mundo congelado con piso resbaloso y copos de nieve.',
-                features: ['❄️ Nieve', '🧊 Hielo', '⛄ Nevado', '💨 Ventisca'],
-                physics: 'Friccion: 0.1 | Resbaloso'
-            },
-            {
-                id: 'desierto', name: 'Desierto', emoji: '🏜️', price: 0, implemented: true,
-                desc: 'Desierto caliente con dunas de arena y cactus.',
-                features: ['🌵 Cactus', '☀️ Sol fuerte', '🏜️ Dunas', '🦎 Lagartijas'],
-                physics: 'Gravedad: Normal | Calor visual'
-            },
-            {
-                id: 'playa', name: 'Playa', emoji: '🏖️', price: 0, implemented: true,
-                desc: 'Playa tropical con arena, agua y palmeras.',
-                features: ['🌴 Palmeras', '🦀 Cangrejos', '🌊 Olas', '🐚 Conchas'],
-                physics: 'Agua parcial | Arena: Friccion alta'
-            },
-            {
-                id: 'bosque', name: 'Bosque', emoji: '🌲', price: 40, implemented: true,
-                desc: 'Bosque denso con muchos arboles y sombras.',
-                features: ['🌲 Pinos', '🍄 Hongos', '🦌 Venados', '🍂 Hojas'],
-                physics: 'Gravedad: Normal | Sombras'
-            },
-            {
-                id: 'noche', name: 'Noche', emoji: '🌃', price: 45, implemented: true,
-                desc: 'Escenario nocturno con estrellas y luna.',
-                features: ['🌙 Luna', '⭐ Estrellas', '🦉 Buhos', '🌃 Oscuridad'],
-                physics: 'Gravedad: Normal | Visual: Oscuro'
-            },
-            {
-                id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 90, implemented: true,
-                desc: 'Ciudad con edificios, calles y luces.',
-                features: ['🏢 Edificios', '🚗 Carros', '🚦 Semaforos', '💡 Luces'],
-                physics: 'Gravedad: Normal | Obstaculos'
-            },
-            {
-                id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 55, implemented: true,
-                desc: 'Mapa con niebla densa que reduce visibilidad.',
-                features: ['🌫️ Niebla', '👻 Misterio', '🌲 Siluetas', '💨 Humedad'],
-                physics: 'Visibilidad: Baja | Atmosfera densa'
-            },
-            {
-                id: 'espacio', name: 'Espacio', emoji: '🚀', price: 120, implemented: true,
-                desc: 'Espacio exterior sin gravedad con estrellas.',
-                features: ['🌟 Estrellas', '🪐 Planetas', '☄️ Meteoros', '🛸 Naves'],
-                physics: 'Gravedad: 0 | Flotacion total'
-            },
-            {
-                id: 'arcoiris', name: 'Arcoiris', emoji: '🌈', price: 85, implemented: true,
-                desc: 'Mundo colorido con arcoiris permanente.',
-                features: ['🌈 Arcoiris', '☁️ Nubes rosa', '✨ Brillos', '🦄 Magico'],
-                physics: 'Gravedad: Normal | Visual: Colorido'
-            },
-
-            // PROPUESTAS NUEVAS
-            {
-                id: 'jungla', name: 'Jungla', emoji: '🌴', price: 80, implemented: false,
-                desc: 'Selva tropical densa con lianas, animales exoticos y lluvia.',
-                features: ['🌴 Palmeras', '🦜 Loros', '🐒 Monos', '🌧️ Lluvia tropical'],
-                physics: 'Lianas para columpiarse | Humedad'
-            },
-            {
-                id: 'oceano', name: 'Oceano Profundo', emoji: '🐋', price: 90, implemented: false,
-                desc: 'Fondo del mar con peces, medusas brillantes y presion.',
-                features: ['🐠 Peces', '🪼 Medusas', '🦈 Tiburones', '🫧 Burbujas'],
-                physics: 'Gravedad: 0.15 | Corrientes marinas'
-            },
-            {
-                id: 'apocalipsis', name: 'Apocalipsis', emoji: '☠️', price: 150, implemented: false,
-                desc: 'Mundo destruido con edificios en ruinas, fuego y cenizas.',
-                features: ['🏚️ Ruinas', '🔥 Fuego', '💀 Calaveras', '🌫️ Ceniza'],
-                physics: 'Gravedad: Normal | Escombros cayendo'
-            },
-            {
-                id: 'dulces', name: 'Mundo de Dulces', emoji: '🍭', price: 100, implemented: false,
-                desc: 'Todo hecho de caramelos, chocolate y gomitas.',
-                features: ['🍬 Caramelos', '🍫 Chocolate', '🧁 Cupcakes', '☁️ Nubes de algodon'],
-                physics: 'Piso pegajoso | Rebote en gomitas'
-            },
-            {
-                id: 'montanas', name: 'Montanas Nevadas', emoji: '🏔️', price: 85, implemented: false,
-                desc: 'Picos nevados con avalanchas ocasionales y viento fuerte.',
-                features: ['❄️ Nieve', '🌬️ Ventisca', '🏔️ Picos', '🦅 Aguilas'],
-                physics: 'Avalanchas aleatorias | Viento fuerte'
-            },
-            {
-                id: 'pantano', name: 'Pantano', emoji: '🐊', price: 70, implemented: false,
-                desc: 'Agua sucia, arboles muertos y niebla espesa.',
-                features: ['🐸 Ranas', '🐊 Cocodrilos', '🌫️ Niebla', '🦟 Mosquitos'],
-                physics: 'Agua viscosa | Movimiento lento'
-            },
-            {
-                id: 'cristales', name: 'Cueva de Cristales', emoji: '💎', price: 120, implemented: false,
-                desc: 'Cueva subterranea llena de cristales brillantes de colores.',
-                features: ['💎 Cristales', '✨ Brillos', '🦇 Murcielagos', '🌈 Reflejos'],
-                physics: 'Luz refractada | Eco de sonidos'
-            },
-            {
-                id: 'ruinas', name: 'Ruinas Antiguas', emoji: '🏛️', price: 110, implemented: false,
-                desc: 'Templo antiguo con columnas rotas, trampas y tesoros.',
-                features: ['🏺 Vasijas', '🪤 Trampas', '💰 Tesoros', '🐍 Serpientes'],
-                physics: 'Trampas de picos | Bloques que caen'
-            },
-            {
-                id: 'supertormenta', name: 'Supertormenta', emoji: '⛈️', price: 95, implemented: false,
-                desc: 'Tormenta extrema con rayos constantes, lluvia intensa y tornado.',
-                features: ['⚡ Rayos x3', '🌧️ Lluvia', '🌪️ Mini-tornados', '🌊 Inundacion'],
-                physics: 'Viento: Muy Alto | Dano: Continuo'
-            }
+            { id: 'normal', name: 'Normal', emoji: '🌳', price: 0, implemented: true,
+              desc: 'Escenario clasico con cielo azul, pasto verde y gravedad normal.',
+              features: ['🌳 Arboles', '🌸 Flores', '☀️ Sol', '☁️ Nubes'],
+              physics: 'Gravedad: 1.0 | Friccion: Normal' },
+            { id: 'volcan', name: 'Volcan', emoji: '🌋', price: 0, implemented: true,
+              desc: 'Volcan activo con lava cayendo, rocas voladoras y cielo rojo.',
+              features: ['🔥 Lava', '💨 Humo', '🪨 Rocas', '🔴 Cielo rojo'],
+              physics: 'Gravedad: 1.0 | Dano: Lava quema' },
+            { id: 'tornado', name: 'Tornado', emoji: '🌪️', price: 50, implemented: true,
+              desc: 'Tornado gigante en el centro que lanza todo lo que toca.',
+              features: ['🌪️ Tornado', '💨 Viento', '🍃 Hojas', '☁️ Cielo gris'],
+              physics: 'Vortice central | Empuje: Muy Alto' },
+            { id: 'rayos', name: 'Tormenta', emoji: '⚡', price: 50, implemented: true,
+              desc: 'Tormenta electrica con rayos frecuentes y lluvia intensa.',
+              features: ['⚡ Rayos', '🌧️ Lluvia', '🌩️ Nubes', '💨 Viento'],
+              physics: 'Rayos aleatorios | Dano: Electrico' },
+            { id: 'lunar', name: 'Luna', emoji: '🌙', price: 75, implemented: true,
+              desc: 'Superficie lunar con gravedad baja y cielo estrellado.',
+              features: ['🌙 Luna grande', '⭐ Estrellas', '🕳️ Crateres', '🌑 Cielo negro'],
+              physics: 'Gravedad: 0.3 | Saltos altos' },
+            { id: 'zombie', name: 'Zombie', emoji: '🧟', price: 100, implemented: true,
+              desc: 'Apocalipsis zombie. Los ragdolls persiguen con piel verde.',
+              features: ['🧟 Zombies', '🧠 Cerebros', '🌫️ Niebla', '🌲 Arboles muertos'],
+              physics: 'AI: Persigue | Velocidad: Lenta' },
+            { id: 'agujero', name: 'Agujero Negro', emoji: '🕳️', price: 150, implemented: true,
+              desc: 'Agujero negro en el centro que atrae todo.',
+              features: ['🕳️ Agujero negro', '✨ Particulas', '🌀 Distorsion', '⬛ Oscuridad'],
+              physics: 'Atraccion: Constante | Radio: Infinito' },
+            { id: 'agua', name: 'Agua', emoji: '🌊', price: 60, implemented: true,
+              desc: 'Mapa subacuatico. Los ragdolls flotan y hay burbujas.',
+              features: ['🫧 Burbujas', '🌊 Olas', '🐠 Peces', '🪸 Corales'],
+              physics: 'Gravedad: 0.2 | Flotacion: SI' },
+            { id: 'lava', name: 'Lava', emoji: '🔥', price: 80, implemented: true,
+              desc: 'Piso de lava burbujeante que quema al contacto.',
+              features: ['🔥 Lava', '💨 Vapor', '🪨 Rocas', '🟠 Cielo naranja'],
+              physics: 'Piso: Lava | Dano: Continuo' },
+            { id: 'hielo', name: 'Hielo', emoji: '❄️', price: 70, implemented: true,
+              desc: 'Mundo congelado con piso resbaloso y copos de nieve.',
+              features: ['❄️ Nieve', '🧊 Hielo', '⛄ Nevado', '💨 Ventisca'],
+              physics: 'Friccion: 0.1 | Resbaloso' },
+            { id: 'desierto', name: 'Desierto', emoji: '🏜️', price: 0, implemented: true,
+              desc: 'Desierto caliente con dunas de arena y cactus.',
+              features: ['🌵 Cactus', '☀️ Sol fuerte', '🏜️ Dunas', '🦎 Lagartijas'],
+              physics: 'Gravedad: Normal | Calor visual' },
+            { id: 'playa', name: 'Playa', emoji: '🏖️', price: 0, implemented: true,
+              desc: 'Playa tropical con arena, agua y palmeras.',
+              features: ['🌴 Palmeras', '🦀 Cangrejos', '🌊 Olas', '🐚 Conchas'],
+              physics: 'Agua parcial | Arena: Friccion alta' },
+            { id: 'bosque', name: 'Bosque', emoji: '🌲', price: 40, implemented: true,
+              desc: 'Bosque denso con muchos arboles y sombras.',
+              features: ['🌲 Pinos', '🍄 Hongos', '🦌 Venados', '🍂 Hojas'],
+              physics: 'Gravedad: Normal | Sombras' },
+            { id: 'noche', name: 'Noche', emoji: '🌃', price: 45, implemented: true,
+              desc: 'Escenario nocturno con estrellas y luna.',
+              features: ['🌙 Luna', '⭐ Estrellas', '🦉 Buhos', '🌃 Oscuridad'],
+              physics: 'Gravedad: Normal | Visual: Oscuro' },
+            { id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 90, implemented: true,
+              desc: 'Ciudad con edificios, calles y luces.',
+              features: ['🏢 Edificios', '🚗 Carros', '🚦 Semaforos', '💡 Luces'],
+              physics: 'Gravedad: Normal | Obstaculos' },
+            { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 55, implemented: true,
+              desc: 'Mapa con niebla densa que reduce visibilidad.',
+              features: ['🌫️ Niebla', '👻 Misterio', '🌲 Siluetas', '💨 Humedad'],
+              physics: 'Visibilidad: Baja | Atmosfera densa' },
+            { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 120, implemented: true,
+              desc: 'Espacio exterior sin gravedad con estrellas.',
+              features: ['🌟 Estrellas', '🪐 Planetas', '☄️ Meteoros', '🛸 Naves'],
+              physics: 'Gravedad: 0 | Flotacion total' },
+            { id: 'arcoiris', name: 'Arcoiris', emoji: '🌈', price: 85, implemented: true,
+              desc: 'Mundo colorido con arcoiris permanente.',
+              features: ['🌈 Arcoiris', '☁️ Nubes rosa', '✨ Brillos', '🦄 Magico'],
+              physics: 'Gravedad: Normal | Visual: Colorido' },
+            // PROPUESTAS
+            { id: 'jungla', name: 'Jungla', emoji: '🌴', price: 80, implemented: false,
+              desc: 'Selva tropical densa con lianas, animales exoticos y lluvia.',
+              features: ['🌴 Palmeras', '🦜 Loros', '🐒 Monos', '🌧️ Lluvia tropical'],
+              physics: 'Lianas para columpiarse | Humedad' },
+            { id: 'oceano', name: 'Oceano Profundo', emoji: '🐋', price: 90, implemented: false,
+              desc: 'Fondo del mar con peces, medusas brillantes y presion.',
+              features: ['🐠 Peces', '🪼 Medusas', '🦈 Tiburones', '🫧 Burbujas'],
+              physics: 'Gravedad: 0.15 | Corrientes marinas' },
+            { id: 'apocalipsis', name: 'Apocalipsis', emoji: '☠️', price: 150, implemented: false,
+              desc: 'Mundo destruido con edificios en ruinas, fuego y cenizas.',
+              features: ['🏚️ Ruinas', '🔥 Fuego', '💀 Calaveras', '🌫️ Ceniza'],
+              physics: 'Gravedad: Normal | Escombros cayendo' },
+            { id: 'dulces', name: 'Mundo de Dulces', emoji: '🍭', price: 100, implemented: false,
+              desc: 'Todo hecho de caramelos, chocolate y gomitas.',
+              features: ['🍬 Caramelos', '🍫 Chocolate', '🧁 Cupcakes', '☁️ Nubes de algodon'],
+              physics: 'Piso pegajoso | Rebote en gomitas' },
+            { id: 'montanas', name: 'Montanas Nevadas', emoji: '🏔️', price: 85, implemented: false,
+              desc: 'Picos nevados con avalanchas ocasionales y viento fuerte.',
+              features: ['❄️ Nieve', '🌬️ Ventisca', '🏔️ Picos', '🦅 Aguilas'],
+              physics: 'Avalanchas aleatorias | Viento fuerte' },
+            { id: 'pantano', name: 'Pantano', emoji: '🐊', price: 70, implemented: false,
+              desc: 'Agua sucia, arboles muertos y niebla espesa.',
+              features: ['🐸 Ranas', '🐊 Cocodrilos', '🌫️ Niebla', '🦟 Mosquitos'],
+              physics: 'Agua viscosa | Movimiento lento' },
+            { id: 'cristales', name: 'Cueva de Cristales', emoji: '💎', price: 120, implemented: false,
+              desc: 'Cueva subterranea llena de cristales brillantes de colores.',
+              features: ['💎 Cristales', '✨ Brillos', '🦇 Murcielagos', '🌈 Reflejos'],
+              physics: 'Luz refractada | Eco de sonidos' },
+            { id: 'ruinas', name: 'Ruinas Antiguas', emoji: '🏛️', price: 110, implemented: false,
+              desc: 'Templo antiguo con columnas rotas, trampas y tesoros.',
+              features: ['🏺 Vasijas', '🪤 Trampas', '💰 Tesoros', '🐍 Serpientes'],
+              physics: 'Trampas de picos | Bloques que caen' },
+            { id: 'supertormenta', name: 'Supertormenta', emoji: '⛈️', price: 95, implemented: false,
+              desc: 'Tormenta extrema con rayos constantes, lluvia intensa y tornado.',
+              features: ['⚡ Rayos x3', '🌧️ Lluvia', '🌪️ Mini-tornados', '🌊 Inundacion'],
+              physics: 'Viento: Muy Alto | Dano: Continuo' }
         ];
 
+        function drawWorld(worldId) {
+            const canvas = document.createElement('canvas');
+            canvas.width = W;
+            canvas.height = H;
+            const ctx = canvas.getContext('2d');
+
+            const groundY = H - 30;
+
+            // Dibujar segun el mundo
+            switch(worldId) {
+                case 'normal':
+                    // Cielo azul
+                    const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+                    skyGrad.addColorStop(0, '#87CEEB');
+                    skyGrad.addColorStop(1, '#E0F6FF');
+                    ctx.fillStyle = skyGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    // Sol
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(W - 50, 40, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nubes
+                    ctx.fillStyle = '#FFFFFF';
+                    drawCloud(ctx, 50, 30, 40);
+                    drawCloud(ctx, 150, 50, 30);
+                    drawCloud(ctx, 250, 25, 35);
+                    // Pasto
+                    ctx.fillStyle = '#228B22';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Arboles
+                    drawTree(ctx, 40, groundY);
+                    drawTree(ctx, 280, groundY);
+                    // Flores
+                    drawFlower(ctx, 100, groundY, '#FF69B4');
+                    drawFlower(ctx, 130, groundY, '#FFD700');
+                    drawFlower(ctx, 200, groundY, '#FF6347');
+                    break;
+
+                case 'volcan':
+                    // Cielo rojo
+                    const lavaSkGrad = ctx.createLinearGradient(0, 0, 0, H);
+                    lavaSkGrad.addColorStop(0, '#8B0000');
+                    lavaSkGrad.addColorStop(0.5, '#FF4500');
+                    lavaSkGrad.addColorStop(1, '#FF6600');
+                    ctx.fillStyle = lavaSkGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    // Volcan
+                    ctx.fillStyle = '#3d3d3d';
+                    ctx.beginPath();
+                    ctx.moveTo(W/2 - 80, H);
+                    ctx.lineTo(W/2 - 30, groundY - 60);
+                    ctx.lineTo(W/2 + 30, groundY - 60);
+                    ctx.lineTo(W/2 + 80, H);
+                    ctx.fill();
+                    // Crater
+                    ctx.fillStyle = '#FF4500';
+                    ctx.beginPath();
+                    ctx.ellipse(W/2, groundY - 55, 25, 10, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Lava cayendo
+                    ctx.fillStyle = '#FF6600';
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.arc(W/2 - 15 + i * 8, groundY - 40 + Math.random() * 30, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Rocas voladoras
+                    ctx.fillStyle = '#4a4a4a';
+                    ctx.beginPath();
+                    ctx.arc(80, 50, 8, 0, Math.PI * 2);
+                    ctx.arc(240, 70, 6, 0, Math.PI * 2);
+                    ctx.arc(180, 40, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Humo
+                    ctx.fillStyle = 'rgba(100,100,100,0.5)';
+                    drawCloud(ctx, W/2 - 20, 30, 25);
+                    drawCloud(ctx, W/2 + 10, 20, 20);
+                    // Piso lava
+                    ctx.fillStyle = '#FF4500';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'tornado':
+                    // Cielo gris tormentoso
+                    const tornadoSky = ctx.createLinearGradient(0, 0, 0, H);
+                    tornadoSky.addColorStop(0, '#2F2F2F');
+                    tornadoSky.addColorStop(1, '#5a5a5a');
+                    ctx.fillStyle = tornadoSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Nubes oscuras
+                    ctx.fillStyle = '#3a3a3a';
+                    drawCloud(ctx, 30, 20, 50);
+                    drawCloud(ctx, 120, 30, 40);
+                    drawCloud(ctx, 220, 15, 55);
+                    // Tornado
+                    ctx.fillStyle = 'rgba(100,100,100,0.7)';
+                    ctx.beginPath();
+                    ctx.moveTo(W/2 - 40, 0);
+                    ctx.quadraticCurveTo(W/2 - 50, H/2, W/2 - 15, H);
+                    ctx.lineTo(W/2 + 15, H);
+                    ctx.quadraticCurveTo(W/2 + 50, H/2, W/2 + 40, 0);
+                    ctx.fill();
+                    // Escombros en tornado
+                    ctx.fillStyle = '#654321';
+                    for (let i = 0; i < 8; i++) {
+                        const angle = i * 0.8;
+                        const r = 10 + i * 3;
+                        ctx.fillRect(W/2 + Math.cos(angle) * r - 3, 40 + i * 15, 6, 4);
+                    }
+                    // Piso
+                    ctx.fillStyle = '#4a4a3a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'rayos':
+                    // Cielo tormentoso
+                    const stormSky = ctx.createLinearGradient(0, 0, 0, H);
+                    stormSky.addColorStop(0, '#1a1a2e');
+                    stormSky.addColorStop(1, '#2d2d4a');
+                    ctx.fillStyle = stormSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Nubes
+                    ctx.fillStyle = '#3a3a4a';
+                    drawCloud(ctx, 40, 25, 50);
+                    drawCloud(ctx, 150, 20, 60);
+                    drawCloud(ctx, 260, 30, 45);
+                    // Rayos
+                    ctx.strokeStyle = '#FFFF00';
+                    ctx.lineWidth = 3;
+                    drawLightning(ctx, 80, 40, 120);
+                    drawLightning(ctx, 200, 30, 130);
+                    // Lluvia
+                    ctx.strokeStyle = 'rgba(150,150,255,0.5)';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 50; i++) {
+                        const x = Math.random() * W;
+                        const y = Math.random() * H;
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x - 2, y + 10);
+                        ctx.stroke();
+                    }
+                    // Piso mojado
+                    ctx.fillStyle = '#3a3a4a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'lunar':
+                    // Cielo negro con estrellas
+                    ctx.fillStyle = '#000011';
+                    ctx.fillRect(0, 0, W, H);
+                    // Estrellas
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 50; i++) {
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, Math.random() * (H - 40), 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Luna grande (Tierra vista desde la luna)
+                    ctx.fillStyle = '#4477BB';
+                    ctx.beginPath();
+                    ctx.arc(W - 60, 50, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#55AA55';
+                    ctx.beginPath();
+                    ctx.ellipse(W - 70, 45, 15, 10, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Superficie lunar gris
+                    ctx.fillStyle = '#606060';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Crateres
+                    ctx.fillStyle = '#404040';
+                    ctx.beginPath();
+                    ctx.ellipse(60, groundY + 12, 20, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(180, groundY + 15, 15, 6, 0, 0, Math.PI * 2);
+                    ctx.ellipse(280, groundY + 10, 18, 7, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'zombie':
+                    // Cielo verde enfermizo
+                    const zombieSky = ctx.createLinearGradient(0, 0, 0, H);
+                    zombieSky.addColorStop(0, '#1a2e1a');
+                    zombieSky.addColorStop(1, '#2d4a2d');
+                    ctx.fillStyle = zombieSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Luna roja
+                    ctx.fillStyle = '#8B0000';
+                    ctx.beginPath();
+                    ctx.arc(W - 50, 40, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Niebla
+                    ctx.fillStyle = 'rgba(50,80,50,0.4)';
+                    ctx.fillRect(0, groundY - 30, W, 40);
+                    // Arboles muertos
+                    drawDeadTree(ctx, 50, groundY);
+                    drawDeadTree(ctx, 270, groundY);
+                    // Tumbas
+                    ctx.fillStyle = '#4a4a4a';
+                    ctx.fillRect(120, groundY - 20, 15, 20);
+                    ctx.fillRect(180, groundY - 18, 12, 18);
+                    // Piso
+                    ctx.fillStyle = '#2a3a2a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'agujero':
+                    // Espacio distorsionado
+                    const bhSky = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W/2);
+                    bhSky.addColorStop(0, '#000000');
+                    bhSky.addColorStop(0.3, '#1a0033');
+                    bhSky.addColorStop(0.7, '#330066');
+                    bhSky.addColorStop(1, '#4a0080');
+                    ctx.fillStyle = bhSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Estrellas distorsionadas
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 30; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = 50 + Math.random() * 100;
+                        ctx.beginPath();
+                        ctx.arc(W/2 + Math.cos(angle) * dist, H/2 + Math.sin(angle) * dist, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Agujero negro central
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.arc(W/2, H/2, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Anillo de acrecion
+                    ctx.strokeStyle = '#FF6600';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.ellipse(W/2, H/2, 50, 15, 0.3, 0, Math.PI * 2);
+                    ctx.stroke();
+                    break;
+
+                case 'agua':
+                    // Fondo submarino
+                    const waterGrad = ctx.createLinearGradient(0, 0, 0, H);
+                    waterGrad.addColorStop(0, '#87CEEB');
+                    waterGrad.addColorStop(0.3, '#4a90c2');
+                    waterGrad.addColorStop(1, '#1a4a7a');
+                    ctx.fillStyle = waterGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    // Rayos de luz
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.beginPath();
+                    ctx.moveTo(100, 0);
+                    ctx.lineTo(80, H);
+                    ctx.lineTo(120, H);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(220, 0);
+                    ctx.lineTo(200, H);
+                    ctx.lineTo(240, H);
+                    ctx.fill();
+                    // Burbujas
+                    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 15; i++) {
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, Math.random() * H, 3 + Math.random() * 5, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    // Peces
+                    ctx.fillStyle = '#FF6B35';
+                    drawFish(ctx, 80, 60, 1);
+                    drawFish(ctx, 200, 100, -1);
+                    ctx.fillStyle = '#FFD700';
+                    drawFish(ctx, 150, 40, 1);
+                    // Arena
+                    ctx.fillStyle = '#D2B48C';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Algas
+                    ctx.strokeStyle = '#228B22';
+                    ctx.lineWidth = 3;
+                    drawSeaweed(ctx, 50, groundY);
+                    drawSeaweed(ctx, 280, groundY);
+                    break;
+
+                case 'lava':
+                    // Cielo de fuego
+                    const lavaSky = ctx.createLinearGradient(0, 0, 0, H);
+                    lavaSky.addColorStop(0, '#4a2a1a');
+                    lavaSky.addColorStop(0.5, '#8B0000');
+                    lavaSky.addColorStop(1, '#FF4500');
+                    ctx.fillStyle = lavaSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Rocas flotantes
+                    ctx.fillStyle = '#3a3a3a';
+                    ctx.beginPath();
+                    ctx.ellipse(80, 80, 25, 15, 0, 0, Math.PI * 2);
+                    ctx.ellipse(240, 60, 30, 12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Lava burbujeante
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(0, groundY, W, 30);
+                    ctx.fillStyle = '#FF4500';
+                    for (let i = 0; i < 8; i++) {
+                        ctx.beginPath();
+                        ctx.arc(30 + i * 40, groundY + 10, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Burbujas de lava
+                    ctx.fillStyle = '#FFAA00';
+                    for (let i = 0; i < 10; i++) {
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, groundY - 10 + Math.random() * 30, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+
+                case 'hielo':
+                    // Cielo helado
+                    const iceSky = ctx.createLinearGradient(0, 0, 0, H);
+                    iceSky.addColorStop(0, '#E0FFFF');
+                    iceSky.addColorStop(1, '#B0E0E6');
+                    ctx.fillStyle = iceSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Copos de nieve
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 30; i++) {
+                        drawSnowflake(ctx, Math.random() * W, Math.random() * H, 3);
+                    }
+                    // Montanas de hielo
+                    ctx.fillStyle = '#ADD8E6';
+                    ctx.beginPath();
+                    ctx.moveTo(0, groundY);
+                    ctx.lineTo(60, groundY - 50);
+                    ctx.lineTo(120, groundY);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(200, groundY);
+                    ctx.lineTo(280, groundY - 60);
+                    ctx.lineTo(W, groundY);
+                    ctx.fill();
+                    // Piso de hielo
+                    ctx.fillStyle = '#87CEEB';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Reflejos
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.fillRect(20, groundY + 5, 80, 5);
+                    ctx.fillRect(150, groundY + 8, 60, 4);
+                    break;
+
+                case 'desierto':
+                    // Cielo desertico
+                    const desertSky = ctx.createLinearGradient(0, 0, 0, H);
+                    desertSky.addColorStop(0, '#FFD700');
+                    desertSky.addColorStop(0.5, '#FFA500');
+                    desertSky.addColorStop(1, '#FF8C00');
+                    ctx.fillStyle = desertSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Sol intenso
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.beginPath();
+                    ctx.arc(W - 50, 40, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Dunas
+                    ctx.fillStyle = '#D2691E';
+                    ctx.beginPath();
+                    ctx.moveTo(0, groundY + 10);
+                    ctx.quadraticCurveTo(80, groundY - 20, 160, groundY + 10);
+                    ctx.quadraticCurveTo(240, groundY - 15, W, groundY + 5);
+                    ctx.lineTo(W, H);
+                    ctx.lineTo(0, H);
+                    ctx.fill();
+                    // Arena
+                    ctx.fillStyle = '#F4A460';
+                    ctx.fillRect(0, groundY + 10, W, 20);
+                    // Cactus
+                    drawCactus(ctx, 60, groundY);
+                    drawCactus(ctx, 250, groundY - 5);
+                    break;
+
+                case 'playa':
+                    // Cielo tropical
+                    const beachSky = ctx.createLinearGradient(0, 0, 0, H);
+                    beachSky.addColorStop(0, '#40E0D0');
+                    beachSky.addColorStop(0.6, '#48D1CC');
+                    beachSky.addColorStop(1, '#87CEEB');
+                    ctx.fillStyle = beachSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Sol
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(W - 50, 40, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mar
+                    ctx.fillStyle = '#1E90FF';
+                    ctx.fillRect(W * 0.6, groundY - 20, W * 0.4, 50);
+                    // Olas
+                    ctx.fillStyle = '#87CEEB';
+                    ctx.beginPath();
+                    ctx.moveTo(W * 0.6, groundY - 10);
+                    ctx.quadraticCurveTo(W * 0.7, groundY - 20, W * 0.8, groundY - 10);
+                    ctx.quadraticCurveTo(W * 0.9, groundY, W, groundY - 10);
+                    ctx.lineTo(W, groundY - 20);
+                    ctx.lineTo(W * 0.6, groundY - 20);
+                    ctx.fill();
+                    // Arena
+                    ctx.fillStyle = '#F4A460';
+                    ctx.fillRect(0, groundY, W * 0.65, 30);
+                    // Palmera
+                    drawPalmTree(ctx, 50, groundY);
+                    drawPalmTree(ctx, 120, groundY);
+                    // Cangrejo
+                    ctx.fillStyle = '#FF6347';
+                    ctx.beginPath();
+                    ctx.ellipse(200, groundY + 10, 8, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'bosque':
+                    // Cielo entre arboles
+                    const forestSky = ctx.createLinearGradient(0, 0, 0, H);
+                    forestSky.addColorStop(0, '#228B22');
+                    forestSky.addColorStop(0.3, '#006400');
+                    forestSky.addColorStop(1, '#004400');
+                    ctx.fillStyle = forestSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Rayos de luz
+                    ctx.fillStyle = 'rgba(255,255,200,0.1)';
+                    ctx.beginPath();
+                    ctx.moveTo(80, 0);
+                    ctx.lineTo(60, H);
+                    ctx.lineTo(100, H);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(200, 0);
+                    ctx.lineTo(180, H);
+                    ctx.lineTo(220, H);
+                    ctx.fill();
+                    // Arboles
+                    for (let i = 0; i < 5; i++) {
+                        drawPineTree(ctx, 30 + i * 70, groundY, 0.8 + Math.random() * 0.4);
+                    }
+                    // Piso con hojas
+                    ctx.fillStyle = '#3a2a1a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Hongos
+                    drawMushroom(ctx, 100, groundY);
+                    drawMushroom(ctx, 220, groundY);
+                    break;
+
+                case 'noche':
+                    // Cielo nocturno
+                    ctx.fillStyle = '#0a0a1a';
+                    ctx.fillRect(0, 0, W, H);
+                    // Estrellas
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 60; i++) {
+                        const size = Math.random() > 0.9 ? 2 : 1;
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, Math.random() * (H - 40), size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Luna
+                    ctx.fillStyle = '#F0E68C';
+                    ctx.beginPath();
+                    ctx.arc(W - 60, 50, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#0a0a1a';
+                    ctx.beginPath();
+                    ctx.arc(W - 50, 45, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Silueta de arboles
+                    ctx.fillStyle = '#111111';
+                    drawTree(ctx, 40, groundY);
+                    drawTree(ctx, 150, groundY);
+                    drawTree(ctx, 260, groundY);
+                    // Piso oscuro
+                    ctx.fillStyle = '#1a1a2a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'ciudad':
+                    // Cielo urbano
+                    const citySky = ctx.createLinearGradient(0, 0, 0, H);
+                    citySky.addColorStop(0, '#4a5568');
+                    citySky.addColorStop(1, '#2d3748');
+                    ctx.fillStyle = citySky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Edificios
+                    ctx.fillStyle = '#1a202c';
+                    ctx.fillRect(20, groundY - 80, 40, 80);
+                    ctx.fillRect(70, groundY - 60, 50, 60);
+                    ctx.fillRect(130, groundY - 100, 45, 100);
+                    ctx.fillRect(185, groundY - 70, 35, 70);
+                    ctx.fillRect(230, groundY - 90, 50, 90);
+                    // Ventanas
+                    ctx.fillStyle = '#FFD700';
+                    for (let b = 0; b < 5; b++) {
+                        const bx = [30, 80, 140, 195, 245][b];
+                        const bh = [80, 60, 100, 70, 90][b];
+                        for (let y = groundY - bh + 10; y < groundY - 10; y += 15) {
+                            for (let x = bx; x < bx + 25; x += 12) {
+                                if (Math.random() > 0.3) {
+                                    ctx.fillRect(x, y, 6, 8);
+                                }
+                            }
+                        }
+                    }
+                    // Calle
+                    ctx.fillStyle = '#2a2a2a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Lineas de calle
+                    ctx.fillStyle = '#FFFF00';
+                    for (let x = 20; x < W; x += 40) {
+                        ctx.fillRect(x, groundY + 13, 20, 4);
+                    }
+                    break;
+
+                case 'niebla':
+                    // Fondo gris
+                    const fogBg = ctx.createLinearGradient(0, 0, 0, H);
+                    fogBg.addColorStop(0, '#A0A0A0');
+                    fogBg.addColorStop(1, '#606060');
+                    ctx.fillStyle = fogBg;
+                    ctx.fillRect(0, 0, W, H);
+                    // Siluetas de arboles
+                    ctx.fillStyle = 'rgba(60,60,60,0.5)';
+                    drawTree(ctx, 50, groundY);
+                    drawTree(ctx, 150, groundY);
+                    drawTree(ctx, 250, groundY);
+                    // Capas de niebla
+                    ctx.fillStyle = 'rgba(180,180,180,0.4)';
+                    ctx.fillRect(0, 40, W, 30);
+                    ctx.fillStyle = 'rgba(200,200,200,0.5)';
+                    ctx.fillRect(0, 90, W, 40);
+                    ctx.fillStyle = 'rgba(220,220,220,0.6)';
+                    ctx.fillRect(0, groundY - 20, W, 30);
+                    // Piso
+                    ctx.fillStyle = '#4a4a4a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'espacio':
+                    // Espacio profundo
+                    ctx.fillStyle = '#000022';
+                    ctx.fillRect(0, 0, W, H);
+                    // Estrellas
+                    for (let i = 0; i < 80; i++) {
+                        const brightness = Math.random();
+                        ctx.fillStyle = `rgba(255,255,255,${0.3 + brightness * 0.7})`;
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, Math.random() * H, brightness > 0.9 ? 2 : 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Planeta
+                    ctx.fillStyle = '#8B4513';
+                    ctx.beginPath();
+                    ctx.arc(80, 60, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Anillo del planeta
+                    ctx.strokeStyle = '#D2691E';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.ellipse(80, 60, 40, 10, 0.2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    // Nebulosa
+                    const nebula = ctx.createRadialGradient(W - 80, 100, 0, W - 80, 100, 60);
+                    nebula.addColorStop(0, 'rgba(100,0,150,0.3)');
+                    nebula.addColorStop(1, 'transparent');
+                    ctx.fillStyle = nebula;
+                    ctx.fillRect(0, 0, W, H);
+                    // Nave espacial
+                    ctx.fillStyle = '#CCCCCC';
+                    ctx.beginPath();
+                    ctx.moveTo(W/2 - 15, H/2);
+                    ctx.lineTo(W/2, H/2 - 8);
+                    ctx.lineTo(W/2 + 15, H/2);
+                    ctx.lineTo(W/2, H/2 + 5);
+                    ctx.fill();
+                    break;
+
+                case 'arcoiris':
+                    // Cielo con gradiente de colores
+                    const rainbowSky = ctx.createLinearGradient(0, 0, 0, H);
+                    rainbowSky.addColorStop(0, '#FFB6C1');
+                    rainbowSky.addColorStop(1, '#E6E6FA');
+                    ctx.fillStyle = rainbowSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Arcoiris
+                    const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#8F00FF'];
+                    for (let i = 0; i < 7; i++) {
+                        ctx.strokeStyle = colors[i];
+                        ctx.lineWidth = 8;
+                        ctx.beginPath();
+                        ctx.arc(W/2, H + 20, 120 - i * 10, Math.PI, 0);
+                        ctx.stroke();
+                    }
+                    // Nubes rosadas
+                    ctx.fillStyle = '#FFB6C1';
+                    drawCloud(ctx, 40, 30, 35);
+                    drawCloud(ctx, 260, 40, 40);
+                    // Brillos
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 20; i++) {
+                        drawSparkle(ctx, Math.random() * W, Math.random() * (H - 40));
+                    }
+                    // Piso colorido
+                    ctx.fillStyle = '#90EE90';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                // PROPUESTAS
+                case 'jungla':
+                    const jungleSky = ctx.createLinearGradient(0, 0, 0, H);
+                    jungleSky.addColorStop(0, '#228B22');
+                    jungleSky.addColorStop(1, '#006400');
+                    ctx.fillStyle = jungleSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Lianas
+                    ctx.strokeStyle = '#2E8B57';
+                    ctx.lineWidth = 3;
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(40 + i * 70, 0);
+                        ctx.quadraticCurveTo(50 + i * 70 + Math.random() * 20, H/2, 30 + i * 70, H);
+                        ctx.stroke();
+                    }
+                    // Palmeras
+                    drawPalmTree(ctx, 60, groundY);
+                    drawPalmTree(ctx, 200, groundY);
+                    // Loro
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.ellipse(150, 50, 8, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#0000FF';
+                    ctx.beginPath();
+                    ctx.ellipse(155, 55, 5, 8, 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Piso
+                    ctx.fillStyle = '#3a2a1a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'oceano':
+                    const oceanGrad = ctx.createLinearGradient(0, 0, 0, H);
+                    oceanGrad.addColorStop(0, '#1E90FF');
+                    oceanGrad.addColorStop(0.5, '#0000CD');
+                    oceanGrad.addColorStop(1, '#000080');
+                    ctx.fillStyle = oceanGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    // Rayos de luz
+                    ctx.fillStyle = 'rgba(100,150,255,0.1)';
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(60 + i * 100, 0);
+                        ctx.lineTo(40 + i * 100, H);
+                        ctx.lineTo(80 + i * 100, H);
+                        ctx.fill();
+                    }
+                    // Medusas
+                    ctx.fillStyle = 'rgba(255,100,255,0.6)';
+                    drawJellyfish(ctx, 80, 60);
+                    drawJellyfish(ctx, 220, 90);
+                    // Ballena
+                    ctx.fillStyle = '#4169E1';
+                    ctx.beginPath();
+                    ctx.ellipse(W/2, H/2 + 20, 50, 25, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(W/2 + 45, H/2 + 20);
+                    ctx.lineTo(W/2 + 70, H/2 + 5);
+                    ctx.lineTo(W/2 + 70, H/2 + 35);
+                    ctx.fill();
+                    // Arena
+                    ctx.fillStyle = '#D2B48C';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'apocalipsis':
+                    const apoSky = ctx.createLinearGradient(0, 0, 0, H);
+                    apoSky.addColorStop(0, '#8B0000');
+                    apoSky.addColorStop(0.5, '#2F4F4F');
+                    apoSky.addColorStop(1, '#1C1C1C');
+                    ctx.fillStyle = apoSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Cenizas cayendo
+                    ctx.fillStyle = 'rgba(150,150,150,0.5)';
+                    for (let i = 0; i < 40; i++) {
+                        ctx.beginPath();
+                        ctx.arc(Math.random() * W, Math.random() * H, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    // Edificios destruidos
+                    ctx.fillStyle = '#2a2a2a';
+                    ctx.fillRect(30, groundY - 60, 35, 60);
+                    ctx.fillRect(80, groundY - 40, 30, 40);
+                    ctx.fillRect(180, groundY - 70, 40, 70);
+                    ctx.fillRect(240, groundY - 50, 35, 50);
+                    // Escombros
+                    ctx.fillStyle = '#3a3a3a';
+                    ctx.beginPath();
+                    ctx.moveTo(30, groundY - 60);
+                    ctx.lineTo(50, groundY - 80);
+                    ctx.lineTo(65, groundY - 60);
+                    ctx.fill();
+                    // Fuego
+                    ctx.fillStyle = '#FF4500';
+                    ctx.beginPath();
+                    ctx.arc(100, groundY - 10, 15, 0, Math.PI * 2);
+                    ctx.arc(260, groundY - 8, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Piso
+                    ctx.fillStyle = '#1a1a1a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'dulces':
+                    const candySky = ctx.createLinearGradient(0, 0, 0, H);
+                    candySky.addColorStop(0, '#FFB6C1');
+                    candySky.addColorStop(1, '#FF69B4');
+                    ctx.fillStyle = candySky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Nubes de algodon
+                    ctx.fillStyle = '#FFFFFF';
+                    drawCloud(ctx, 50, 30, 35);
+                    drawCloud(ctx, 180, 50, 40);
+                    drawCloud(ctx, 280, 25, 30);
+                    // Paletas
+                    drawLollipop(ctx, 80, groundY, '#FF0000');
+                    drawLollipop(ctx, 200, groundY, '#00FF00');
+                    drawLollipop(ctx, 280, groundY, '#0000FF');
+                    // Cupcakes
+                    ctx.fillStyle = '#8B4513';
+                    ctx.fillRect(130, groundY - 20, 30, 20);
+                    ctx.fillStyle = '#FF69B4';
+                    ctx.beginPath();
+                    ctx.arc(145, groundY - 25, 18, Math.PI, 0);
+                    ctx.fill();
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.arc(145, groundY - 40, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Piso de galleta
+                    ctx.fillStyle = '#D2691E';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Chispas de chocolate
+                    ctx.fillStyle = '#3a1a0a';
+                    for (let i = 0; i < 15; i++) {
+                        ctx.fillRect(Math.random() * W, groundY + Math.random() * 20, 4, 2);
+                    }
+                    break;
+
+                case 'montanas':
+                    const mountSky = ctx.createLinearGradient(0, 0, 0, H);
+                    mountSky.addColorStop(0, '#87CEEB');
+                    mountSky.addColorStop(1, '#B0C4DE');
+                    ctx.fillStyle = mountSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Montanas de fondo
+                    ctx.fillStyle = '#708090';
+                    ctx.beginPath();
+                    ctx.moveTo(0, groundY);
+                    ctx.lineTo(80, groundY - 100);
+                    ctx.lineTo(160, groundY - 40);
+                    ctx.lineTo(240, groundY - 120);
+                    ctx.lineTo(W, groundY - 60);
+                    ctx.lineTo(W, groundY);
+                    ctx.fill();
+                    // Nieve en picos
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.moveTo(60, groundY - 80);
+                    ctx.lineTo(80, groundY - 100);
+                    ctx.lineTo(100, groundY - 80);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(220, groundY - 100);
+                    ctx.lineTo(240, groundY - 120);
+                    ctx.lineTo(260, groundY - 100);
+                    ctx.fill();
+                    // Copos de nieve
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 20; i++) {
+                        drawSnowflake(ctx, Math.random() * W, Math.random() * H, 2);
+                    }
+                    // Aguila
+                    ctx.fillStyle = '#3a2a1a';
+                    ctx.beginPath();
+                    ctx.moveTo(150, 40);
+                    ctx.lineTo(140, 45);
+                    ctx.lineTo(150, 43);
+                    ctx.lineTo(160, 45);
+                    ctx.fill();
+                    // Piso nevado
+                    ctx.fillStyle = '#F0F8FF';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'pantano':
+                    const swampSky = ctx.createLinearGradient(0, 0, 0, H);
+                    swampSky.addColorStop(0, '#556B2F');
+                    swampSky.addColorStop(1, '#2F4F4F');
+                    ctx.fillStyle = swampSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Niebla
+                    ctx.fillStyle = 'rgba(100,120,100,0.4)';
+                    ctx.fillRect(0, 50, W, 40);
+                    ctx.fillRect(0, groundY - 30, W, 40);
+                    // Arboles muertos
+                    drawDeadTree(ctx, 50, groundY - 10);
+                    drawDeadTree(ctx, 250, groundY - 10);
+                    // Agua sucia
+                    ctx.fillStyle = '#4a5a3a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Nenufares
+                    ctx.fillStyle = '#228B22';
+                    ctx.beginPath();
+                    ctx.ellipse(100, groundY + 10, 15, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(200, groundY + 15, 12, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cocodrilo
+                    ctx.fillStyle = '#2F4F4F';
+                    ctx.beginPath();
+                    ctx.ellipse(150, groundY + 8, 25, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.arc(170, groundY + 5, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'cristales':
+                    const crystalBg = ctx.createLinearGradient(0, 0, W, H);
+                    crystalBg.addColorStop(0, '#1a1a3a');
+                    crystalBg.addColorStop(0.5, '#2a2a5a');
+                    crystalBg.addColorStop(1, '#1a1a3a');
+                    ctx.fillStyle = crystalBg;
+                    ctx.fillRect(0, 0, W, H);
+                    // Cristales
+                    drawCrystal(ctx, 50, groundY, 40, '#FF69B4');
+                    drawCrystal(ctx, 120, groundY, 55, '#00FFFF');
+                    drawCrystal(ctx, 180, groundY, 35, '#9400D3');
+                    drawCrystal(ctx, 240, groundY, 50, '#00FF00');
+                    drawCrystal(ctx, 290, groundY, 30, '#FFD700');
+                    // Brillos
+                    ctx.fillStyle = '#FFFFFF';
+                    for (let i = 0; i < 15; i++) {
+                        drawSparkle(ctx, Math.random() * W, Math.random() * (H - 40));
+                    }
+                    // Piso de cueva
+                    ctx.fillStyle = '#2a2a3a';
+                    ctx.fillRect(0, groundY, W, 30);
+                    // Estalactitas arriba
+                    ctx.fillStyle = '#3a3a4a';
+                    for (let x = 20; x < W; x += 50) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 10, 0);
+                        ctx.lineTo(x, 20 + Math.random() * 20);
+                        ctx.lineTo(x + 10, 0);
+                        ctx.fill();
+                    }
+                    break;
+
+                case 'ruinas':
+                    const ruinsSky = ctx.createLinearGradient(0, 0, 0, H);
+                    ruinsSky.addColorStop(0, '#D2B48C');
+                    ruinsSky.addColorStop(1, '#8B7355');
+                    ctx.fillStyle = ruinsSky;
+                    ctx.fillRect(0, 0, W, H);
+                    // Columnas
+                    ctx.fillStyle = '#C0C0C0';
+                    // Columna izquierda (rota)
+                    ctx.fillRect(40, groundY - 70, 20, 70);
+                    ctx.beginPath();
+                    ctx.arc(50, groundY - 70, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Columna derecha
+                    ctx.fillRect(250, groundY - 90, 20, 90);
+                    ctx.beginPath();
+                    ctx.arc(260, groundY - 90, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Techo caido
+                    ctx.fillStyle = '#A0A0A0';
+                    ctx.beginPath();
+                    ctx.moveTo(80, groundY - 40);
+                    ctx.lineTo(120, groundY - 60);
+                    ctx.lineTo(160, groundY - 20);
+                    ctx.lineTo(80, groundY - 20);
+                    ctx.fill();
+                    // Vasija
+                    ctx.fillStyle = '#8B4513';
+                    ctx.beginPath();
+                    ctx.ellipse(180, groundY - 10, 15, 20, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#654321';
+                    ctx.beginPath();
+                    ctx.ellipse(180, groundY - 25, 10, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Piso de piedra
+                    ctx.fillStyle = '#696969';
+                    ctx.fillRect(0, groundY, W, 30);
+                    break;
+
+                case 'supertormenta':
+                    const stormGrad = ctx.createLinearGradient(0, 0, 0, H);
+                    stormGrad.addColorStop(0, '#1a1a2e');
+                    stormGrad.addColorStop(1, '#2a2a3e');
+                    ctx.fillStyle = stormGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    // Nubes muy oscuras
+                    ctx.fillStyle = '#2a2a3a';
+                    drawCloud(ctx, 20, 15, 60);
+                    drawCloud(ctx, 120, 25, 70);
+                    drawCloud(ctx, 240, 10, 55);
+                    // Muchos rayos
+                    ctx.strokeStyle = '#FFFF00';
+                    ctx.lineWidth = 3;
+                    drawLightning(ctx, 50, 30, 100);
+                    drawLightning(ctx, 120, 40, 90);
+                    drawLightning(ctx, 200, 35, 110);
+                    drawLightning(ctx, 280, 45, 85);
+                    // Lluvia intensa
+                    ctx.strokeStyle = 'rgba(150,150,255,0.7)';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 80; i++) {
+                        const x = Math.random() * W;
+                        const y = Math.random() * H;
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x - 5, y + 15);
+                        ctx.stroke();
+                    }
+                    // Inundacion
+                    ctx.fillStyle = 'rgba(50,100,150,0.6)';
+                    ctx.fillRect(0, groundY - 10, W, 40);
+                    // Mini tornado
+                    ctx.fillStyle = 'rgba(100,100,100,0.5)';
+                    ctx.beginPath();
+                    ctx.moveTo(160, 60);
+                    ctx.quadraticCurveTo(150, groundY/2, 155, groundY);
+                    ctx.lineTo(175, groundY);
+                    ctx.quadraticCurveTo(180, groundY/2, 170, 60);
+                    ctx.fill();
+                    break;
+
+                default:
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(0, groundY, W, 30);
+            }
+
+            return canvas;
+        }
+
+        // Helper functions
+        function drawCloud(ctx, x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.4, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.8, y, size * 0.45, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawTree(ctx, x, y) {
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(x - 5, y - 40, 10, 40);
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.arc(x, y - 50, 25, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawPineTree(ctx, x, y, scale = 1) {
+            ctx.fillStyle = '#3a2a1a';
+            ctx.fillRect(x - 4 * scale, y - 30 * scale, 8 * scale, 30 * scale);
+            ctx.fillStyle = '#006400';
+            ctx.beginPath();
+            ctx.moveTo(x, y - 80 * scale);
+            ctx.lineTo(x - 25 * scale, y - 30 * scale);
+            ctx.lineTo(x + 25 * scale, y - 30 * scale);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x, y - 60 * scale);
+            ctx.lineTo(x - 20 * scale, y - 20 * scale);
+            ctx.lineTo(x + 20 * scale, y - 20 * scale);
+            ctx.fill();
+        }
+
+        function drawDeadTree(ctx, x, y) {
+            ctx.fillStyle = '#3a3a3a';
+            ctx.fillRect(x - 4, y - 50, 8, 50);
+            ctx.strokeStyle = '#3a3a3a';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x, y - 40);
+            ctx.lineTo(x - 20, y - 55);
+            ctx.moveTo(x, y - 30);
+            ctx.lineTo(x + 18, y - 45);
+            ctx.moveTo(x, y - 20);
+            ctx.lineTo(x - 15, y - 30);
+            ctx.stroke();
+        }
+
+        function drawPalmTree(ctx, x, y) {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(x - 5, y - 60, 10, 60);
+            ctx.fillStyle = '#228B22';
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.ellipse(x + Math.cos(angle) * 25, y - 65 + Math.sin(angle) * 10, 30, 8, angle, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // Cocos
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(x - 5, y - 55, 5, 0, Math.PI * 2);
+            ctx.arc(x + 5, y - 58, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawFlower(ctx, x, y, color) {
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(x - 1, y - 12, 2, 12);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawCactus(ctx, x, y) {
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(x - 8, y - 40, 16, 40);
+            ctx.fillRect(x - 20, y - 30, 12, 8);
+            ctx.fillRect(x - 20, y - 30, 8, 20);
+            ctx.fillRect(x + 8, y - 25, 12, 8);
+            ctx.fillRect(x + 12, y - 25, 8, 15);
+        }
+
+        function drawFish(ctx, x, y, dir) {
+            ctx.beginPath();
+            ctx.ellipse(x, y, 12, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x - 12 * dir, y);
+            ctx.lineTo(x - 20 * dir, y - 6);
+            ctx.lineTo(x - 20 * dir, y + 6);
+            ctx.fill();
+        }
+
+        function drawSeaweed(ctx, x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(x + 10, y - 20, x, y - 40);
+            ctx.quadraticCurveTo(x - 10, y - 60, x + 5, y - 80);
+            ctx.stroke();
+        }
+
+        function drawSnowflake(ctx, x, y, size) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
+            }
+            ctx.stroke();
+            ctx.fill();
+        }
+
+        function drawLightning(ctx, x, startY, length) {
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            let currentY = startY;
+            while (currentY < startY + length) {
+                const nextY = currentY + 10 + Math.random() * 15;
+                const nextX = x + (Math.random() - 0.5) * 20;
+                ctx.lineTo(nextX, nextY);
+                x = nextX;
+                currentY = nextY;
+            }
+            ctx.stroke();
+        }
+
+        function drawMushroom(ctx, x, y) {
+            ctx.fillStyle = '#F5F5DC';
+            ctx.fillRect(x - 3, y - 10, 6, 10);
+            ctx.fillStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.arc(x, y - 12, 10, Math.PI, 0);
+            ctx.fill();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(x - 4, y - 15, 2, 0, Math.PI * 2);
+            ctx.arc(x + 3, y - 13, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawJellyfish(ctx, x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 15, Math.PI, 0);
+            ctx.fill();
+            ctx.strokeStyle = ctx.fillStyle;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x - 10 + i * 5, y);
+                ctx.quadraticCurveTo(x - 8 + i * 5, y + 15, x - 10 + i * 5, y + 25);
+                ctx.stroke();
+            }
+        }
+
+        function drawLollipop(ctx, x, y, color) {
+            ctx.fillStyle = '#F5F5DC';
+            ctx.fillRect(x - 2, y - 50, 4, 50);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y - 55, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y - 55, 10, 0, Math.PI);
+            ctx.stroke();
+        }
+
+        function drawCrystal(ctx, x, y, height, color) {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(x, y - height);
+            ctx.lineTo(x - 12, y);
+            ctx.lineTo(x + 12, y);
+            ctx.fill();
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.moveTo(x - 2, y - height + 5);
+            ctx.lineTo(x - 8, y - 5);
+            ctx.lineTo(x - 2, y - 5);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawSparkle(ctx, x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - 3);
+            ctx.lineTo(x, y + 3);
+            ctx.moveTo(x - 3, y);
+            ctx.lineTo(x + 3, y);
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Generate cards
         const implementedGrid = document.getElementById('implemented-grid');
         const pendingGrid = document.getElementById('pending-grid');
 
@@ -302,25 +1366,30 @@
             const card = document.createElement('div');
             card.className = `world-card ${world.implemented ? 'implemented' : 'pending'}`;
 
-            const previewClass = `preview-${world.id}`;
+            const preview = document.createElement('div');
+            preview.className = 'world-preview';
+            preview.appendChild(drawWorld(world.id));
 
-            card.innerHTML = `
-                <div class="world-preview ${previewClass}">
-                    <span class="emoji">${world.emoji}</span>
+            const info = document.createElement('div');
+            info.className = 'world-info';
+            info.innerHTML = `
+                <div class="world-header">
+                    <span class="world-emoji">${world.emoji}</span>
+                    <span class="world-name">${world.name}</span>
+                    <span class="world-status ${world.implemented ? 'status-done' : 'status-pending'}">
+                        ${world.implemented ? 'OK' : 'NUEVO'}
+                    </span>
                 </div>
-                <div class="world-info">
-                    <div class="world-name">${world.name}</div>
-                    <div class="world-status ${world.implemented ? 'status-done' : 'status-pending'}">
-                        ${world.implemented ? 'IMPLEMENTADO' : 'PROPUESTA'}
-                    </div>
-                    <div class="world-price">${world.price === 0 ? 'GRATIS' : '💎 ' + world.price}</div>
-                    <div class="world-desc">${world.desc}</div>
-                    <div class="world-features">
-                        ${world.features.map(f => `<span class="feature">${f}</span>`).join('')}
-                    </div>
-                    <div class="world-physics">${world.physics}</div>
+                <div class="world-price">${world.price === 0 ? 'GRATIS' : '💎 ' + world.price}</div>
+                <div class="world-desc">${world.desc}</div>
+                <div class="world-features">
+                    ${world.features.map(f => `<span class="feature">${f}</span>`).join('')}
                 </div>
+                <div class="world-physics">${world.physics}</div>
             `;
+
+            card.appendChild(preview);
+            card.appendChild(info);
 
             if (world.implemented) {
                 implementedGrid.appendChild(card);
