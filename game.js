@@ -2196,6 +2196,42 @@ function playBurnSound() {
     } catch (e) {}
 }
 
+// Dibujar cangrejo decorativo (fondo - NPCs no lo tocan)
+function drawCrab(graphics, x, y, color, scale = 1) {
+    const s = scale;
+    // Cuerpo
+    graphics.fillStyle(color, 1);
+    graphics.fillEllipse(x, y, 12 * s, 8 * s);
+    // Ojos (pequeños palitos con bolitas)
+    graphics.fillStyle(0x000000, 1);
+    graphics.fillCircle(x - 5 * s, y - 8 * s, 2 * s);
+    graphics.fillCircle(x + 5 * s, y - 8 * s, 2 * s);
+    // Palitos de ojos
+    graphics.lineStyle(1.5 * s, color, 1);
+    graphics.lineBetween(x - 4 * s, y - 3 * s, x - 5 * s, y - 7 * s);
+    graphics.lineBetween(x + 4 * s, y - 3 * s, x + 5 * s, y - 7 * s);
+    // Pinzas (animadas)
+    const pinzaAnim = Math.sin(Date.now()/300) * 0.3;
+    graphics.fillStyle(color, 1);
+    graphics.fillEllipse(x - 18 * s, y - 3 * s + pinzaAnim * 2, 8 * s, 5 * s);
+    graphics.fillEllipse(x + 18 * s, y - 3 * s - pinzaAnim * 2, 8 * s, 5 * s);
+    // Puntas de pinzas
+    graphics.lineStyle(2 * s, color, 1);
+    graphics.lineBetween(x - 23 * s, y - 5 * s, x - 26 * s, y - 8 * s + pinzaAnim * 3);
+    graphics.lineBetween(x - 23 * s, y - 1 * s, x - 26 * s, y + 2 * s - pinzaAnim * 3);
+    graphics.lineBetween(x + 23 * s, y - 5 * s, x + 26 * s, y - 8 * s - pinzaAnim * 3);
+    graphics.lineBetween(x + 23 * s, y - 1 * s, x + 26 * s, y + 2 * s + pinzaAnim * 3);
+    // Patas (6 en cada lado)
+    graphics.lineStyle(2 * s, color, 1);
+    for (let leg = -1; leg <= 1; leg += 2) {
+        for (let i = 0; i < 3; i++) {
+            const legX = x + leg * (4 + i * 3) * s;
+            const legAnim = Math.sin(Date.now()/150 + i * 0.5) * 2;
+            graphics.lineBetween(legX, y + 3 * s, legX + leg * 6 * s, y + 8 * s + legAnim);
+        }
+    }
+}
+
 function createAppleTree(scene, x) {
     const tree = scene.add.graphics();
     tree.setDepth(0);
@@ -5009,8 +5045,8 @@ function updateMapEffects() {
         const groundY = h - 50;
         const waterStartX = w * 0.65; // El agua empieza a 2/3 de la pantalla
 
-        // === PALMERAS CON COCOS (fondo, no caen) ===
-        const palmPositions = [80, 180, w * 0.45];
+        // === PALMERAS CON COCOS (izquierda, 2 palmeras) ===
+        const palmPositions = [80, 180];
         palmPositions.forEach((palmX, idx) => {
             const sway = Math.sin(Date.now()/1500 + idx) * 5;
 
@@ -5158,29 +5194,21 @@ function updateMapEffects() {
             }
         });
 
-        // Cangrejo caminando (decorativo)
-        const crabX = waterStartX - 50 + Math.sin(Date.now()/2000) * 30;
-        const crabY = groundY - 15;
-        // Cuerpo
-        sceneRef.beachGraphics.fillStyle(0xFF6347, 1);
-        sceneRef.beachGraphics.fillEllipse(crabX, crabY, 12, 8);
-        // Ojos
-        sceneRef.beachGraphics.fillStyle(0x000000, 1);
-        sceneRef.beachGraphics.fillCircle(crabX - 5, crabY - 8, 2);
-        sceneRef.beachGraphics.fillCircle(crabX + 5, crabY - 8, 2);
-        // Pinzas
-        const pinzaAnim = Math.sin(Date.now()/300) * 0.3;
-        sceneRef.beachGraphics.fillStyle(0xFF6347, 1);
-        sceneRef.beachGraphics.fillEllipse(crabX - 18, crabY - 3, 8, 5);
-        sceneRef.beachGraphics.fillEllipse(crabX + 18, crabY - 3, 8, 5);
-        // Patas
-        sceneRef.beachGraphics.lineStyle(2, 0xFF6347, 1);
-        for (let leg = -1; leg <= 1; leg += 2) {
-            for (let i = 0; i < 3; i++) {
-                const legX = crabX + leg * (4 + i * 3);
-                sceneRef.beachGraphics.lineBetween(legX, crabY + 3, legX + leg * 5, crabY + 8);
-            }
-        }
+        // === CANGREJOS CAMINANDO (decorativos, fondo - NPCs no los tocan) ===
+        // Cangrejo 1 - cerca del agua
+        const crab1X = waterStartX - 50 + Math.sin(Date.now()/2000) * 30;
+        const crab1Y = groundY - 15;
+        drawCrab(sceneRef.beachGraphics, crab1X, crab1Y, 0xFF6347);
+
+        // Cangrejo 2 - más a la izquierda, va en dirección opuesta
+        const crab2X = 280 + Math.sin(Date.now()/2500 + 2) * 40;
+        const crab2Y = groundY - 12;
+        drawCrab(sceneRef.beachGraphics, crab2X, crab2Y, 0xFF4500);
+
+        // Cangrejo 3 - pequeño cerca de las palmeras
+        const crab3X = 120 + Math.sin(Date.now()/3000 + 4) * 25;
+        const crab3Y = groundY - 10;
+        drawCrab(sceneRef.beachGraphics, crab3X, crab3Y, 0xE9967A, 0.7);
 
     } else if (sceneRef.beachGraphics) {
         sceneRef.beachGraphics.clear();
