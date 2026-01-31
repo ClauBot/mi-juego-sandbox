@@ -130,7 +130,28 @@ git add -A && git commit -m "mensaje" && git push origin master
   - Cangrejos caminando
   - Arena dorada con conchas
 
+## Layout de UI (NO CAMBIAR)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [☰]                    💎 1,234              [🗺️][🔫][🧑][🎨]│
+│                                                             │
+│                      ÁREA DE JUEGO                          │
+│                                                             │
+│ [🎵]                                              [⏱️]      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **Arriba izquierda**: Menu hamburguesa (☰) con Tienda, Creador, y Limpiar Todo
+- **Arriba centro**: Mayhems (💎) grande y visible (22px, formato K/M/B)
+- **Arriba derecha**: Botones [Mapa][Armas][NPC][Color] - SIN boton X
+- **Abajo izquierda**: Boton de musica (🎵)
+- **Abajo derecha**: Boton de camara lenta (⏱️)
+
+**IMPORTANTE**: El boton "Limpiar Todo" esta DENTRO del menu ☰ para evitar borrados accidentales por niños
+
 ## Reglas de desarrollo
 - **NO ROMPER NADA**: Al hacer cambios, asegurar que toda la funcionalidad existente siga funcionando
 - Los mundos/mapas siempre deben funcionar correctamente
 - Los botones del menu deben seguir funcionando despues de cambiar de mapa
+- **NO mover el boton Limpiar fuera del menu** - debe quedarse dentro del ☰
