@@ -22,6 +22,8 @@ Juego sandbox estilo Melon Playground. Arrastra, lanza y destruye ragdolls.
 - `manifest.json` - Config PWA
 - `icon.svg` - Icono del juego
 - `npc-designs.html` - Dashboard de diseno de NPCs (3x escala)
+- `weapon-designs.html` - Dashboard de armas (tipos, precios, efectos)
+- `world-designs.html` - Dashboard de mundos (previews, fisica, features)
 
 ## Funcionalidades
 - Ragdolls con fisica realista (parpadean cada 30s)
