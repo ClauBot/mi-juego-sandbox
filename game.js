@@ -262,7 +262,7 @@ function getDiscountedPrice(originalPrice) {
 const defaultUnlocked = {
     npcs: ['normal', 'esqueleto'],
     weapons: ['pistola', 'cuchillo', 'granada'],
-    worlds: ['normal']
+    worlds: ['normal', 'desierto']
 };
 
 // Cargar datos guardados
@@ -3715,9 +3715,11 @@ function changeMap(mapId) {
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
             clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
-            // Cielo azul tropical
+            // Cielo azul tropical con gradiente
+            sceneRef.mapOverlay.fillStyle(0x4ECDC4, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
             sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.3);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
