@@ -3500,6 +3500,7 @@ function spawnNpc(npcType) {
 
 function changeMap(mapId) {
     currentMap = mapId;
+    showNotification('🗺️ ' + mapId);
 
     // Reset efectos del mapa anterior
     tornadoActive = false;
@@ -3691,24 +3692,19 @@ function changeMap(mapId) {
             createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0x666666, 'esqueleto');
             break;
         case 'desierto':
-            console.log('Cambiando a desierto...');
             sceneRef.matter.world.setGravity(0, 0.8);
             // Desierto: sol grande, sin árboles ni flores, suelo de arena naranja
             if (sun) sun.setVisible(true);
             if (groundGraphics) groundGraphics.setVisible(false);
-            console.log('desertGround existe:', groundGraphics && groundGraphics.desertGround);
-            if (groundGraphics && groundGraphics.desertGround) {
-                groundGraphics.desertGround.setVisible(true);
-                console.log('desertGround visible:', groundGraphics.desertGround.visible);
-            }
+            if (groundGraphics && groundGraphics.desertGround) groundGraphics.desertGround.setVisible(true);
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
             clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
-            // Cielo del desierto (amarillo/naranja caliente)
-            sceneRef.mapOverlay.fillStyle(0xFFD700, 0.3);
+            // Cielo del desierto - amarillo brillante muy visible
+            sceneRef.mapOverlay.fillStyle(0xFFCC00, 0.5);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
-            // Degradado más intenso arriba
-            sceneRef.mapOverlay.fillStyle(0xFFA500, 0.2);
+            // Degradado naranja intenso arriba
+            sceneRef.mapOverlay.fillStyle(0xFF8C00, 0.4);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
             break;
         case 'playa':
