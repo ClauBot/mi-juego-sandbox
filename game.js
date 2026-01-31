@@ -78,7 +78,7 @@ let selectedPart = null;
 let isDragging = false;
 let lastPointerPosition = { x: 0, y: 0 };
 let velocity = { x: 0, y: 0 };
-let teamColors = [0xFF4444, 0x4444FF, 0xFFFF44, 0x44FF44];
+let teamColors = [0xFF4444, 0x4444FF, 0xFFFF44, 0x44FF44, 0xFF44FF, 0x44FFFF, 0xFF8800, 0x8800FF];
 let currentTeam = 0;
 let teamButton;
 let uiText;
@@ -1365,7 +1365,15 @@ function onPointerDown(pointer) {
             'bat': createBat,
             'cohete': createCohete,
             'barril': createBarril,
-            'trampolin': createTrampolin
+            'trampolin': createTrampolin,
+            'katana': createKatana,
+            'motosierra': createMotosierra,
+            'arco': createArco,
+            'nuke': createNuke,
+            'iman': createIman,
+            'lanzallamas': createLanzallamas,
+            'portal': createPortal,
+            'ventilador': createVentilador
         };
 
         if (weaponCreators[currentWeapon]) {
@@ -1487,11 +1495,65 @@ function onPointerUp(pointer) {
                 activateCohete(selectedWeapon);
             } else if (selectedWeapon.type === 'barril') {
                 explodeBarril(selectedWeapon);
+            } else if (selectedWeapon.type === 'arco') {
+                shootArrow(selectedWeapon);
+            } else if (selectedWeapon.type === 'lanzallamas') {
+                selectedWeapon.isFiring = !selectedWeapon.isFiring;
+            } else if (selectedWeapon.type === 'motosierra') {
+                selectedWeapon.isOn = !selectedWeapon.isOn;
+                if (selectedWeapon.isOn) playMotosierraSound();
+            } else if (selectedWeapon.type === 'iman') {
+                selectedWeapon.isActive = !selectedWeapon.isActive;
+            } else if (selectedWeapon.type === 'ventilador') {
+                selectedWeapon.isOn = !selectedWeapon.isOn;
             }
         }
         selectedWeapon = null;
         isDraggingWeapon = false;
     }
+}
+
+function shootArrow(weapon) {
+    const angle = weapon.body.angle;
+    const speed = 20;
+    const startX = weapon.x + Math.cos(angle) * 25;
+    const startY = weapon.y + Math.sin(angle) * 25;
+
+    const arrow = sceneRef.add.graphics();
+    arrow.fillStyle(0x8B4513, 1);
+    arrow.fillRect(-15, -1, 30, 3);
+    arrow.fillStyle(0x888888, 1);
+    arrow.fillTriangle(15, -3, 15, 4, 22, 0);
+    arrow.setPosition(startX, startY);
+    arrow.setRotation(angle);
+    arrow.setDepth(15);
+
+    bullets.push({
+        graphics: arrow,
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        lifetime: 180,
+        isArrow: true
+    });
+
+    playGunSound();
+}
+
+function playMotosierraSound() {
+    if (!audioContext) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, audioContext.currentTime);
+    osc.frequency.linearRampToValueAtTime(150, audioContext.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.3);
 }
 
 function activateCohete(weapon) {
@@ -2281,17 +2343,25 @@ function createUI(scene) {
     weaponMenu.setVisible(false);
 
     const weaponOptions = [
-        { id: 'pistola', emoji: '🔫', name: 'Pistola' },
-        { id: 'cuchillo', emoji: '🔪', name: 'Cuchillo' },
-        { id: 'granada', emoji: '💣', name: 'Granada' },
-        { id: 'espada', emoji: '🗡️', name: 'Espada' },
-        { id: 'bat', emoji: '🏏', name: 'Bat' },
-        { id: 'cohete', emoji: '🚀', name: 'Cohete' },
-        { id: 'barril', emoji: '🛢️', name: 'Barril' },
-        { id: 'trampolin', emoji: '🛝', name: 'Trampolín' }
+        { id: 'pistola', emoji: '🔫' },
+        { id: 'cuchillo', emoji: '🔪' },
+        { id: 'granada', emoji: '💣' },
+        { id: 'espada', emoji: '🗡️' },
+        { id: 'bat', emoji: '🏏' },
+        { id: 'cohete', emoji: '🚀' },
+        { id: 'barril', emoji: '🛢️' },
+        { id: 'trampolin', emoji: '🛝' },
+        { id: 'katana', emoji: '⚔️' },
+        { id: 'motosierra', emoji: '🪚' },
+        { id: 'arco', emoji: '🏹' },
+        { id: 'nuke', emoji: '☢️' },
+        { id: 'iman', emoji: '🧲' },
+        { id: 'lanzallamas', emoji: '🔥' },
+        { id: 'portal', emoji: '🌀' },
+        { id: 'ventilador', emoji: '💨' }
     ];
 
-    const cols = 2;
+    const cols = 4;
     const itemW = 70;
     const itemH = 40;
     const menuW = cols * itemW + 10;
@@ -2354,16 +2424,20 @@ function createUI(scene) {
     mapMenu.setVisible(false);
 
     const mapOptions = [
-        { id: 'normal', emoji: '🌳', name: 'Normal' },
-        { id: 'tornado', emoji: '🌪️', name: 'Tornado' },
-        { id: 'rayos', emoji: '⚡', name: 'Tormenta' },
-        { id: 'lunar', emoji: '🌙', name: 'Luna' },
-        { id: 'zombie', emoji: '🧟', name: 'Zombie' },
-        { id: 'blackhole', emoji: '🕳️', name: 'Agujero' }
+        { id: 'normal', emoji: '🌳' },
+        { id: 'tornado', emoji: '🌪️' },
+        { id: 'rayos', emoji: '⚡' },
+        { id: 'lunar', emoji: '🌙' },
+        { id: 'zombie', emoji: '🧟' },
+        { id: 'blackhole', emoji: '🕳️' },
+        { id: 'agua', emoji: '🌊' },
+        { id: 'lava', emoji: '🌋' },
+        { id: 'hielo', emoji: '🧊' },
+        { id: 'espacio', emoji: '🚀' }
     ];
 
-    const mapMenuW = 2 * itemW + 10;
-    const mapMenuH = Math.ceil(mapOptions.length / 2) * itemH + 10;
+    const mapMenuW = 5 * 50 + 10;
+    const mapMenuH = Math.ceil(mapOptions.length / 5) * itemH + 10;
 
     const mapMenuBg = scene.add.graphics();
     mapMenuBg.fillStyle(0x333333, 0.95);
@@ -2371,23 +2445,23 @@ function createUI(scene) {
     mapMenu.add(mapMenuBg);
 
     mapOptions.forEach((opt, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const bx = -mapMenuW/2 + 5 + col * itemW;
+        const col = i % 5;
+        const row = Math.floor(i / 5);
+        const bx = -mapMenuW/2 + 5 + col * 50;
         const by = 5 + row * itemH;
 
         const btn = scene.add.graphics();
         btn.fillStyle(0x555555, 1);
-        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        btn.fillRoundedRect(bx, by, 45, itemH - 5, 6);
         mapMenu.add(btn);
 
-        const txt = scene.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, opt.emoji, {
-            font: '20px Arial'
+        const txt = scene.add.text(bx + 22, by + (itemH-5)/2, opt.emoji, {
+            font: '18px Arial'
         }).setOrigin(0.5);
         mapMenu.add(txt);
 
         // Zona interactiva dentro del container
-        const zoneGraphic = scene.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        const zoneGraphic = scene.add.rectangle(bx + 22, by + (itemH-5)/2, 45, itemH-5, 0x000000, 0);
         zoneGraphic.setInteractive();
         mapMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -2541,6 +2615,30 @@ function changeMap(mapId) {
             sceneRef.matter.world.setGravity(0, 0.3);
             // Cielo espacial
             sceneRef.mapOverlay.fillStyle(0x110022, 0.6);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'agua':
+            sceneRef.matter.world.setGravity(0, 0.3); // Flotan
+            // Cielo azul agua
+            sceneRef.mapOverlay.fillStyle(0x0066AA, 0.5);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'lava':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cielo rojo fuego
+            sceneRef.mapOverlay.fillStyle(0x661100, 0.5);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'hielo':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cielo azul claro
+            sceneRef.mapOverlay.fillStyle(0xAADDFF, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            break;
+        case 'espacio':
+            sceneRef.matter.world.setGravity(0, 0); // Sin gravedad
+            // Cielo negro espacial
+            sceneRef.mapOverlay.fillStyle(0x000011, 0.8);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
         default:
@@ -3055,6 +3153,257 @@ function createTrampolin(scene, x, y) {
     return weapon;
 }
 
+// === NUEVAS ARMAS ===
+
+function createKatana(scene, x, y) {
+    const katana = scene.add.graphics();
+    katana.setDepth(10);
+    katana.fillStyle(0x8B0000, 1);
+    katana.fillRect(-40, -3, 15, 8); // Mango
+    katana.fillStyle(0xFFD700, 1);
+    katana.fillRect(-25, -4, 4, 10); // Guardia
+    katana.fillStyle(0xE8E8E8, 1);
+    katana.fillRect(-21, -2, 70, 6); // Hoja
+    katana.fillTriangle(49, -2, 49, 4, 60, 1); // Punta
+    katana.fillStyle(0xFFFFFF, 1);
+    katana.fillRect(-21, -2, 70, 1); // Filo
+    katana.setPosition(x, y);
+
+    const weapon = { graphics: katana, type: 'katana', x, y,
+        body: scene.matter.add.rectangle(x, y, 90, 10, {
+            friction: 0.2, frictionAir: 0.01, restitution: 0.3, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createMotosierra(scene, x, y) {
+    const sierra = scene.add.graphics();
+    sierra.setDepth(10);
+    sierra.fillStyle(0xFF6600, 1);
+    sierra.fillRect(-30, -8, 25, 18); // Cuerpo
+    sierra.fillStyle(0x333333, 1);
+    sierra.fillRect(-5, -4, 45, 10); // Barra
+    sierra.fillStyle(0x666666, 1);
+    for (let i = 0; i < 40; i += 5) {
+        sierra.fillTriangle(-5 + i, -4, -5 + i + 3, -7, -5 + i + 5, -4);
+        sierra.fillTriangle(-5 + i, 6, -5 + i + 3, 9, -5 + i + 5, 6);
+    }
+    sierra.setPosition(x, y);
+
+    const weapon = { graphics: sierra, type: 'motosierra', x, y, isOn: false,
+        body: scene.matter.add.rectangle(x, y, 70, 18, {
+            friction: 0.3, frictionAir: 0.01, restitution: 0.2, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createArco(scene, x, y) {
+    const arco = scene.add.graphics();
+    arco.setDepth(10);
+    arco.lineStyle(4, 0x8B4513, 1);
+    arco.beginPath();
+    arco.arc(0, 0, 25, -Math.PI/2 - 0.5, Math.PI/2 + 0.5);
+    arco.strokePath();
+    arco.lineStyle(2, 0xFFFFFF, 1);
+    arco.lineBetween(0, -22, 0, 22); // Cuerda
+    arco.setPosition(x, y);
+
+    const weapon = { graphics: arco, type: 'arco', x, y,
+        body: scene.matter.add.rectangle(x, y, 30, 50, {
+            friction: 0.3, frictionAir: 0.02, restitution: 0.2, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createNuke(scene, x, y) {
+    const nuke = scene.add.graphics();
+    nuke.setDepth(10);
+    nuke.fillStyle(0x333333, 1);
+    nuke.fillEllipse(0, 0, 40, 25);
+    nuke.fillStyle(0xFFFF00, 1);
+    nuke.fillCircle(-5, 0, 8);
+    nuke.fillStyle(0x000000, 1);
+    nuke.fillTriangle(-5, -5, -5, 5, 2, 0);
+    nuke.fillStyle(0xFF0000, 1);
+    nuke.fillRect(15, -3, 8, 6);
+    nuke.setPosition(x, y);
+
+    const weapon = { graphics: nuke, type: 'nuke', x, y, timer: 8,
+        body: scene.matter.add.ellipse(x, y, 40, 25, {
+            friction: 0.5, frictionAir: 0.01, restitution: 0.3, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+
+    // Timer de 8 segundos
+    const timerText = scene.add.text(x, y - 30, '8', {
+        font: 'bold 18px Arial', fill: '#FF0000', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(100);
+    weapon.timerText = timerText;
+
+    weapon.timerInterval = setInterval(() => {
+        weapon.timer--;
+        if (weapon.timerText) weapon.timerText.setText(weapon.timer.toString());
+        if (weapon.timer <= 0) {
+            clearInterval(weapon.timerInterval);
+            explodeNuke(weapon);
+        }
+    }, 1000);
+
+    weapons.push(weapon);
+    return weapon;
+}
+
+function explodeNuke(weapon) {
+    const ex = weapon.x, ey = weapon.y;
+
+    // Flash blanco gigante
+    const flash = sceneRef.add.graphics();
+    flash.setDepth(200);
+    flash.fillStyle(0xFFFFFF, 1);
+    flash.fillRect(0, 0, game.scale.width, game.scale.height);
+    sceneRef.tweens.add({ targets: flash, alpha: 0, duration: 1000, onComplete: () => flash.destroy() });
+
+    // Explosión masiva
+    const explosion = sceneRef.add.graphics();
+    explosion.setDepth(150);
+    for (let r = 300; r > 0; r -= 30) {
+        const color = r > 200 ? 0xFF0000 : r > 100 ? 0xFF6600 : 0xFFFF00;
+        explosion.fillStyle(color, 0.8 - r/400);
+        explosion.fillCircle(ex, ey, r);
+    }
+    sceneRef.tweens.add({ targets: explosion, alpha: 0, scale: 3, duration: 1500, onComplete: () => explosion.destroy() });
+
+    playExplosionSound();
+    playExplosionSound();
+
+    // Empujar TODO con fuerza extrema
+    ragdolls.forEach(r => {
+        if (r.isStanding) { r.isStanding = false; r.parts.forEach(p => p?.body && p.setStatic(false)); }
+        r.parts.forEach(p => {
+            if (p?.body) {
+                const dx = p.x - ex, dy = p.y - ey;
+                const dist = Math.max(Math.sqrt(dx*dx + dy*dy), 50);
+                const force = 50 * (1 - Math.min(dist/500, 1));
+                p.setVelocity(dx/dist * force, dy/dist * force - 20);
+            }
+        });
+    });
+    weapons.forEach(w => {
+        if (w !== weapon && w.body && w.type !== 'trampolin') {
+            const dx = w.x - ex, dy = w.y - ey;
+            const dist = Math.max(Math.sqrt(dx*dx + dy*dy), 50);
+            const force = 40 * (1 - Math.min(dist/500, 1));
+            sceneRef.matter.body.setVelocity(w.body, { x: dx/dist * force, y: dy/dist * force - 15 });
+        }
+    });
+
+    spawnBlood(ex, ey, 50);
+
+    if (weapon.timerText) weapon.timerText.destroy();
+    if (weapon.graphics) weapon.graphics.destroy();
+    if (weapon.body) sceneRef.matter.world.remove(weapon.body);
+    const idx = weapons.indexOf(weapon);
+    if (idx > -1) weapons.splice(idx, 1);
+}
+
+function createIman(scene, x, y) {
+    const iman = scene.add.graphics();
+    iman.setDepth(10);
+    iman.fillStyle(0xFF0000, 1);
+    iman.fillRect(-20, -15, 15, 30);
+    iman.fillStyle(0x0000FF, 1);
+    iman.fillRect(5, -15, 15, 30);
+    iman.fillStyle(0x888888, 1);
+    iman.fillRect(-5, -15, 10, 15);
+    iman.setPosition(x, y);
+
+    const weapon = { graphics: iman, type: 'iman', x, y, isActive: true,
+        body: scene.matter.add.rectangle(x, y, 40, 30, {
+            friction: 0.5, frictionAir: 0.02, restitution: 0.2, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createLanzallamas(scene, x, y) {
+    const llamas = scene.add.graphics();
+    llamas.setDepth(10);
+    llamas.fillStyle(0x444444, 1);
+    llamas.fillRect(-25, -5, 35, 12);
+    llamas.fillStyle(0xFF6600, 1);
+    llamas.fillRect(-30, -3, 8, 8);
+    llamas.fillStyle(0x222222, 1);
+    llamas.fillRect(10, -4, 20, 10);
+    llamas.setPosition(x, y);
+
+    const weapon = { graphics: llamas, type: 'lanzallamas', x, y, fuel: 100,
+        body: scene.matter.add.rectangle(x, y, 55, 15, {
+            friction: 0.3, frictionAir: 0.01, restitution: 0.2, slop: 0.01,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
+let portals = [];
+function createPortal(scene, x, y) {
+    const portal = scene.add.graphics();
+    portal.setDepth(3);
+    const hue = portals.length % 2 === 0 ? 0x00FFFF : 0xFF00FF;
+    portal.lineStyle(5, hue, 0.8);
+    portal.strokeCircle(0, 0, 30);
+    portal.lineStyle(3, 0xFFFFFF, 0.5);
+    portal.strokeCircle(0, 0, 20);
+    portal.setPosition(x, y);
+
+    const weapon = { graphics: portal, type: 'portal', x, y, portalId: portals.length,
+        body: scene.matter.add.circle(x, y, 30, {
+            isStatic: true, isSensor: true,
+            collisionFilter: { category: 0x0004, mask: 0x0002 }
+        })
+    };
+    portals.push(weapon);
+    weapons.push(weapon);
+    return weapon;
+}
+
+function createVentilador(scene, x, y) {
+    const vent = scene.add.graphics();
+    vent.setDepth(10);
+    vent.fillStyle(0x666666, 1);
+    vent.fillRect(-20, -25, 40, 50);
+    vent.fillStyle(0x333333, 1);
+    vent.fillCircle(0, 0, 15);
+    vent.fillStyle(0xAAAAAA, 1);
+    for (let a = 0; a < 3; a++) {
+        const angle = a * Math.PI * 2 / 3 + Date.now()/100;
+        vent.fillEllipse(Math.cos(angle) * 8, Math.sin(angle) * 8, 12, 5);
+    }
+    vent.setPosition(x, y);
+
+    const weapon = { graphics: vent, type: 'ventilador', x, y, isOn: true,
+        body: scene.matter.add.rectangle(x, y, 40, 50, {
+            isStatic: true,
+            collisionFilter: { category: 0x0004, mask: 0x0001 | 0x0002 }
+        })
+    };
+    weapons.push(weapon);
+    return weapon;
+}
+
 // === EFECTOS DE MAPA ===
 
 function updateMapEffects() {
@@ -3314,6 +3663,209 @@ function updateMapEffects() {
                 x: Math.cos(angle) * 12,
                 y: Math.sin(angle) * 12
             });
+        }
+    });
+
+    // === EFECTOS DE NUEVOS MAPAS ===
+
+    // Agua - burbujas y flotar
+    if (currentMap === 'agua') {
+        if (!sceneRef.waterGraphics) {
+            sceneRef.waterGraphics = sceneRef.add.graphics();
+            sceneRef.waterGraphics.setDepth(1);
+        }
+        sceneRef.waterGraphics.clear();
+        // Olas
+        sceneRef.waterGraphics.fillStyle(0x0088CC, 0.3);
+        for (let i = 0; i < 5; i++) {
+            const wy = game.scale.height - 100 + Math.sin(Date.now()/500 + i) * 20;
+            sceneRef.waterGraphics.fillEllipse(i * 200, wy, 250, 40);
+        }
+        // Burbujas
+        for (let i = 0; i < 10; i++) {
+            const bx = (i * 97 + Date.now()/20) % game.scale.width;
+            const by = game.scale.height - 50 - ((Date.now()/10 + i * 50) % 300);
+            sceneRef.waterGraphics.fillStyle(0xAADDFF, 0.5);
+            sceneRef.waterGraphics.fillCircle(bx, by, 3 + i % 3);
+        }
+    } else if (sceneRef.waterGraphics) {
+        sceneRef.waterGraphics.clear();
+    }
+
+    // Lava - partículas de fuego y daño
+    if (currentMap === 'lava') {
+        if (!sceneRef.lavaGraphics) {
+            sceneRef.lavaGraphics = sceneRef.add.graphics();
+            sceneRef.lavaGraphics.setDepth(1);
+        }
+        sceneRef.lavaGraphics.clear();
+        // Lava burbujeante
+        for (let i = 0; i < 8; i++) {
+            const lx = (i * 120) % game.scale.width;
+            const bubble = Math.sin(Date.now()/200 + i) * 10;
+            sceneRef.lavaGraphics.fillStyle(0xFF4400, 0.8);
+            sceneRef.lavaGraphics.fillCircle(lx, game.scale.height - 30 + bubble, 15 + bubble/2);
+            sceneRef.lavaGraphics.fillStyle(0xFFFF00, 0.5);
+            sceneRef.lavaGraphics.fillCircle(lx, game.scale.height - 35 + bubble, 8);
+        }
+        // Si ragdoll toca el fondo, lanzarlo
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.body && p.y > game.scale.height - 70) {
+                p.setVelocity(p.body.velocity.x, -15);
+                spawnBlood(p.x, p.y, 2);
+            }
+        }));
+    } else if (sceneRef.lavaGraphics) {
+        sceneRef.lavaGraphics.clear();
+    }
+
+    // Hielo - resbaloso
+    if (currentMap === 'hielo') {
+        if (!sceneRef.iceGraphics) {
+            sceneRef.iceGraphics = sceneRef.add.graphics();
+            sceneRef.iceGraphics.setDepth(1);
+        }
+        sceneRef.iceGraphics.clear();
+        // Copos de nieve
+        for (let i = 0; i < 20; i++) {
+            const sx = (i * 73 + Date.now()/30) % game.scale.width;
+            const sy = (Date.now()/20 + i * 40) % game.scale.height;
+            sceneRef.iceGraphics.fillStyle(0xFFFFFF, 0.8);
+            sceneRef.iceGraphics.fillCircle(sx, sy, 2);
+        }
+        // Hacer que ragdolls resbalen
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.body && p.y > game.scale.height - 80) {
+                p.setVelocity(p.body.velocity.x * 1.01, p.body.velocity.y);
+            }
+        }));
+    } else if (sceneRef.iceGraphics) {
+        sceneRef.iceGraphics.clear();
+    }
+
+    // Espacio - estrellas y sin fricción
+    if (currentMap === 'espacio') {
+        if (!sceneRef.spaceGraphics) {
+            sceneRef.spaceGraphics = sceneRef.add.graphics();
+            sceneRef.spaceGraphics.setDepth(-6);
+        }
+        sceneRef.spaceGraphics.clear();
+        // Estrellas
+        for (let i = 0; i < 50; i++) {
+            const sx = (i * 137) % game.scale.width;
+            const sy = (i * 89) % game.scale.height;
+            const twinkle = Math.sin(Date.now()/300 + i) * 0.5 + 0.5;
+            sceneRef.spaceGraphics.fillStyle(0xFFFFFF, twinkle);
+            sceneRef.spaceGraphics.fillCircle(sx, sy, 1);
+        }
+        // Planeta de fondo
+        sceneRef.spaceGraphics.fillStyle(0x4444AA, 0.5);
+        sceneRef.spaceGraphics.fillCircle(game.scale.width - 100, game.scale.height - 100, 80);
+    } else if (sceneRef.spaceGraphics) {
+        sceneRef.spaceGraphics.clear();
+    }
+
+    // === EFECTOS DE NUEVAS ARMAS ===
+
+    // Imán - atrae ragdolls
+    weapons.forEach(weapon => {
+        if (weapon.type === 'iman' && weapon.isActive) {
+            ragdolls.forEach(r => r.parts.forEach(p => {
+                if (p?.body) {
+                    const dx = weapon.x - p.x;
+                    const dy = weapon.y - p.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 200 && dist > 30) {
+                        const force = 0.3 * (1 - dist/200);
+                        p.setVelocity(p.body.velocity.x + dx/dist * force, p.body.velocity.y + dy/dist * force);
+                    }
+                }
+            }));
+        }
+    });
+
+    // Ventilador - sopla ragdolls
+    weapons.forEach(weapon => {
+        if (weapon.type === 'ventilador' && weapon.isOn) {
+            // Actualizar aspas giratorias
+            weapon.graphics.clear();
+            weapon.graphics.fillStyle(0x666666, 1);
+            weapon.graphics.fillRect(-20, -25, 40, 50);
+            weapon.graphics.fillStyle(0x333333, 1);
+            weapon.graphics.fillCircle(0, 0, 15);
+            weapon.graphics.fillStyle(0xAAAAAA, 1);
+            for (let a = 0; a < 3; a++) {
+                const angle = a * Math.PI * 2 / 3 + Date.now()/50;
+                weapon.graphics.fillEllipse(Math.cos(angle) * 8, Math.sin(angle) * 8, 12, 5);
+            }
+
+            // Soplar hacia arriba
+            ragdolls.forEach(r => r.parts.forEach(p => {
+                if (p?.body) {
+                    const dx = p.x - weapon.x;
+                    const dy = p.y - weapon.y;
+                    if (Math.abs(dx) < 80 && dy < 0 && dy > -200) {
+                        p.setVelocity(p.body.velocity.x + dx * 0.01, p.body.velocity.y - 0.8);
+                    }
+                }
+            }));
+        }
+    });
+
+    // Portal - teletransportar
+    if (portals.length >= 2) {
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.body && !p.justTeleported) {
+                for (let i = 0; i < portals.length; i++) {
+                    const portal = portals[i];
+                    const dist = Phaser.Math.Distance.Between(p.x, p.y, portal.x, portal.y);
+                    if (dist < 25) {
+                        const otherPortal = portals[(i + 1) % portals.length];
+                        p.setPosition(otherPortal.x, otherPortal.y);
+                        p.justTeleported = true;
+                        setTimeout(() => { if (p) p.justTeleported = false; }, 500);
+                        break;
+                    }
+                }
+            }
+        }));
+    }
+
+    // Lanzallamas - disparar fuego
+    weapons.forEach(weapon => {
+        if (weapon.type === 'lanzallamas' && weapon.isFiring && weapon.fuel > 0) {
+            weapon.fuel--;
+            const angle = weapon.body.angle;
+            const fx = weapon.x + Math.cos(angle) * 30;
+            const fy = weapon.y + Math.sin(angle) * 30;
+
+            // Partícula de fuego
+            const fire = sceneRef.add.graphics();
+            fire.fillStyle(Math.random() > 0.5 ? 0xFF6600 : 0xFFFF00, 0.8);
+            fire.fillCircle(0, 0, 5 + Math.random() * 5);
+            fire.setPosition(fx, fy);
+            fire.setDepth(20);
+
+            sceneRef.tweens.add({
+                targets: fire,
+                x: fx + Math.cos(angle) * 100,
+                y: fy + Math.sin(angle) * 100,
+                alpha: 0,
+                scale: 0.5,
+                duration: 300,
+                onComplete: () => fire.destroy()
+            });
+
+            // Empujar ragdolls cercanos
+            ragdolls.forEach(r => r.parts.forEach(p => {
+                if (p?.body) {
+                    const dist = Phaser.Math.Distance.Between(fx, fy, p.x, p.y);
+                    if (dist < 60) {
+                        p.setVelocity(p.body.velocity.x + Math.cos(angle) * 2, p.body.velocity.y + Math.sin(angle) * 2);
+                        if (Math.random() < 0.3) spawnBlood(p.x, p.y, 1);
+                    }
+                }
+            }));
         }
     });
 }
