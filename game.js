@@ -134,43 +134,64 @@ function preload() {}
 
 function create() {
     sceneRef = this;
+    const scene = this;
 
-    // IMPORTANTE: Usar dimensiones reales del canvas, no las cacheadas
-    const realWidth = this.scale.width;
-    const realHeight = this.scale.height;
+    // Forzar canvas a 100% del contenedor
+    const canvas = this.game.canvas;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
 
-    console.log('CREATE - Dimensiones:', realWidth, 'x', realHeight);
+    // Pequeño delay para asegurar que las dimensiones estén correctas
+    setTimeout(() => {
+        initGameContent(scene);
+    }, 100);
+}
+
+function initGameContent(scene) {
+    // Obtener dimensiones del viewport actual
+    const realWidth = window.innerWidth;
+    const realHeight = window.innerHeight;
+
+    console.log('=== INIT GAME CONTENT ===');
+    console.log('window:', realWidth, 'x', realHeight);
+    console.log('game.scale:', game.scale.width, 'x', game.scale.height);
+
+    // Forzar resize del juego a las dimensiones correctas
+    game.scale.resize(realWidth, realHeight);
 
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     } catch (e) {}
 
-    createGround(this);
+    createGround(scene);
 
     const spawnY = realHeight - 200;
     const w = realWidth;
 
     if (isMobile) {
-        createRagdoll(this, w * 0.3, spawnY, teamColors[0]);
-        createRagdoll(this, w * 0.7, spawnY, teamColors[1]);
+        createRagdoll(scene, w * 0.3, spawnY, teamColors[0]);
+        createRagdoll(scene, w * 0.7, spawnY, teamColors[1]);
     } else {
-        createRagdoll(this, w * 0.25, spawnY, teamColors[0]);
-        createRagdoll(this, w * 0.5, spawnY, teamColors[1]);
-        createRagdoll(this, w * 0.75, spawnY, teamColors[2]);
+        createRagdoll(scene, w * 0.25, spawnY, teamColors[0]);
+        createRagdoll(scene, w * 0.5, spawnY, teamColors[1]);
+        createRagdoll(scene, w * 0.75, spawnY, teamColors[2]);
     }
 
-    createUI(this);
+    createUI(scene);
 
-    this.input.on('pointerdown', onPointerDown, this);
-    this.input.on('pointermove', onPointerMove, this);
-    this.input.on('pointerup', onPointerUp, this);
-    this.input.on('pointerupoutside', onPointerUp, this);
+    scene.input.on('pointerdown', onPointerDown, scene);
+    scene.input.on('pointermove', onPointerMove, scene);
+    scene.input.on('pointerup', onPointerUp, scene);
+    scene.input.on('pointerupoutside', onPointerUp, scene);
 
     // Colisiones (optimizado para móvil)
     let lastCollisionTime = 0;
     const collisionCooldown = isLowPerf ? 100 : 50; // ms entre efectos de colisión
 
-    this.matter.world.on('collisionstart', (event) => {
+    scene.matter.world.on('collisionstart', (event) => {
         const now = Date.now();
 
         // En móvil, limitar frecuencia de efectos
@@ -1089,6 +1110,9 @@ function update() {
     // Actualizar posición de armas
     updateWeapons();
 
+    // Actualizar balas
+    updateBullets();
+
     // Actualizar barras de vida solo cada 3 frames (posición)
     if (frameCount % 3 === 0) {
         updateAllHealthBars();
@@ -1269,8 +1293,47 @@ function onPointerDown(pointer) {
         return;
     }
 
-    // Si hay arma seleccionada, crear arma
+    // Verificar si clickeó en un arma para mover o disparar
+    let clickedWeapon = null;
+    let closestWeaponDist = 40;
+    weapons.forEach(weapon => {
+        if (weapon.body) {
+            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, weapon.x, weapon.y);
+            if (dist < closestWeaponDist) {
+                closestWeaponDist = dist;
+                clickedWeapon = weapon;
+            }
+        }
+    });
+
+    if (clickedWeapon) {
+        selectedWeapon = clickedWeapon;
+        isDraggingWeapon = true;
+        selectedWeapon.dragStartX = pointer.x;
+        selectedWeapon.dragStartY = pointer.y;
+        selectedWeapon.hasMoved = false;
+        lastPointerPosition.x = pointer.x;
+        lastPointerPosition.y = pointer.y;
+        playGrabSound();
+        return;
+    }
+
+    // Si hay arma seleccionada, crear arma (máximo 10)
     if (currentWeapon && pointer.y > 100 && pointer.y < game.scale.height - 70) {
+        if (weapons.length >= 10) {
+            const maxText = sceneRef.add.text(game.scale.width / 2, 80, 'Máx 10 armas', {
+                font: 'bold 14px Arial',
+                fill: '#FF0000'
+            }).setOrigin(0.5);
+            sceneRef.tweens.add({
+                targets: maxText,
+                alpha: 0,
+                y: 60,
+                duration: 1000,
+                onComplete: () => maxText.destroy()
+            });
+            return;
+        }
         if (currentWeapon === 'pistola') {
             createPistola(sceneRef, pointer.x, pointer.y);
         } else if (currentWeapon === 'cuchillo') {
@@ -1334,6 +1397,24 @@ function onPointerMove(pointer) {
         lastPointerPosition.x = pointer.x;
         lastPointerPosition.y = pointer.y;
     }
+
+    // Mover arma
+    if (isDraggingWeapon && selectedWeapon && selectedWeapon.body) {
+        const moveDistance = Phaser.Math.Distance.Between(
+            selectedWeapon.dragStartX, selectedWeapon.dragStartY,
+            pointer.x, pointer.y
+        );
+        if (moveDistance > 10) {
+            selectedWeapon.hasMoved = true;
+        }
+
+        const forceX = (pointer.x - selectedWeapon.x) * 0.15;
+        const forceY = (pointer.y - selectedWeapon.y) * 0.15;
+        sceneRef.matter.body.setVelocity(selectedWeapon.body, { x: forceX * 2, y: forceY * 2 });
+
+        lastPointerPosition.x = pointer.x;
+        lastPointerPosition.y = pointer.y;
+    }
 }
 
 function onPointerUp(pointer) {
@@ -1359,6 +1440,16 @@ function onPointerUp(pointer) {
 
         selectedPart = null;
         isDragging = false;
+    }
+
+    // Soltar arma
+    if (isDraggingWeapon && selectedWeapon) {
+        // Si no se movió mucho y es pistola, disparar
+        if (!selectedWeapon.hasMoved && selectedWeapon.type === 'pistola') {
+            shootBullet(selectedWeapon);
+        }
+        selectedWeapon = null;
+        isDraggingWeapon = false;
     }
 }
 
@@ -2162,6 +2253,116 @@ function updateWeapons() {
             weapon.graphics.setRotation(weapon.body.angle);
         }
     });
+}
+
+function shootBullet(weapon) {
+    if (weapon.type !== 'pistola') return;
+
+    const angle = weapon.body.angle;
+    const speed = 15;
+    const startX = weapon.x + Math.cos(angle) * 35;
+    const startY = weapon.y + Math.sin(angle) * 35;
+
+    const bullet = sceneRef.add.graphics();
+    bullet.fillStyle(0xFFD700, 1);
+    bullet.fillCircle(0, 0, 4);
+    bullet.setPosition(startX, startY);
+    bullet.setDepth(15);
+
+    bullets.push({
+        graphics: bullet,
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        lifetime: 120
+    });
+
+    playGunSound();
+}
+
+function playGunSound() {
+    if (!audioContext) return;
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const noise = audioContext.createOscillator();
+    const noiseGain = audioContext.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+    noise.type = 'sawtooth';
+    noise.frequency.setValueAtTime(100, audioContext.currentTime);
+    noiseGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    noise.connect(noiseGain);
+    noiseGain.connect(audioContext.destination);
+
+    osc.start();
+    noise.start();
+    osc.stop(audioContext.currentTime + 0.15);
+    noise.stop(audioContext.currentTime + 0.1);
+}
+
+function updateBullets() {
+    const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+        bullet.lifetime--;
+
+        bullet.graphics.setPosition(bullet.x, bullet.y);
+
+        // Verificar colisión con ragdolls
+        let hitRagdoll = false;
+        ragdolls.forEach(ragdoll => {
+            if (ragdoll.isDead || hitRagdoll) return;
+
+            ragdoll.parts.forEach(part => {
+                if (part && part.body && !hitRagdoll) {
+                    const dist = Phaser.Math.Distance.Between(bullet.x, bullet.y, part.x, part.y);
+                    if (dist < 20) {
+                        hitRagdoll = true;
+
+                        // Dañar ragdoll
+                        ragdoll.health -= 25;
+                        if (ragdoll.health < 0) ragdoll.health = 0;
+                        updateHealthBar(ragdoll);
+
+                        // Aplicar fuerza al impacto
+                        part.setVelocity(bullet.vx * 0.5, bullet.vy * 0.5);
+
+                        // Efecto de sangre
+                        spawnBlood(bullet.x, bullet.y, 5);
+                        playHitSound(0.5);
+
+                        if (ragdoll.health <= 0 && !ragdoll.isDead) {
+                            killRagdoll(ragdoll);
+                        }
+                    }
+                }
+            });
+        });
+
+        // Eliminar bala si golpeó algo, salió de pantalla o expiró
+        if (hitRagdoll || bullet.lifetime <= 0 ||
+            bullet.x < 0 || bullet.x > game.scale.width ||
+            bullet.y < 0 || bullet.y > groundY) {
+            bullet.graphics.destroy();
+            bullets.splice(i, 1);
+        }
+    }
 }
 
 function damageRagdollAt(x, y, damage) {
