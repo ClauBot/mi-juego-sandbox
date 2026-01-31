@@ -44,7 +44,7 @@ const config = {
     physics: {
         default: 'matter',
         matter: {
-            gravity: { y: 0.8 },
+            gravity: { y: 1.0 }, // Gravedad más realista
             debug: false,
             // Optimizaciones para móvil
             positionIterations: isLowPerf ? 4 : 6,
@@ -249,6 +249,14 @@ const shopItems = {
         { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 100 }
     ]
 };
+
+// Calcular precio con descuento: mitad de precio, gratis si < 50 (pero 50 no es gratis)
+function getDiscountedPrice(originalPrice) {
+    if (originalPrice === 0) return 0;
+    const halfPrice = Math.floor(originalPrice / 2);
+    if (halfPrice < 50) return 0; // Gratis si es menos de 50
+    return halfPrice; // 50 o más se mantiene
+}
 
 // Items por defecto que siempre deben estar desbloqueados
 const defaultUnlocked = {
@@ -1796,13 +1804,21 @@ function onPointerDown(pointer) {
 
 function onPointerMove(pointer) {
     if (isDragging && selectedPart) {
-        velocity.x = (pointer.x - lastPointerPosition.x);
-        velocity.y = (pointer.y - lastPointerPosition.y);
+        // Calcular velocidad de movimiento del dedo
+        velocity.x = (pointer.x - lastPointerPosition.x) * 1.2;
+        velocity.y = (pointer.y - lastPointerPosition.y) * 1.2;
 
-        const forceX = (pointer.x - selectedPart.x) * 0.12;
-        const forceY = (pointer.y - selectedPart.y) * 0.12;
+        // Fuerza de arrastre mejorada - más suave y responsiva
+        const dx = pointer.x - selectedPart.x;
+        const dy = pointer.y - selectedPart.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        selectedPart.setVelocity(forceX * 2, forceY * 2);
+        // Fuerza proporcional a la distancia pero con límite
+        const forceMult = Math.min(distance * 0.08, 15);
+        const forceX = (dx / (distance || 1)) * forceMult;
+        const forceY = (dy / (distance || 1)) * forceMult;
+
+        selectedPart.setVelocity(forceX * 2.5, forceY * 2.5);
 
         lastPointerPosition.x = pointer.x;
         lastPointerPosition.y = pointer.y;
@@ -1835,14 +1851,15 @@ function onPointerUp(pointer) {
             selectedPart.ownerRagdoll.isBeingDragged = false;
         }
 
-        const throwPower = 0.7;
+        const throwPower = 1.2; // Mayor poder de lanzamiento
         const throwSpeed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
 
-        if (throwSpeed > 5) {
+        if (throwSpeed > 3) {
             playThrowSound(throwSpeed);
             playScream();
         }
 
+        // Lanzamiento más potente y satisfactorio
         selectedPart.setVelocity(
             velocity.x * throwPower,
             velocity.y * throwPower
@@ -2510,11 +2527,14 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         }
     };
 
+    // Ninja es 25% más ligero (cae más rápido por menos resistencia al aire)
+    const densityMult = isNinja ? 0.75 : 1;
+
     const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
-        density: 0.001
+        density: 0.001 * densityMult
     });
     parts.push(head);
 
@@ -2552,7 +2572,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
-        density: 0.002
+        density: 0.002 * densityMult
     });
     parts.push(torso);
 
@@ -2560,7 +2580,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
-        density: 0.0008
+        density: 0.0008 * densityMult
     });
     parts.push(armL);
 
@@ -2568,7 +2588,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
-        density: 0.0008
+        density: 0.0008 * densityMult
     });
     parts.push(armR);
 
@@ -2576,7 +2596,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
-        density: 0.001
+        density: 0.001 * densityMult
     });
     parts.push(legL);
 
@@ -2584,7 +2604,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
-        density: 0.001
+        density: 0.001 * densityMult
     });
     parts.push(legR);
 
@@ -2687,10 +2707,10 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             // Cabeza con máscara ninja negra
             graphics.fillStyle(0x111111, 1); // Negro máscara
             graphics.fillCircle(width/2, height/2, width/2);
-            // Banda roja en la frente
-            graphics.fillStyle(0xCC0000, 1);
+            // Banda blanca en la frente
+            graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillRect(0, height/2 - 6, width, 4);
-            // Colas de la banda
+            // Colas de la banda blancas
             graphics.fillTriangle(width + 2, height/2 - 6, width + 8, height/2 - 8, width + 6, height/2 - 2);
             graphics.fillTriangle(width + 2, height/2 - 2, width + 10, height/2, width + 8, height/2 + 4);
             // Solo los ojos visibles (blancos con pupila)
@@ -2705,8 +2725,8 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             // Traje ninja negro con cinturón
             graphics.fillStyle(0x111111, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Cinturón rojo
-            graphics.fillStyle(0xCC0000, 1);
+            // Cinturón blanco
+            graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillRect(0, height/2 - 3, width, 6);
             // Línea del traje
             graphics.lineStyle(1, 0x222222, 1);
@@ -2715,8 +2735,8 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             // Brazos/piernas ninja negros
             graphics.fillStyle(0x111111, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Vendas grises
-            graphics.lineStyle(2, 0x333333, 0.5);
+            // Vendas blancas
+            graphics.lineStyle(2, 0xFFFFFF, 0.7);
             for (let i = 0; i < 3; i++) {
                 const y = 5 + i * (height / 3);
                 graphics.lineBetween(0, y, width, y + 3);
@@ -5324,10 +5344,11 @@ function refreshShopItems() {
             });
             container.add(name);
 
-            const priceText = item.price === 0 ? 'GRATIS' : '💎 ' + item.price;
+            const realPrice = getDiscountedPrice(item.price);
+            const priceText = realPrice === 0 ? 'GRATIS' : '💎 ' + realPrice;
             const price = sceneRef.add.text(x + 60, y + 45, priceText, {
                 font: '12px Arial',
-                fill: item.price === 0 ? '#00FF00' : '#FFD700'
+                fill: realPrice === 0 ? '#00FF00' : '#FFD700'
             });
             container.add(price);
 
@@ -5335,8 +5356,8 @@ function refreshShopItems() {
             buyRect.setInteractive();
             container.add(buyRect);
             buyRect.on('pointerdown', () => {
-                if (item.price === 0 || mayhems >= item.price) {
-                    mayhems -= item.price;
+                if (realPrice === 0 || mayhems >= realPrice) {
+                    mayhems -= realPrice;
                     unlockedItems[cat].push(item.id);
                     saveSaveData();
                     updateMayhemsDisplay();
