@@ -95,6 +95,12 @@ let weaponMenuOpen = false;
 let weaponButton;
 let weaponMenu;
 
+// NPC Menu
+let npcMenuOpen = false;
+let npcButton;
+let npcMenu;
+let currentNpcType = 'normal';
+
 // === NUEVAS FEATURES ===
 let bullets = [];
 let grenades = [];
@@ -210,8 +216,7 @@ const shopItems = {
         { id: 'blackhole', name: 'Agujero Negro', emoji: '🕳️', price: 150 },
         { id: 'agua', name: 'Agua', emoji: '🌊', price: 75 },
         { id: 'lava', name: 'Lava', emoji: '🌋', price: 125 },
-        { id: 'hielo', name: 'Hielo', emoji: '🧊', price: 75 },
-        { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 200 }
+        { id: 'hielo', name: 'Hielo', emoji: '🧊', price: 75 }
     ]
 };
 
@@ -2200,7 +2205,7 @@ function createGround(scene) {
     scene.matter.add.rectangle(w / 2, -25, w, 50, wallOptions);
 }
 
-function createRagdoll(scene, x, y, color) {
+function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const parts = [];
     const constraints = [];
 
@@ -2209,9 +2214,55 @@ function createRagdoll(scene, x, y, color) {
 
     // Color zombie si estamos en modo zombie
     const isZombie = (currentMap === 'zombie');
-    const skinColor = isZombie ? 0x6B8E23 : 0xFFDBB4; // Verde zombie o piel normal
-    const shirtColor = isZombie ? 0x4A4A4A : color; // Ropa rasgada gris
-    const pantsColor = isZombie ? 0x2F2F2F : 0x333333;
+
+    // Colores según tipo de NPC
+    let skinColor = 0xFFDBB4; // Piel normal
+    let shirtColor = color;
+    let pantsColor = 0x333333;
+
+    switch(npcType) {
+        case 'ninja':
+            skinColor = 0xFFDBB4;
+            shirtColor = 0x111111;
+            pantsColor = 0x111111;
+            break;
+        case 'robot':
+            skinColor = 0xC0C0C0;
+            shirtColor = 0x666666;
+            pantsColor = 0x444444;
+            break;
+        case 'alien':
+            skinColor = 0x90EE90;
+            shirtColor = 0x4444FF;
+            pantsColor = 0x2222AA;
+            break;
+        case 'pirata':
+            skinColor = 0xDEB887;
+            shirtColor = 0x8B0000;
+            pantsColor = 0x222222;
+            break;
+        case 'knight':
+            skinColor = 0xFFDBB4;
+            shirtColor = 0x888888;
+            pantsColor = 0x666666;
+            break;
+        case 'wizard':
+            skinColor = 0xFFDBB4;
+            shirtColor = 0x4B0082;
+            pantsColor = 0x2E0854;
+            break;
+        case 'demon':
+            skinColor = 0xFF4444;
+            shirtColor = 0x222222;
+            pantsColor = 0x111111;
+            break;
+    }
+
+    if (isZombie) {
+        skinColor = 0x6B8E23;
+        shirtColor = 0x4A4A4A;
+        pantsColor = 0x2F2F2F;
+    }
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -2438,37 +2489,26 @@ function createUI(scene) {
         drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
     });
 
-    // Botón agregar (+) - tercero desde la derecha
+    // Botón de NPCs (antes era +, ahora muestra menú de NPCs desbloqueados)
     const spawnX = teamX - margin - btnSize;
-    const spawnButton = scene.add.graphics();
-    spawnButton.fillStyle(0x44AA44, 1);
-    spawnButton.fillRoundedRect(spawnX, topY, btnSize, btnSize, 8);
-    spawnButton.fillStyle(0xFFFFFF, 1);
-    spawnButton.fillRect(spawnX + btnSize/2 - 2, topY + 10, 4, btnSize - 20);
-    spawnButton.fillRect(spawnX + 10, topY + btnSize/2 - 2, btnSize - 20, 4);
+    npcButton = scene.add.graphics();
+    npcButton.setDepth(100);
+    drawNpcButton(spawnX, topY, btnSize);
 
     const spawnZone = scene.add.zone(spawnX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
     spawnZone.setInteractive();
+    spawnZone.setDepth(100);
     spawnZone.on('pointerdown', () => {
-        if (ragdolls.length >= MAX_RAGDOLLS) {
-            const maxText = sceneRef.add.text(game.scale.width / 2, 80, 'Máx ' + MAX_RAGDOLLS, {
-                font: 'bold 14px Arial',
-                fill: '#FF4444',
-                stroke: '#FFFFFF',
-                strokeThickness: 2
-            }).setOrigin(0.5).setDepth(100);
-            sceneRef.tweens.add({
-                targets: maxText,
-                alpha: 0,
-                y: 60,
-                duration: 800,
-                onComplete: () => maxText.destroy()
-            });
-            return;
-        }
-        const newX = Phaser.Math.Between(80, game.scale.width - 80);
-        createRagdoll(sceneRef, newX, game.scale.height - 150, teamColors[currentTeam]);
+        toggleNpcMenu();
     });
+
+    // Menú de NPCs
+    const npcMenuX = spawnX + btnSize/2;
+    const npcMenuY = topY + btnSize + 5;
+    npcMenu = scene.add.container(npcMenuX, npcMenuY);
+    npcMenu.setDepth(101);
+    npcMenu.setVisible(false);
+    createNpcMenu(scene, npcMenu);
 
     // Botón de armas - cuarto desde la derecha
     const weaponX = spawnX - margin - btnSize;
@@ -2595,8 +2635,7 @@ function createUI(scene) {
         { id: 'blackhole', emoji: '🕳️' },
         { id: 'agua', emoji: '🌊' },
         { id: 'lava', emoji: '🌋' },
-        { id: 'hielo', emoji: '🧊' },
-        { id: 'espacio', emoji: '🚀' }
+        { id: 'hielo', emoji: '🧊' }
     ];
 
     const mapMenuW = 5 * 50 + 10;
@@ -2781,6 +2820,10 @@ function toggleWeaponMenu() {
         mapMenu.setVisible(false);
         mapMenuOpen = false;
     }
+    if (npcMenuOpen) {
+        npcMenu.setVisible(false);
+        npcMenuOpen = false;
+    }
 }
 
 function toggleMapMenu() {
@@ -2790,6 +2833,136 @@ function toggleMapMenu() {
         weaponMenu.setVisible(false);
         weaponMenuOpen = false;
     }
+    if (npcMenuOpen) {
+        npcMenu.setVisible(false);
+        npcMenuOpen = false;
+    }
+}
+
+// === NPC MENU FUNCTIONS ===
+let npcBtnPos = { x: 0, y: 0, size: 50 };
+
+function drawNpcButton(x, y, size) {
+    if (x !== undefined) npcBtnPos = { x, y, size };
+    const { x: bx, y: by, size: bs } = npcBtnPos;
+
+    npcButton.clear();
+    npcButton.fillStyle(0x44AA44, 1);
+    npcButton.fillRoundedRect(bx, by, bs, bs, 8);
+
+    // Mostrar emoji del NPC actual
+    const npcEmojis = {
+        'normal': '🧑',
+        'ninja': '🥷',
+        'robot': '🤖',
+        'alien': '👽',
+        'pirata': '🏴‍☠️',
+        'knight': '🛡️',
+        'wizard': '🧙',
+        'demon': '👹'
+    };
+
+    if (!npcButton.emojiText) {
+        npcButton.emojiText = sceneRef.add.text(bx + bs/2, by + bs/2, npcEmojis[currentNpcType] || '🧑', {
+            font: '24px Arial'
+        }).setOrigin(0.5).setDepth(101);
+    } else {
+        npcButton.emojiText.setText(npcEmojis[currentNpcType] || '🧑');
+        npcButton.emojiText.setPosition(bx + bs/2, by + bs/2);
+    }
+}
+
+function toggleNpcMenu() {
+    npcMenuOpen = !npcMenuOpen;
+    npcMenu.setVisible(npcMenuOpen);
+
+    // Actualizar menú con NPCs desbloqueados
+    if (npcMenuOpen) {
+        updateNpcMenu();
+    }
+
+    if (weaponMenuOpen) {
+        weaponMenu.setVisible(false);
+        weaponMenuOpen = false;
+    }
+    if (mapMenuOpen) {
+        mapMenu.setVisible(false);
+        mapMenuOpen = false;
+    }
+}
+
+function createNpcMenu(scene, container) {
+    // Se llenará dinámicamente en updateNpcMenu
+}
+
+function updateNpcMenu() {
+    if (!npcMenu) return;
+    npcMenu.removeAll(true);
+
+    // Obtener NPCs desbloqueados
+    const unlockedNpcs = shopItems.npcs.filter(npc => unlockedItems.npcs.includes(npc.id));
+
+    const cols = 4;
+    const itemW = 55;
+    const itemH = 55;
+    const menuW = cols * itemW + 10;
+    const menuH = Math.ceil(unlockedNpcs.length / cols) * itemH + 10;
+
+    const menuBg = sceneRef.add.graphics();
+    menuBg.fillStyle(0x333333, 0.95);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    npcMenu.add(menuBg);
+
+    unlockedNpcs.forEach((npc, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const bx = -menuW/2 + 5 + col * itemW;
+        const by = 5 + row * itemH;
+
+        const isSelected = currentNpcType === npc.id;
+
+        const btn = sceneRef.add.graphics();
+        btn.fillStyle(isSelected ? 0x44AA44 : 0x555555, 1);
+        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        npcMenu.add(btn);
+
+        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, npc.emoji, {
+            font: '24px Arial'
+        }).setOrigin(0.5);
+        npcMenu.add(txt);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        zoneGraphic.setInteractive();
+        npcMenu.add(zoneGraphic);
+        zoneGraphic.on('pointerdown', () => {
+            currentNpcType = npc.id;
+            spawnNpc(npc.id);
+            npcMenu.setVisible(false);
+            npcMenuOpen = false;
+            drawNpcButton();
+        });
+    });
+}
+
+function spawnNpc(npcType) {
+    if (ragdolls.length >= MAX_RAGDOLLS) {
+        const maxText = sceneRef.add.text(game.scale.width / 2, 80, 'Máx ' + MAX_RAGDOLLS, {
+            font: 'bold 14px Arial',
+            fill: '#FF4444',
+            stroke: '#FFFFFF',
+            strokeThickness: 2
+        }).setOrigin(0.5).setDepth(100);
+        sceneRef.tweens.add({
+            targets: maxText,
+            alpha: 0,
+            y: 60,
+            duration: 800,
+            onComplete: () => maxText.destroy()
+        });
+        return;
+    }
+    const newX = Phaser.Math.Between(80, game.scale.width - 80);
+    createRagdoll(sceneRef, newX, game.scale.height - 150, teamColors[currentTeam], npcType);
 }
 
 function changeMap(mapId) {
@@ -2934,12 +3107,6 @@ function changeMap(mapId) {
                 const ax = Math.random() * game.scale.width;
                 sceneRef.mapOverlay.fillEllipse(ax, 100 + i * 40, 150, 30);
             }
-            break;
-        case 'espacio':
-            sceneRef.matter.world.setGravity(0, 0); // Sin gravedad
-            // Cielo negro espacial
-            sceneRef.mapOverlay.fillStyle(0x000011, 0.8);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
@@ -4159,28 +4326,6 @@ function updateMapEffects() {
         }));
     } else if (sceneRef.iceGraphics) {
         sceneRef.iceGraphics.clear();
-    }
-
-    // Espacio - estrellas y sin fricción
-    if (currentMap === 'espacio') {
-        if (!sceneRef.spaceGraphics) {
-            sceneRef.spaceGraphics = sceneRef.add.graphics();
-            sceneRef.spaceGraphics.setDepth(-6);
-        }
-        sceneRef.spaceGraphics.clear();
-        // Estrellas
-        for (let i = 0; i < 50; i++) {
-            const sx = (i * 137) % game.scale.width;
-            const sy = (i * 89) % game.scale.height;
-            const twinkle = Math.sin(Date.now()/300 + i) * 0.5 + 0.5;
-            sceneRef.spaceGraphics.fillStyle(0xFFFFFF, twinkle);
-            sceneRef.spaceGraphics.fillCircle(sx, sy, 1);
-        }
-        // Planeta de fondo
-        sceneRef.spaceGraphics.fillStyle(0x4444AA, 0.5);
-        sceneRef.spaceGraphics.fillCircle(game.scale.width - 100, game.scale.height - 100, 80);
-    } else if (sceneRef.spaceGraphics) {
-        sceneRef.spaceGraphics.clear();
     }
 
     // === EFECTOS DE NUEVAS ARMAS ===
