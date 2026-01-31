@@ -3032,103 +3032,52 @@ function createPartTexture(scene, name, width, height, color, isHead = false, np
             graphics.strokeRoundedRect(width/4, 0, width/2, height, 3);
         }
     } else if (npcType === 'ninja') {
-        // Dibujar ninja con máscara
         if (isHead) {
-            // Cabeza con máscara ninja negra
-            graphics.fillStyle(0x111111, 1); // Negro máscara
+            graphics.fillStyle(0x111111, 1);
             graphics.fillCircle(width/2, height/2, width/2);
-            // Banda blanca en la frente
             graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillRect(0, height/2 - 6, width, 4);
-            // Colas de la banda blancas
             graphics.fillTriangle(width + 2, height/2 - 6, width + 8, height/2 - 8, width + 6, height/2 - 2);
-            graphics.fillTriangle(width + 2, height/2 - 2, width + 10, height/2, width + 8, height/2 + 4);
-            // Solo los ojos visibles (blancos con pupila)
-            graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillEllipse(width/2 - 4, height/2, 5, 3);
             graphics.fillEllipse(width/2 + 4, height/2, 5, 3);
-            // Pupilas
             graphics.fillStyle(0x000000, 1);
             graphics.fillCircle(width/2 - 4, height/2, 1.5);
             graphics.fillCircle(width/2 + 4, height/2, 1.5);
         } else if (name === 'torso') {
-            // Traje ninja negro con cinturón
             graphics.fillStyle(0x111111, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Cinturón blanco
             graphics.fillStyle(0xFFFFFF, 1);
             graphics.fillRect(0, height/2 - 3, width, 6);
-            // Línea del traje
-            graphics.lineStyle(1, 0x222222, 1);
-            graphics.lineBetween(width/2, 0, width/2, height/2 - 3);
         } else {
-            // Brazos/piernas ninja negros
             graphics.fillStyle(0x111111, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Vendas blancas
             graphics.lineStyle(2, 0xFFFFFF, 0.7);
             for (let i = 0; i < 3; i++) {
-                const y = 5 + i * (height / 3);
-                graphics.lineBetween(0, y, width, y + 3);
+                graphics.lineBetween(0, 5 + i * (height / 3), width, 8 + i * (height / 3));
             }
         }
-    } else if (isHead) {
-        graphics.fillStyle(color, 1);
-        graphics.fillCircle(width/2, height/2, width/2);
-        graphics.fillStyle(0x000000, 1);
-        graphics.fillCircle(width/2 - 4, height/2 - 2, 2);
-        graphics.fillCircle(width/2 + 4, height/2 - 2, 2);
-        graphics.fillRect(width/2 - 3, height/2 + 5, 6, 2);
     } else if (npcType === 'fairy') {
-        // HADA MÁGICA - colores pastel y brillos
         if (isHead) {
-            // Cara del hada (piel clara con brillo)
-            graphics.fillStyle(0xFFE4E1, 1); // Rosa claro
+            graphics.fillStyle(0xFFE4E1, 1);
             graphics.fillCircle(width/2, height/2, width/2);
-            // Mejillas rosadas
             graphics.fillStyle(0xFFB6C1, 0.6);
             graphics.fillCircle(width/2 - 5, height/2 + 2, 3);
             graphics.fillCircle(width/2 + 5, height/2 + 2, 3);
-            // Ojos grandes brillantes
-            graphics.fillStyle(0x9370DB, 1); // Púrpura
+            graphics.fillStyle(0x9370DB, 1);
             graphics.fillEllipse(width/2 - 4, height/2 - 1, 5, 4);
             graphics.fillEllipse(width/2 + 4, height/2 - 1, 5, 4);
-            // Pupilas con brillo
             graphics.fillStyle(0x000000, 1);
-            graphics.fillCircle(width/2 - 4, height/2 - 1, 2);
-            graphics.fillCircle(width/2 + 4, height/2 - 1, 2);
-            graphics.fillStyle(0xFFFFFF, 1);
-            graphics.fillCircle(width/2 - 5, height/2 - 2, 1);
-            graphics.fillCircle(width/2 + 3, height/2 - 2, 1);
-            // Boca pequeña sonriente
-            graphics.lineStyle(1, 0xFF69B4, 1);
-            graphics.beginPath();
-            graphics.arc(width/2, height/2 + 4, 3, 0, Math.PI, false);
-            graphics.strokePath();
-            // Corona/tiara de flores
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 1);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 1);
             graphics.fillStyle(0xFFD700, 1);
             graphics.fillCircle(width/2 - 5, height/2 - 8, 2);
             graphics.fillCircle(width/2, height/2 - 9, 2);
             graphics.fillCircle(width/2 + 5, height/2 - 8, 2);
-            graphics.fillStyle(0xFF69B4, 1);
-            graphics.fillCircle(width/2 - 5, height/2 - 8, 1);
-            graphics.fillCircle(width/2, height/2 - 9, 1);
-            graphics.fillCircle(width/2 + 5, height/2 - 8, 1);
         } else if (name === 'torso') {
-            // Vestido de hada con pétalos
-            graphics.fillStyle(0xDDA0DD, 1); // Plum/lila
+            graphics.fillStyle(0xDDA0DD, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Pétalos del vestido
             graphics.fillStyle(0xFF69B4, 0.8);
-            graphics.fillTriangle(0, height, width/4, height - 10, width/2 - 5, height);
-            graphics.fillTriangle(width/2 - 5, height, width/2 + 5, height - 12, width, height);
-            graphics.fillTriangle(width * 3/4, height, width, height - 8, width, height);
-            // Detalles brillantes
-            graphics.fillStyle(0xFFFFFF, 0.5);
-            graphics.fillCircle(width/4, height/3, 2);
-            graphics.fillCircle(width * 3/4, height/2, 2);
-            graphics.fillCircle(width/2, height/4, 2);
-            // Cinturón de flores
+            graphics.fillTriangle(0, height, width/4, height - 10, width/2, height);
             graphics.fillStyle(0x98FB98, 1);
             graphics.fillRect(0, height/3, width, 4);
             graphics.fillStyle(0xFFFF00, 1);
@@ -3136,14 +3085,408 @@ function createPartTexture(scene, name, width, height, color, isHead = false, np
             graphics.fillCircle(width/2, height/3 + 2, 2);
             graphics.fillCircle(width * 3/4, height/3 + 2, 2);
         } else {
-            // Brazos/piernas del hada (piel clara)
             graphics.fillStyle(0xFFE4E1, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            // Brillo mágico
-            graphics.fillStyle(0xFFFFFF, 0.4);
-            graphics.fillCircle(width/2, height/3, 2);
         }
+    } else if (npcType === 'robot') {
+        if (isHead) {
+            graphics.fillStyle(0x888888, 1);
+            graphics.fillRect(1, 1, width-2, height-2);
+            graphics.fillStyle(0x444444, 1);
+            graphics.fillRect(width/2 - 1, 0, 2, 4);
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, 1, 2);
+            graphics.fillRect(width/2 - 6, height/2 - 3, 4, 4);
+            graphics.fillRect(width/2 + 2, height/2 - 3, 4, 4);
+            graphics.fillStyle(0x333333, 1);
+            graphics.fillRect(width/2 - 5, height/2 + 4, 10, 4);
+            graphics.lineStyle(1, 0xAAAAAA, 1);
+            graphics.strokeRect(1, 1, width-2, height-2);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x777777, 1);
+            graphics.fillRect(0, 0, width, height);
+            graphics.fillStyle(0x333333, 1);
+            graphics.fillRect(width/4, 4, width/2, height/2);
+            graphics.fillStyle(0x00FF00, 1);
+            graphics.fillCircle(width/2 - 4, 10, 2);
+            graphics.fillStyle(0xFFFF00, 1);
+            graphics.fillCircle(width/2 + 4, 10, 2);
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, 18, 2);
+        } else {
+            graphics.fillStyle(0x666666, 1);
+            graphics.fillRect(0, 0, width, height);
+            graphics.fillStyle(0x444444, 1);
+            graphics.fillEllipse(width/2, height/3, width-2, 6);
+            graphics.fillEllipse(width/2, height*2/3, width-2, 6);
+        }
+    } else if (npcType === 'alien') {
+        if (isHead) {
+            graphics.fillStyle(0x9BAA9B, 1);
+            graphics.fillEllipse(width/2, height/2 + 2, width, height + 4);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillEllipse(width/2 - 5, height/2, 8, 10);
+            graphics.fillEllipse(width/2 + 5, height/2, 8, 10);
+            graphics.fillStyle(0x333333, 1);
+            graphics.fillCircle(width/2 - 6, height/2 - 2, 1);
+            graphics.fillCircle(width/2 + 4, height/2 - 2, 1);
+            graphics.fillStyle(0x666666, 1);
+            graphics.fillEllipse(width/2, height/2 + 6, 3, 2);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x8A9A8A, 1);
+            graphics.fillEllipse(width/2, height/2, width - 4, height);
+        } else {
+            graphics.fillStyle(0x8A9A8A, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'wizard') {
+        if (isHead) {
+            graphics.fillStyle(0xFFDBB4, 1);
+            graphics.fillCircle(width/2, height/2 + 2, width/2 - 2);
+            graphics.fillStyle(0x6A0DAD, 1);
+            graphics.fillTriangle(width/2, -8, width + 2, height/2 - 2, -2, height/2 - 2);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(width/2, 2, 2);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 3, height/2, 1.5);
+            graphics.fillCircle(width/2 + 3, height/2, 1.5);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2, height/2 + 8, 10, 8);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x6A0DAD, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0x8B4513, 1);
+            graphics.fillRect(0, height/2 - 2, width, 4);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(width/4, height/4, 2);
+            graphics.fillCircle(width*3/4, height*3/4, 2);
+        } else {
+            graphics.fillStyle(0x6A0DAD, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'demon') {
+        if (isHead) {
+            graphics.fillStyle(0xCC2222, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x222222, 1);
+            graphics.fillTriangle(2, height/2 - 4, -4, -4, 6, height/2 - 6);
+            graphics.fillTriangle(width - 2, height/2 - 4, width + 4, -4, width - 6, height/2 - 6);
+            graphics.fillStyle(0xFFFF00, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 6, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 6, 4);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillRect(width/2 - 4.5, height/2 - 2, 1, 3);
+            graphics.fillRect(width/2 + 3.5, height/2 - 2, 1, 3);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillTriangle(width/2 - 3, height/2 + 5, width/2 - 4, height/2 + 9, width/2 - 2, height/2 + 5);
+            graphics.fillTriangle(width/2 + 3, height/2 + 5, width/2 + 4, height/2 + 9, width/2 + 2, height/2 + 5);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xBB2222, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.lineStyle(2, 0x660000, 1);
+            graphics.lineBetween(width/4, 5, width/4, height - 5);
+            graphics.lineBetween(width*3/4, 5, width*3/4, height - 5);
+        } else {
+            graphics.fillStyle(0xBB2222, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'vampire') {
+        if (isHead) {
+            graphics.fillStyle(0xF5F5F5, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillEllipse(width/2, 2, width - 2, 10);
+            graphics.fillTriangle(width/2, 0, width/2 - 4, 5, width/2 + 4, 5);
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 4, 3);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 4, 3);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 1);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 1);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillTriangle(width/2 - 2, height/2 + 5, width/2 - 3, height/2 + 9, width/2 - 1, height/2 + 5);
+            graphics.fillTriangle(width/2 + 2, height/2 + 5, width/2 + 3, height/2 + 9, width/2 + 1, height/2 + 5);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillTriangle(0, 0, width/2, 8, width, 0);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillTriangle(width/2 - 4, 2, width/2, height/2, width/2 + 4, 2);
+        } else {
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'zombie') {
+        if (isHead) {
+            graphics.fillStyle(0x7A9A6A, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x3A3A2A, 1);
+            graphics.fillEllipse(width/2 - 5, 3, 8, 6);
+            graphics.fillEllipse(width/2 + 4, 4, 6, 6);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 6, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 6, 4);
+            graphics.fillStyle(0x8B0000, 1);
+            graphics.fillRect(width/2 + 5, height/2 - 4, 3, 5);
+            graphics.fillStyle(0x333333, 1);
+            graphics.fillEllipse(width/2, height/2 + 6, 8, 6);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x5A5A4A, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0x6A8A5A, 1);
+            graphics.fillRect(width/4, height/3, 4, 10);
+            graphics.fillRect(width*2/3, height/2, 5, 8);
+        } else {
+            graphics.fillStyle(0x4A4A3A, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0x6A8A5A, 1);
+            graphics.fillRect(width/3, height/2, 3, 6);
+        }
+    } else if (npcType === 'ghost') {
+        if (isHead) {
+            graphics.fillStyle(0xFFFFFF, 0.8);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 2, 6, 8);
+            graphics.fillEllipse(width/2 + 4, height/2 - 2, 6, 8);
+            graphics.fillEllipse(width/2, height/2 + 5, 6, 8);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xFFFFFF, 0.7);
+            graphics.fillRoundedRect(0, 0, width, height, 5);
+        } else {
+            graphics.fillStyle(0xFFFFFF, 0.6);
+            graphics.fillRoundedRect(0, 0, width, height - 5, 3);
+            graphics.fillTriangle(0, height - 8, width/3, height, 0, height);
+            graphics.fillTriangle(width/3, height, width*2/3, height - 8, width, height);
+        }
+    } else if (npcType === 'superhero') {
+        if (isHead) {
+            graphics.fillStyle(0x2244AA, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0xFFDBB4, 1);
+            graphics.fillEllipse(width/2, height/2 + 4, width - 4, height/2);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 2, 6, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 2, 6, 4);
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillEllipse(width/2, 2, 12, 8);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x2244AA, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(width/2, height/3, 6);
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRect(width/2 - 3, height/3 - 4, 6, 8);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(0, height - 8, width, 4);
+        } else {
+            if (name.includes('leg')) {
+                graphics.fillStyle(0xCC0000, 1);
+            } else {
+                graphics.fillStyle(0x2244AA, 1);
+            }
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'villain') {
+        if (isHead) {
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 6, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 6, 4);
+            graphics.fillStyle(0xFFAAAA, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 2, 1);
+            graphics.fillCircle(width/2 + 3, height/2 - 2, 1);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(width/2, height/3, 5);
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillCircle(width/2 - 2, height/3 - 1, 1);
+            graphics.fillCircle(width/2 + 2, height/3 - 1, 1);
+            graphics.fillRect(width/2 - 2, height/3 + 2, 4, 2);
+        } else {
+            graphics.fillStyle(0x1a1a1a, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            if (name.includes('leg')) {
+                graphics.fillStyle(0x444444, 1);
+                graphics.fillTriangle(width/2, height - 3, width/2 - 3, height, width/2 + 3, height);
+            }
+        }
+    } else if (npcType === 'astronaut') {
+        if (isHead) {
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0xDAA520, 0.7);
+            graphics.fillEllipse(width/2, height/2, width - 6, height - 6);
+            graphics.fillStyle(0xFFFFFF, 0.5);
+            graphics.fillEllipse(width/2 - 3, height/2 - 3, 6, 4);
+            graphics.lineStyle(2, 0xCCCCCC, 1);
+            graphics.strokeCircle(width/2, height/2, width/2 - 1);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xF5F5F5, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xCCCCCC, 1);
+            graphics.fillRect(width - 6, 5, 6, height - 10);
+            graphics.fillStyle(0x0044AA, 1);
+            graphics.fillRect(2, 5, 8, 8);
+            graphics.lineStyle(1, 0xAAAAAA, 1);
+            graphics.lineBetween(width/2, 0, width/2, height);
+        } else {
+            graphics.fillStyle(0xF5F5F5, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.lineStyle(1, 0xAAAAAA, 1);
+            graphics.lineBetween(0, height/2, width, height/2);
+        }
+    } else if (npcType === 'king') {
+        if (isHead) {
+            graphics.fillStyle(0xFFDBB4, 1);
+            graphics.fillCircle(width/2, height/2 + 2, width/2 - 2);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(2, 0, width - 4, height/2 - 4);
+            graphics.fillTriangle(2, 0, 2, height/2 - 4, 6, 4);
+            graphics.fillTriangle(width/2, 0, width/2 - 4, height/2 - 6, width/2 + 4, height/2 - 6);
+            graphics.fillTriangle(width - 2, 0, width - 2, height/2 - 4, width - 6, 4);
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, 3, 2);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 3, height/2, 1.5);
+            graphics.fillCircle(width/2 + 3, height/2, 1.5);
+            graphics.fillStyle(0x8B4513, 1);
+            graphics.fillEllipse(width/2, height/2 + 7, 10, 8);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xFFF8DC, 1);
+            graphics.fillRect(0, 0, 6, height);
+            graphics.fillRect(width - 6, 0, 6, height);
+            graphics.fillStyle(0x000000, 1);
+            for (let i = 0; i < 4; i++) {
+                graphics.fillCircle(3, 5 + i * 9, 1);
+                graphics.fillCircle(width - 3, 5 + i * 9, 1);
+            }
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(width/2 - 1, 5, 2, height - 10);
+        } else {
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+        }
+    } else if (npcType === 'queen') {
+        if (isHead) {
+            graphics.fillStyle(0xFFDBB4, 1);
+            graphics.fillCircle(width/2, height/2 + 2, width/2 - 2);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(3, -2, width - 6, height/2);
+            graphics.fillTriangle(width/2, -8, width/2 - 3, 0, width/2 + 3, 0);
+            graphics.fillStyle(0x0000FF, 1);
+            graphics.fillCircle(width/2, -5, 2);
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(6, 0, 1.5);
+            graphics.fillCircle(width - 6, 0, 1.5);
+            graphics.fillStyle(0x8B4513, 1);
+            graphics.fillEllipse(2, height/2 + 4, 6, 16);
+            graphics.fillEllipse(width - 2, height/2 + 4, 6, 16);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 3, height/2, 1.5);
+            graphics.fillCircle(width/2 + 3, height/2, 1.5);
+            graphics.fillStyle(0xCC4444, 1);
+            graphics.fillEllipse(width/2, height/2 + 5, 6, 3);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(0, 0, width, 3);
+            graphics.fillRect(0, height - 3, width, 3);
+            graphics.fillStyle(0xFFFFF0, 1);
+            for (let i = 0; i < 5; i++) {
+                graphics.fillCircle(width/2 - 8 + i * 4, 6, 2);
+            }
+        } else {
+            graphics.fillStyle(0xCC0000, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            if (name.includes('arm')) {
+                graphics.fillStyle(0xFFFFFF, 1);
+                graphics.fillRect(0, height - 8, width, 8);
+            }
+        }
+    } else if (npcType === 'mermaid') {
+        if (isHead) {
+            graphics.fillStyle(0xB0E0E6, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x20B2AA, 1);
+            graphics.fillEllipse(0, height/2, 8, 20);
+            graphics.fillEllipse(width, height/2, 8, 20);
+            graphics.fillEllipse(width/2, 2, 16, 8);
+            graphics.fillStyle(0x000080, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 2);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 2);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0xB0E0E6, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0xFFB6C1, 1);
+            graphics.fillCircle(width/3, 8, 5);
+            graphics.fillCircle(width*2/3, 8, 5);
+            graphics.fillStyle(0x40E0D0, 1);
+            for (let i = 0; i < 3; i++) {
+                graphics.fillEllipse(width/4 + i * width/4, height - 5, 10, 6);
+            }
+        } else {
+            graphics.fillStyle(0x40E0D0, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            graphics.fillStyle(0x20B2AA, 1);
+            for (let y = 0; y < height; y += 6) {
+                for (let x = (Math.floor(y/6) % 2) * 3; x < width; x += 6) {
+                    graphics.fillEllipse(x, y, 6, 4);
+                }
+            }
+            if (name.includes('leg')) {
+                graphics.fillStyle(0x48D1CC, 1);
+                graphics.fillTriangle(0, height - 5, -3, height + 3, width/2, height);
+                graphics.fillTriangle(width/2, height, width + 3, height + 3, width, height - 5);
+            }
+        }
+    } else if (npcType === 'genie') {
+        if (isHead) {
+            graphics.fillStyle(0x4169E1, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            graphics.fillStyle(0x6495ED, 1);
+            graphics.fillEllipse(width/2 - 3, 4, 6, 4);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 6, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 6, 4);
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 1);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 1);
+            graphics.fillStyle(0x4169E1, 1);
+            graphics.fillTriangle(0, height/2, -4, height/2 - 4, 2, height/2 - 2);
+            graphics.fillTriangle(width, height/2, width + 4, height/2 - 4, width - 2, height/2 - 2);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(-2, height/2, 2);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2, height/2 + 5, 10, 6);
+        } else if (name === 'torso') {
+            graphics.fillStyle(0x4169E1, 1);
+            graphics.fillRoundedRect(0, 0, width, height * 2/3, 3);
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillRect(0, 0, width, 4);
+            graphics.fillStyle(0x87CEEB, 0.6);
+            graphics.fillEllipse(width/2, height - 5, width + 10, 20);
+        } else {
+            graphics.fillStyle(0x87CEEB, 0.5);
+            graphics.fillEllipse(width/2, height/2, width + 6, height);
+        }
+    } else if (isHead) {
+        // NPC Normal - cabeza
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(width/2, height/2, width/2);
+        graphics.fillStyle(0x000000, 1);
+        graphics.fillCircle(width/2 - 4, height/2 - 2, 2);
+        graphics.fillCircle(width/2 + 4, height/2 - 2, 2);
+        graphics.fillRect(width/2 - 3, height/2 + 5, 6, 2);
     } else {
+        // NPC Normal - cuerpo
         graphics.fillStyle(color, 1);
         graphics.fillRoundedRect(0, 0, width, height, 3);
         graphics.lineStyle(1, 0x000000, 0.2);
@@ -4000,18 +4343,22 @@ function changeMap(mapId) {
         case 'playa':
             console.log('PLAYA: changeMap ejecutado');
             sceneRef.matter.world.setGravity(0, 0.8);
-            // Playa: mostrar sol, ocultar árboles normales, mostrar suelo de arena
-            if (sun) sun.setVisible(true);
+            // Playa tropical al atardecer
+            if (sun) sun.setVisible(false); // Usamos sol custom grande
             if (groundGraphics) groundGraphics.setVisible(false);
             if (groundGraphics && groundGraphics.beachGround) groundGraphics.beachGround.setVisible(true);
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
-            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
-            // Cielo azul tropical con gradiente
-            sceneRef.mapOverlay.fillStyle(0x4ECDC4, 0.4);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo de atardecer (naranja -> rosa -> azul)
+            sceneRef.mapOverlay.fillStyle(0xFF4500, 0.5);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height * 0.25);
+            sceneRef.mapOverlay.fillStyle(0xFF6347, 0.4);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.15, game.scale.width, game.scale.height * 0.25);
+            sceneRef.mapOverlay.fillStyle(0xFFB6C1, 0.35);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.35, game.scale.width, game.scale.height * 0.25);
             sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.3);
-            sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.55, game.scale.width, game.scale.height * 0.45);
             break;
         case 'volcan':
             sceneRef.matter.world.setGravity(0, 0.8);
