@@ -3799,6 +3799,150 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.3);
             sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
             break;
+        case 'volcan':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Volcán: cielo rojo/naranja, sin árboles, humo
+            if (sun) sun.setVisible(true);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.rockGround) groundGraphics.rockGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo volcánico rojo intenso
+            sceneRef.mapOverlay.fillStyle(0x8B0000, 0.6);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0xFF4500, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
+            break;
+        case 'jungla':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Jungla: muy verde, muchas plantas
+            if (sun) sun.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(true); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo verde tropical
+            sceneRef.mapOverlay.fillStyle(0x006400, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x228B22, 0.2);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
+            break;
+        case 'oceano':
+            sceneRef.matter.world.setGravity(0, 0.2);
+            // Océano profundo: muy azul, flotación
+            if (sun) sun.setVisible(false);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.sandGround) groundGraphics.sandGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Océano azul profundo
+            sceneRef.mapOverlay.fillStyle(0x000080, 0.8);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x0000CD, 0.5);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
+            break;
+        case 'apocalipsis':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Apocalipsis: oscuro, cenizas
+            if (sun) sun.setVisible(false);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo apocalíptico
+            sceneRef.mapOverlay.fillStyle(0x1C1C1C, 0.9);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x8B0000, 0.3);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.6, game.scale.width, game.scale.height * 0.4);
+            break;
+        case 'dulces':
+            sceneRef.matter.world.setGravity(0, 0.6);
+            // Mundo de dulces: colores pastel
+            if (sun) sun.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo rosa candy
+            sceneRef.mapOverlay.fillStyle(0xFFB6C1, 0.6);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0xFF69B4, 0.3);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
+            break;
+        case 'montanas':
+            sceneRef.matter.world.setGravity(0, 0.9);
+            // Montañas: gravedad un poco más alta, nieve
+            if (sun) sun.setVisible(true);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.iceGround) groundGraphics.iceGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo de montaña
+            sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0xB0C4DE, 0.3);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
+            break;
+        case 'pantano':
+            sceneRef.matter.world.setGravity(0, 0.7);
+            // Pantano: verde oscuro, niebla
+            if (sun) sun.setVisible(false);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo pantanoso
+            sceneRef.mapOverlay.fillStyle(0x2F4F4F, 0.7);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x556B2F, 0.4);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.7, game.scale.width, game.scale.height * 0.3);
+            break;
+        case 'cristales':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Cueva de cristales: oscuro con brillos
+            if (sun) sun.setVisible(false);
+            if (starsGraphics) starsGraphics.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cueva oscura con reflejos
+            sceneRef.mapOverlay.fillStyle(0x1a1a2e, 0.9);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            // Reflejos de cristales
+            sceneRef.mapOverlay.fillStyle(0x00CED1, 0.2);
+            sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.2, game.scale.height * 0.3, 100, 150);
+            sceneRef.mapOverlay.fillStyle(0x9400D3, 0.2);
+            sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.7, game.scale.height * 0.4, 120, 180);
+            sceneRef.mapOverlay.fillStyle(0xFF1493, 0.15);
+            sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.5, game.scale.height * 0.6, 80, 120);
+            break;
+        case 'ruinas':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Ruinas antiguas: arena y piedra
+            if (sun) sun.setVisible(true);
+            if (groundGraphics) groundGraphics.setVisible(false);
+            if (groundGraphics && groundGraphics.desertGround) groundGraphics.desertGround.setVisible(true);
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo egipcio
+            sceneRef.mapOverlay.fillStyle(0xD2B48C, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0xFFD700, 0.2);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
+            break;
+        case 'tormenta':
+            sceneRef.matter.world.setGravity(0, 0.8);
+            // Supertormenta: muy oscuro, lluvia intensa
+            if (sun) sun.setVisible(false);
+            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
+            // Cielo tormentoso extremo
+            sceneRef.mapOverlay.fillStyle(0x1C1C1C, 0.8);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x4A4A4A, 0.4);
+            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
+            break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
             // Sin overlay
@@ -5454,6 +5598,539 @@ function updateMapEffects() {
 
     } else if (sceneRef.beachGraphics) {
         sceneRef.beachGraphics.clear();
+    }
+
+    // === VOLCÁN EN ERUPCIÓN ===
+    if (currentMap === 'volcan') {
+        if (!sceneRef.volcanGraphics) {
+            sceneRef.volcanGraphics = sceneRef.add.graphics();
+            sceneRef.volcanGraphics.setDepth(-5);
+        }
+        sceneRef.volcanGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+        const volcanoX = w / 2;
+        const volcanoTop = groundY - 180;
+
+        // Volcán (montaña)
+        sceneRef.volcanGraphics.fillStyle(0x4a4a4a, 1);
+        sceneRef.volcanGraphics.fillTriangle(volcanoX - 150, groundY, volcanoX + 150, groundY, volcanoX, volcanoTop);
+        // Cráter
+        sceneRef.volcanGraphics.fillStyle(0x8B0000, 1);
+        sceneRef.volcanGraphics.fillEllipse(volcanoX, volcanoTop + 10, 40, 20);
+        // Lava en el cráter
+        sceneRef.volcanGraphics.fillStyle(0xFF4500, 1);
+        sceneRef.volcanGraphics.fillEllipse(volcanoX, volcanoTop + 10, 30, 15);
+
+        // Lava cayendo por los lados
+        const lavaTime = Date.now() / 100;
+        for (let i = 0; i < 3; i++) {
+            const lavaX = volcanoX + (i - 1) * 30;
+            const lavaY = volcanoTop + 20 + (lavaTime + i * 50) % 100;
+            sceneRef.volcanGraphics.fillStyle(0xFF4500, 0.9);
+            sceneRef.volcanGraphics.fillCircle(lavaX, lavaY, 8);
+            sceneRef.volcanGraphics.fillStyle(0xFFFF00, 0.7);
+            sceneRef.volcanGraphics.fillCircle(lavaX, lavaY - 3, 4);
+        }
+
+        // Humo saliendo
+        for (let i = 0; i < 8; i++) {
+            const smokeX = volcanoX + Math.sin(Date.now()/400 + i) * 30;
+            const smokeY = volcanoTop - 30 - i * 25 - ((Date.now()/50) % 40);
+            const smokeSize = 15 + i * 10;
+            sceneRef.volcanGraphics.fillStyle(0x555555, 0.5 - i * 0.05);
+            sceneRef.volcanGraphics.fillCircle(smokeX, smokeY, smokeSize);
+        }
+
+        // Rocas voladoras
+        for (let i = 0; i < 5; i++) {
+            const rockX = volcanoX + Math.sin(Date.now()/200 + i * 2) * (50 + i * 20);
+            const rockY = volcanoTop - 50 - ((Date.now()/8 + i * 80) % 200);
+            sceneRef.volcanGraphics.fillStyle(0x3d3d3d, 1);
+            sceneRef.volcanGraphics.fillCircle(rockX, rockY, 5 + i % 3);
+        }
+
+        // Cenizas cayendo
+        for (let i = 0; i < 20; i++) {
+            const ashX = (i * 80 + Date.now()/10) % w;
+            const ashY = (i * 60 + Date.now()/5) % h;
+            sceneRef.volcanGraphics.fillStyle(0x666666, 0.6);
+            sceneRef.volcanGraphics.fillCircle(ashX, ashY, 2);
+        }
+
+    } else if (sceneRef.volcanGraphics) {
+        sceneRef.volcanGraphics.clear();
+    }
+
+    // === JUNGLA ===
+    if (currentMap === 'jungla') {
+        if (!sceneRef.junglaGraphics) {
+            sceneRef.junglaGraphics = sceneRef.add.graphics();
+            sceneRef.junglaGraphics.setDepth(-6);
+        }
+        sceneRef.junglaGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Palmeras extra
+        for (let i = 0; i < 4; i++) {
+            const palmX = 80 + i * (w / 4);
+            const sway = Math.sin(Date.now()/1000 + i) * 5;
+            // Tronco
+            sceneRef.junglaGraphics.lineStyle(15, 0x8B4513, 1);
+            sceneRef.junglaGraphics.lineBetween(palmX, groundY, palmX + sway, groundY - 120);
+            // Hojas
+            sceneRef.junglaGraphics.fillStyle(0x228B22, 0.9);
+            for (let j = 0; j < 6; j++) {
+                const angle = -Math.PI/2 + (j - 2.5) * 0.4 + Math.sin(Date.now()/500 + j) * 0.1;
+                const leafX = palmX + sway + Math.cos(angle) * 50;
+                const leafY = groundY - 120 + Math.sin(angle) * 30;
+                sceneRef.junglaGraphics.fillEllipse(leafX, leafY, 30, 8);
+            }
+        }
+
+        // Pájaros volando
+        for (let i = 0; i < 3; i++) {
+            const birdX = ((Date.now()/10 + i * 200) % (w + 100)) - 50;
+            const birdY = 80 + i * 40 + Math.sin(Date.now()/200 + i) * 20;
+            sceneRef.junglaGraphics.lineStyle(2, 0x000000, 1);
+            sceneRef.junglaGraphics.lineBetween(birdX - 8, birdY, birdX, birdY - 5);
+            sceneRef.junglaGraphics.lineBetween(birdX, birdY - 5, birdX + 8, birdY);
+        }
+
+        // Lluvia ocasional
+        if (Math.sin(Date.now()/5000) > 0.5) {
+            sceneRef.junglaGraphics.lineStyle(1, 0x6699CC, 0.5);
+            for (let i = 0; i < 30; i++) {
+                const rx = (i * 40 + Date.now()/2) % w;
+                const ry = (Date.now()/3 + i * 30) % h;
+                sceneRef.junglaGraphics.lineBetween(rx, ry, rx - 2, ry + 15);
+            }
+        }
+
+    } else if (sceneRef.junglaGraphics) {
+        sceneRef.junglaGraphics.clear();
+    }
+
+    // === OCÉANO PROFUNDO ===
+    if (currentMap === 'oceano') {
+        if (!sceneRef.oceanoGraphics) {
+            sceneRef.oceanoGraphics = sceneRef.add.graphics();
+            sceneRef.oceanoGraphics.setDepth(-6);
+        }
+        sceneRef.oceanoGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+
+        // Burbujas subiendo
+        for (let i = 0; i < 15; i++) {
+            const bubbleX = (i * 70 + Math.sin(Date.now()/500 + i) * 20) % w;
+            const bubbleY = h - ((Date.now()/4 + i * 60) % h);
+            const bubbleSize = 3 + (i % 4);
+            sceneRef.oceanoGraphics.fillStyle(0xADD8E6, 0.6);
+            sceneRef.oceanoGraphics.fillCircle(bubbleX, bubbleY, bubbleSize);
+        }
+
+        // Peces nadando
+        for (let i = 0; i < 5; i++) {
+            const fishX = ((Date.now()/8 + i * 150) % (w + 100)) - 50;
+            const fishY = 150 + i * 80 + Math.sin(Date.now()/300 + i) * 30;
+            const fishColor = [0xFF6347, 0xFFD700, 0x00CED1, 0xFF69B4, 0x32CD32][i];
+            // Cuerpo
+            sceneRef.oceanoGraphics.fillStyle(fishColor, 0.9);
+            sceneRef.oceanoGraphics.fillEllipse(fishX, fishY, 15, 8);
+            // Cola
+            sceneRef.oceanoGraphics.fillTriangle(fishX - 15, fishY, fishX - 25, fishY - 8, fishX - 25, fishY + 8);
+            // Ojo
+            sceneRef.oceanoGraphics.fillStyle(0x000000, 1);
+            sceneRef.oceanoGraphics.fillCircle(fishX + 5, fishY - 2, 2);
+        }
+
+        // Medusa
+        const jellyX = w * 0.7 + Math.sin(Date.now()/1000) * 50;
+        const jellyY = h * 0.4 + Math.sin(Date.now()/800) * 30;
+        sceneRef.oceanoGraphics.fillStyle(0xFF69B4, 0.5);
+        sceneRef.oceanoGraphics.fillEllipse(jellyX, jellyY, 25, 15);
+        sceneRef.oceanoGraphics.lineStyle(2, 0xFF69B4, 0.4);
+        for (let t = 0; t < 5; t++) {
+            const tentX = jellyX - 15 + t * 8;
+            const wave = Math.sin(Date.now()/200 + t) * 5;
+            sceneRef.oceanoGraphics.lineBetween(tentX, jellyY + 10, tentX + wave, jellyY + 40);
+        }
+
+        // Física de flotación
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.body) {
+                p.setVelocity(p.body.velocity.x * 0.98, p.body.velocity.y * 0.98 - 0.3);
+            }
+        }));
+
+    } else if (sceneRef.oceanoGraphics) {
+        sceneRef.oceanoGraphics.clear();
+    }
+
+    // === APOCALIPSIS ===
+    if (currentMap === 'apocalipsis') {
+        if (!sceneRef.apocalipsisGraphics) {
+            sceneRef.apocalipsisGraphics = sceneRef.add.graphics();
+            sceneRef.apocalipsisGraphics.setDepth(-6);
+        }
+        sceneRef.apocalipsisGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Edificios destruidos
+        for (let i = 0; i < 4; i++) {
+            const bx = 80 + i * (w / 4);
+            const bh = 80 + (i % 3) * 40;
+            sceneRef.apocalipsisGraphics.fillStyle(0x2F2F2F, 1);
+            sceneRef.apocalipsisGraphics.fillRect(bx - 25, groundY - bh, 50, bh);
+            // Daños
+            sceneRef.apocalipsisGraphics.fillStyle(0x1a1a1a, 1);
+            sceneRef.apocalipsisGraphics.fillRect(bx - 20, groundY - bh + 20, 15, 20);
+            sceneRef.apocalipsisGraphics.fillRect(bx + 5, groundY - bh + 50, 12, 15);
+        }
+
+        // Fuego
+        for (let i = 0; i < 3; i++) {
+            const fireX = 150 + i * (w / 3);
+            const fireY = groundY - 20;
+            const flicker = Math.sin(Date.now()/100 + i) * 5;
+            sceneRef.apocalipsisGraphics.fillStyle(0xFF4500, 0.8);
+            sceneRef.apocalipsisGraphics.fillEllipse(fireX, fireY + flicker, 20, 30);
+            sceneRef.apocalipsisGraphics.fillStyle(0xFFFF00, 0.6);
+            sceneRef.apocalipsisGraphics.fillEllipse(fireX, fireY + flicker + 10, 10, 15);
+        }
+
+        // Cenizas cayendo
+        for (let i = 0; i < 25; i++) {
+            const ashX = (i * 50 + Date.now()/15) % w;
+            const ashY = (i * 40 + Date.now()/8) % h;
+            sceneRef.apocalipsisGraphics.fillStyle(0x555555, 0.5);
+            sceneRef.apocalipsisGraphics.fillCircle(ashX, ashY, 1.5);
+        }
+
+        // Calaveras en el suelo
+        for (let i = 0; i < 3; i++) {
+            const skullX = 100 + i * (w / 3);
+            sceneRef.apocalipsisGraphics.fillStyle(0xFFFACD, 0.8);
+            sceneRef.apocalipsisGraphics.fillCircle(skullX, groundY - 10, 8);
+            sceneRef.apocalipsisGraphics.fillStyle(0x000000, 1);
+            sceneRef.apocalipsisGraphics.fillCircle(skullX - 3, groundY - 12, 2);
+            sceneRef.apocalipsisGraphics.fillCircle(skullX + 3, groundY - 12, 2);
+        }
+
+    } else if (sceneRef.apocalipsisGraphics) {
+        sceneRef.apocalipsisGraphics.clear();
+    }
+
+    // === MUNDO DE DULCES ===
+    if (currentMap === 'dulces') {
+        if (!sceneRef.dulcesGraphics) {
+            sceneRef.dulcesGraphics = sceneRef.add.graphics();
+            sceneRef.dulcesGraphics.setDepth(-6);
+        }
+        sceneRef.dulcesGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Suelo de galleta
+        sceneRef.dulcesGraphics.fillStyle(0xD2691E, 1);
+        sceneRef.dulcesGraphics.fillRect(0, groundY, w, 50);
+        sceneRef.dulcesGraphics.fillStyle(0x8B4513, 0.5);
+        for (let i = 0; i < w; i += 30) {
+            sceneRef.dulcesGraphics.fillCircle(i + 15, groundY + 25, 5);
+        }
+
+        // Árboles de paleta
+        for (let i = 0; i < 3; i++) {
+            const lollipopX = 100 + i * (w / 3);
+            const colors = [0xFF69B4, 0x00CED1, 0xFFD700];
+            // Palo
+            sceneRef.dulcesGraphics.fillStyle(0xFFFFFF, 1);
+            sceneRef.dulcesGraphics.fillRect(lollipopX - 5, groundY - 100, 10, 100);
+            // Dulce
+            sceneRef.dulcesGraphics.fillStyle(colors[i], 1);
+            sceneRef.dulcesGraphics.fillCircle(lollipopX, groundY - 130, 35);
+            // Espiral
+            sceneRef.dulcesGraphics.lineStyle(4, 0xFFFFFF, 0.7);
+            sceneRef.dulcesGraphics.strokeCircle(lollipopX, groundY - 130, 20);
+            sceneRef.dulcesGraphics.strokeCircle(lollipopX, groundY - 130, 10);
+        }
+
+        // Caramelos flotando
+        for (let i = 0; i < 8; i++) {
+            const candyX = (i * 100 + Date.now()/20) % w;
+            const candyY = 100 + Math.sin(Date.now()/500 + i) * 30 + i * 20;
+            const candyColor = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFA500, 0xFF69B4][i];
+            sceneRef.dulcesGraphics.fillStyle(candyColor, 0.8);
+            sceneRef.dulcesGraphics.fillCircle(candyX, candyY, 10);
+            sceneRef.dulcesGraphics.fillStyle(0xFFFFFF, 0.5);
+            sceneRef.dulcesGraphics.fillCircle(candyX - 3, candyY - 3, 3);
+        }
+
+        // Nubes de algodón de azúcar
+        sceneRef.dulcesGraphics.fillStyle(0xFFB6C1, 0.7);
+        sceneRef.dulcesGraphics.fillEllipse(w * 0.2, 60, 80, 40);
+        sceneRef.dulcesGraphics.fillEllipse(w * 0.7, 80, 100, 50);
+
+    } else if (sceneRef.dulcesGraphics) {
+        sceneRef.dulcesGraphics.clear();
+    }
+
+    // === MONTAÑAS ===
+    if (currentMap === 'montanas') {
+        if (!sceneRef.montanasGraphics) {
+            sceneRef.montanasGraphics = sceneRef.add.graphics();
+            sceneRef.montanasGraphics.setDepth(-6);
+        }
+        sceneRef.montanasGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Montañas de fondo
+        sceneRef.montanasGraphics.fillStyle(0x708090, 1);
+        sceneRef.montanasGraphics.fillTriangle(0, groundY, w * 0.4, groundY, w * 0.2, groundY - 200);
+        sceneRef.montanasGraphics.fillTriangle(w * 0.3, groundY, w * 0.8, groundY, w * 0.55, groundY - 250);
+        sceneRef.montanasGraphics.fillTriangle(w * 0.6, groundY, w, groundY, w * 0.85, groundY - 180);
+
+        // Nieve en las cimas
+        sceneRef.montanasGraphics.fillStyle(0xFFFFFF, 1);
+        sceneRef.montanasGraphics.fillTriangle(w * 0.15, groundY - 160, w * 0.25, groundY - 160, w * 0.2, groundY - 200);
+        sceneRef.montanasGraphics.fillTriangle(w * 0.48, groundY - 200, w * 0.62, groundY - 200, w * 0.55, groundY - 250);
+        sceneRef.montanasGraphics.fillTriangle(w * 0.8, groundY - 140, w * 0.9, groundY - 140, w * 0.85, groundY - 180);
+
+        // Nieve cayendo
+        for (let i = 0; i < 30; i++) {
+            const snowX = (i * 40 + Date.now()/15) % w;
+            const snowY = (i * 35 + Date.now()/10) % h;
+            sceneRef.montanasGraphics.fillStyle(0xFFFFFF, 0.8);
+            sceneRef.montanasGraphics.fillCircle(snowX, snowY, 2);
+        }
+
+        // Águila volando
+        const eagleX = ((Date.now()/15) % (w + 200)) - 100;
+        const eagleY = 100 + Math.sin(Date.now()/500) * 30;
+        sceneRef.montanasGraphics.lineStyle(3, 0x3d3d3d, 1);
+        sceneRef.montanasGraphics.lineBetween(eagleX - 20, eagleY + 5, eagleX, eagleY);
+        sceneRef.montanasGraphics.lineBetween(eagleX, eagleY, eagleX + 20, eagleY + 5);
+
+    } else if (sceneRef.montanasGraphics) {
+        sceneRef.montanasGraphics.clear();
+    }
+
+    // === PANTANO ===
+    if (currentMap === 'pantano') {
+        if (!sceneRef.pantanoGraphics) {
+            sceneRef.pantanoGraphics = sceneRef.add.graphics();
+            sceneRef.pantanoGraphics.setDepth(-6);
+        }
+        sceneRef.pantanoGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Agua pantanosa
+        sceneRef.pantanoGraphics.fillStyle(0x556B2F, 0.8);
+        sceneRef.pantanoGraphics.fillRect(0, groundY - 20, w, 70);
+
+        // Burbujas de gas
+        for (let i = 0; i < 5; i++) {
+            if (Math.sin(Date.now()/1000 + i * 2) > 0.7) {
+                const bubX = 100 + i * (w / 5);
+                const bubY = groundY - 10 - ((Date.now()/10 + i * 50) % 30);
+                sceneRef.pantanoGraphics.fillStyle(0x7CFC00, 0.5);
+                sceneRef.pantanoGraphics.fillCircle(bubX, bubY, 5);
+            }
+        }
+
+        // Troncos flotando
+        for (let i = 0; i < 2; i++) {
+            const logX = 150 + i * (w / 2) + Math.sin(Date.now()/2000) * 20;
+            sceneRef.pantanoGraphics.fillStyle(0x8B4513, 1);
+            sceneRef.pantanoGraphics.fillRect(logX - 40, groundY - 15, 80, 15);
+        }
+
+        // Ranas
+        for (let i = 0; i < 3; i++) {
+            const frogX = 80 + i * (w / 3);
+            const frogY = groundY - 25;
+            const jump = Math.sin(Date.now()/500 + i * 2) > 0.9 ? -10 : 0;
+            sceneRef.pantanoGraphics.fillStyle(0x32CD32, 1);
+            sceneRef.pantanoGraphics.fillEllipse(frogX, frogY + jump, 12, 8);
+            sceneRef.pantanoGraphics.fillStyle(0x000000, 1);
+            sceneRef.pantanoGraphics.fillCircle(frogX - 4, frogY - 3 + jump, 2);
+            sceneRef.pantanoGraphics.fillCircle(frogX + 4, frogY - 3 + jump, 2);
+        }
+
+        // Niebla
+        sceneRef.pantanoGraphics.fillStyle(0x808080, 0.3);
+        for (let i = 0; i < 5; i++) {
+            const fogX = (i * 200 + Date.now()/50) % (w + 200) - 100;
+            sceneRef.pantanoGraphics.fillEllipse(fogX, h * 0.4 + i * 30, 150, 40);
+        }
+
+    } else if (sceneRef.pantanoGraphics) {
+        sceneRef.pantanoGraphics.clear();
+    }
+
+    // === CRISTALES ===
+    if (currentMap === 'cristales') {
+        if (!sceneRef.cristalesGraphics) {
+            sceneRef.cristalesGraphics = sceneRef.add.graphics();
+            sceneRef.cristalesGraphics.setDepth(-6);
+        }
+        sceneRef.cristalesGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Cristales grandes
+        const crystalColors = [0x00CED1, 0x9400D3, 0xFF1493, 0x00FF00, 0xFFD700];
+        for (let i = 0; i < 5; i++) {
+            const cx = 80 + i * (w / 5);
+            const ch = 60 + (i % 3) * 30;
+            const color = crystalColors[i];
+            const glow = Math.sin(Date.now()/500 + i) * 0.2 + 0.8;
+            sceneRef.cristalesGraphics.fillStyle(color, glow);
+            sceneRef.cristalesGraphics.fillTriangle(cx - 15, groundY, cx + 15, groundY, cx, groundY - ch);
+            // Brillo
+            sceneRef.cristalesGraphics.fillStyle(0xFFFFFF, 0.5);
+            sceneRef.cristalesGraphics.fillTriangle(cx - 5, groundY - 20, cx + 2, groundY - 20, cx, groundY - ch + 10);
+        }
+
+        // Cristales pequeños en el techo
+        for (let i = 0; i < 8; i++) {
+            const cx = 50 + i * (w / 8);
+            const ch = 30 + (i % 4) * 15;
+            const color = crystalColors[i % 5];
+            sceneRef.cristalesGraphics.fillStyle(color, 0.7);
+            sceneRef.cristalesGraphics.fillTriangle(cx - 10, 0, cx + 10, 0, cx, ch);
+        }
+
+        // Partículas brillantes
+        for (let i = 0; i < 15; i++) {
+            const sparkX = (i * 80 + Date.now()/30) % w;
+            const sparkY = (i * 60 + Math.sin(Date.now()/200 + i) * 50) % h;
+            const sparkAlpha = Math.sin(Date.now()/100 + i) * 0.3 + 0.5;
+            sceneRef.cristalesGraphics.fillStyle(0xFFFFFF, sparkAlpha);
+            sceneRef.cristalesGraphics.fillCircle(sparkX, sparkY, 2);
+        }
+
+    } else if (sceneRef.cristalesGraphics) {
+        sceneRef.cristalesGraphics.clear();
+    }
+
+    // === RUINAS ===
+    if (currentMap === 'ruinas') {
+        if (!sceneRef.ruinasGraphics) {
+            sceneRef.ruinasGraphics = sceneRef.add.graphics();
+            sceneRef.ruinasGraphics.setDepth(-6);
+        }
+        sceneRef.ruinasGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+        const groundY = h - 50;
+
+        // Columnas rotas
+        for (let i = 0; i < 4; i++) {
+            const colX = 100 + i * (w / 4);
+            const colH = 100 + (i % 2) * 50;
+            // Base
+            sceneRef.ruinasGraphics.fillStyle(0xD2B48C, 1);
+            sceneRef.ruinasGraphics.fillRect(colX - 20, groundY - 20, 40, 20);
+            // Columna
+            sceneRef.ruinasGraphics.fillStyle(0xF5DEB3, 1);
+            sceneRef.ruinasGraphics.fillRect(colX - 15, groundY - colH, 30, colH - 20);
+            // Grietas
+            sceneRef.ruinasGraphics.lineStyle(2, 0x8B7355, 0.5);
+            sceneRef.ruinasGraphics.lineBetween(colX - 5, groundY - colH + 20, colX + 5, groundY - colH + 50);
+        }
+
+        // Pirámide al fondo
+        sceneRef.ruinasGraphics.fillStyle(0xD2B48C, 0.8);
+        sceneRef.ruinasGraphics.fillTriangle(w * 0.3, groundY, w * 0.7, groundY, w * 0.5, groundY - 150);
+
+        // Jeroglíficos (líneas decorativas)
+        sceneRef.ruinasGraphics.lineStyle(2, 0x8B4513, 0.6);
+        for (let i = 0; i < 6; i++) {
+            const hx = w * 0.4 + i * 20;
+            const hy = groundY - 80;
+            sceneRef.ruinasGraphics.lineBetween(hx, hy, hx, hy + 15);
+            sceneRef.ruinasGraphics.lineBetween(hx, hy + 5, hx + 8, hy + 5);
+        }
+
+        // Serpiente
+        const snakeX = 200 + Math.sin(Date.now()/500) * 30;
+        const snakeY = groundY - 10;
+        sceneRef.ruinasGraphics.lineStyle(4, 0x228B22, 1);
+        sceneRef.ruinasGraphics.beginPath();
+        sceneRef.ruinasGraphics.moveTo(snakeX, snakeY);
+        for (let s = 0; s < 5; s++) {
+            sceneRef.ruinasGraphics.lineTo(snakeX + s * 8, snakeY + Math.sin(Date.now()/100 + s) * 5);
+        }
+        sceneRef.ruinasGraphics.strokePath();
+
+    } else if (sceneRef.ruinasGraphics) {
+        sceneRef.ruinasGraphics.clear();
+    }
+
+    // === TORMENTA ===
+    if (currentMap === 'tormenta') {
+        if (!sceneRef.tormentaGraphics) {
+            sceneRef.tormentaGraphics = sceneRef.add.graphics();
+            sceneRef.tormentaGraphics.setDepth(-6);
+        }
+        sceneRef.tormentaGraphics.clear();
+
+        const w = game.scale.width;
+        const h = game.scale.height;
+
+        // Lluvia intensa
+        sceneRef.tormentaGraphics.lineStyle(1, 0x6699CC, 0.7);
+        for (let i = 0; i < 100; i++) {
+            const rx = (i * 20 + Date.now()/2) % w;
+            const ry = (Date.now()/2 + i * 15) % h;
+            sceneRef.tormentaGraphics.lineBetween(rx, ry, rx - 5, ry + 20);
+        }
+
+        // Rayos frecuentes
+        if (Math.random() < 0.02) {
+            const lx = Math.random() * w;
+            sceneRef.tormentaGraphics.lineStyle(4, 0xFFFFFF, 1);
+            sceneRef.tormentaGraphics.beginPath();
+            sceneRef.tormentaGraphics.moveTo(lx, 0);
+            let ly = 0;
+            while (ly < h) {
+                ly += 30 + Math.random() * 50;
+                sceneRef.tormentaGraphics.lineTo(lx + (Math.random() - 0.5) * 60, ly);
+            }
+            sceneRef.tormentaGraphics.strokePath();
+        }
+
+        // Charcos en el suelo
+        sceneRef.tormentaGraphics.fillStyle(0x4682B4, 0.5);
+        for (let i = 0; i < 5; i++) {
+            const px = 80 + i * (w / 5);
+            sceneRef.tormentaGraphics.fillEllipse(px, h - 45, 40, 10);
+        }
+
+    } else if (sceneRef.tormentaGraphics) {
+        sceneRef.tormentaGraphics.clear();
     }
 
     // === EFECTOS DE NUEVAS ARMAS ===
