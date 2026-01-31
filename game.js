@@ -2325,9 +2325,9 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
             pantsColor = 0x111111;
             break;
         case 'esqueleto':
-            skinColor = 0xF5F5DC; // Hueso beige
-            shirtColor = 0xE8E8D0; // Costillas
-            pantsColor = 0xDDDDCC; // Huesos piernas
+            skinColor = 0xCCCCBB; // Hueso gris
+            shirtColor = 0xAAAAAA; // Costillas gris
+            pantsColor = 0x888888; // Huesos piernas oscuro
             break;
     }
 
@@ -3227,7 +3227,7 @@ function changeMap(mapId) {
                 sceneRef.mapOverlay.fillEllipse(fogX, fogY, 250 + Math.random() * 100, 100 + Math.random() * 50);
             }
             // Crear un esqueleto al entrar al mapa
-            createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0xFFFFFF, 'esqueleto');
+            createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0x666666, 'esqueleto');
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
