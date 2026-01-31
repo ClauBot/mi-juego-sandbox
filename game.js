@@ -725,27 +725,36 @@ function updateMusicButton() {
     if (!musicButton) return;
     musicButton.clear();
 
-    // Botón en esquina inferior izquierda
-    const btnX = 10;
-    const btnY = 555;
-    const btnW = 50;
-    const btnH = 35;
+    // Botón grande en esquina inferior izquierda
+    const btnX = 15;
+    const btnY = game.scale.height - 85;
+    const btnW = 70;
+    const btnH = 70;
 
-    musicButton.fillStyle(musicPlaying ? 0x44AA44 : 0x666666, 1);
-    musicButton.fillRoundedRect(btnX, btnY, btnW, btnH, 8);
+    // Fondo con sombra
+    musicButton.fillStyle(0x000000, 0.3);
+    musicButton.fillRoundedRect(btnX + 3, btnY + 3, btnW, btnH, 15);
 
-    // Icono
+    // Botón principal
+    musicButton.fillStyle(musicPlaying ? 0x44DD44 : 0x888888, 1);
+    musicButton.fillRoundedRect(btnX, btnY, btnW, btnH, 15);
+
+    // Borde
+    musicButton.lineStyle(3, musicPlaying ? 0x22AA22 : 0x555555, 1);
+    musicButton.strokeRoundedRect(btnX, btnY, btnW, btnH, 15);
+
+    // Icono grande
     musicButton.fillStyle(0xFFFFFF, 1);
     if (musicPlaying) {
-        // Pausa
-        musicButton.fillRect(btnX + 15, btnY + 8, 6, 19);
-        musicButton.fillRect(btnX + 28, btnY + 8, 6, 19);
+        // Pausa - dos barras
+        musicButton.fillRect(btnX + 22, btnY + 18, 10, 34);
+        musicButton.fillRect(btnX + 38, btnY + 18, 10, 34);
     } else {
-        // Play
+        // Play - triángulo
         musicButton.fillTriangle(
-            btnX + 15, btnY + 7,
-            btnX + 15, btnY + 28,
-            btnX + 38, btnY + 17
+            btnX + 22, btnY + 15,
+            btnX + 22, btnY + 55,
+            btnX + 55, btnY + 35
         );
     }
 }
@@ -1067,8 +1076,8 @@ function onPointerDown(pointer) {
     const uiAreaX = game.scale.width - 90;
     if (pointer.x > uiAreaX) return;
 
-    // Área de botón de música
-    if (pointer.x < 70 && pointer.y > game.scale.height - 100) {
+    // Área de botón de música (más grande)
+    if (pointer.x < 100 && pointer.y > game.scale.height - 100) {
         toggleMusic();
         return;
     }
@@ -1721,12 +1730,14 @@ function createUI(scene) {
         drawWeaponButton();
     });
 
-    // Botón de música (abajo izquierda)
+    // Botón de música (abajo izquierda) - GRANDE
     musicButton = scene.add.graphics();
     musicButton.setDepth(100);
     updateMusicButton();
 
-    const musicZone = scene.add.zone(35, 572, 60, 45);
+    const musicBtnX = 15 + 35;  // centro del botón
+    const musicBtnY = game.scale.height - 85 + 35;
+    const musicZone = scene.add.zone(musicBtnX, musicBtnY, 80, 80);
     musicZone.setInteractive();
     musicZone.setDepth(100);
     musicZone.on('pointerdown', (pointer) => {
