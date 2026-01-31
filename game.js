@@ -3380,35 +3380,49 @@ function updateWeaponMenu() {
     const unlockedWeapons = shopItems.weapons.filter(weapon => unlockedItems.weapons.includes(weapon.id));
 
     const cols = 4;
-    const itemW = 60;
-    const itemH = 50;
-    const menuW = cols * itemW + 10;
-    const menuH = Math.ceil(unlockedWeapons.length / cols) * itemH + 10;
+    const itemW = 70;
+    const itemH = 65;
+    const menuW = cols * itemW + 15;
+    const menuH = Math.ceil(unlockedWeapons.length / cols) * itemH + 15;
 
+    // Fondo más oscuro con borde
     const menuBg = sceneRef.add.graphics();
-    menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    menuBg.fillStyle(0x1a1a2e, 0.98);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.lineStyle(2, 0x4a4a6a, 1);
+    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
     weaponMenu.add(menuBg);
 
     unlockedWeapons.forEach((weapon, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const bx = -menuW/2 + 5 + col * itemW;
-        const by = 5 + row * itemH;
+        const bx = -menuW/2 + 8 + col * itemW;
+        const by = 8 + row * itemH;
 
         const isSelected = currentWeapon === weapon.id;
 
+        // Botón con borde visible
         const btn = sceneRef.add.graphics();
-        btn.fillStyle(isSelected ? 0x666666 : 0x555555, 1);
-        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        btn.fillStyle(isSelected ? 0x666688 : 0x3a3a5a, 1);
+        btn.fillRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
+        btn.lineStyle(2, isSelected ? 0x8888AA : 0x5a5a7a, 1);
+        btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         weaponMenu.add(btn);
 
-        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, weapon.emoji, {
-            font: '22px Arial'
+        // Emoji más grande
+        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, weapon.emoji, {
+            font: '28px Arial'
         }).setOrigin(0.5);
-        weaponMenu.add(txt);
+        weaponMenu.add(emoji);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        // Nombre del arma
+        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 46, weapon.name, {
+            font: 'bold 9px Arial',
+            fill: isSelected ? '#AAAAFF' : '#CCCCCC'
+        }).setOrigin(0.5);
+        weaponMenu.add(name);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         weaponMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -3446,36 +3460,50 @@ function updateMapMenu() {
     // Solo mostrar mapas desbloqueados
     const unlockedMaps = shopItems.worlds.filter(world => unlockedItems.worlds.includes(world.id));
 
-    const cols = 5;
-    const itemW = 50;
-    const itemH = 40;
-    const menuW = cols * itemW + 10;
-    const menuH = Math.ceil(unlockedMaps.length / cols) * itemH + 10;
+    const cols = 4;
+    const itemW = 70;
+    const itemH = 65;
+    const menuW = cols * itemW + 15;
+    const menuH = Math.ceil(unlockedMaps.length / cols) * itemH + 15;
 
+    // Fondo más oscuro con borde
     const menuBg = sceneRef.add.graphics();
-    menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    menuBg.fillStyle(0x1a1a2e, 0.98);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.lineStyle(2, 0x4a4a6a, 1);
+    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
     mapMenu.add(menuBg);
 
     unlockedMaps.forEach((map, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const bx = -menuW/2 + 5 + col * itemW;
-        const by = 5 + row * itemH;
+        const bx = -menuW/2 + 8 + col * itemW;
+        const by = 8 + row * itemH;
 
         const isSelected = currentMap === map.id;
 
+        // Botón con borde visible
         const btn = sceneRef.add.graphics();
-        btn.fillStyle(isSelected ? 0x8B4513 : 0x555555, 1);
-        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        btn.fillStyle(isSelected ? 0x8B5513 : 0x3a3a5a, 1);
+        btn.fillRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
+        btn.lineStyle(2, isSelected ? 0xBB7733 : 0x5a5a7a, 1);
+        btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         mapMenu.add(btn);
 
-        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, map.emoji, {
-            font: '18px Arial'
+        // Emoji más grande
+        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, map.emoji, {
+            font: '26px Arial'
         }).setOrigin(0.5);
-        mapMenu.add(txt);
+        mapMenu.add(emoji);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        // Nombre del mapa
+        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 46, map.name, {
+            font: 'bold 9px Arial',
+            fill: isSelected ? '#FFCC88' : '#CCCCCC'
+        }).setOrigin(0.5);
+        mapMenu.add(name);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         mapMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -3549,36 +3577,50 @@ function updateNpcMenu() {
     // Obtener NPCs desbloqueados
     const unlockedNpcs = shopItems.npcs.filter(npc => unlockedItems.npcs.includes(npc.id));
 
-    const cols = 4;
-    const itemW = 55;
-    const itemH = 55;
-    const menuW = cols * itemW + 10;
-    const menuH = Math.ceil(unlockedNpcs.length / cols) * itemH + 10;
+    const cols = 3;
+    const itemW = 80;
+    const itemH = 75;
+    const menuW = cols * itemW + 15;
+    const menuH = Math.ceil(unlockedNpcs.length / cols) * itemH + 15;
 
+    // Fondo más oscuro con borde
     const menuBg = sceneRef.add.graphics();
-    menuBg.fillStyle(0x333333, 0.95);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 8);
+    menuBg.fillStyle(0x1a1a2e, 0.98);
+    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.lineStyle(2, 0x4a4a6a, 1);
+    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
     npcMenu.add(menuBg);
 
     unlockedNpcs.forEach((npc, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const bx = -menuW/2 + 5 + col * itemW;
-        const by = 5 + row * itemH;
+        const bx = -menuW/2 + 8 + col * itemW;
+        const by = 8 + row * itemH;
 
         const isSelected = currentNpcType === npc.id;
 
+        // Botón con borde visible
         const btn = sceneRef.add.graphics();
-        btn.fillStyle(isSelected ? 0x44AA44 : 0x555555, 1);
-        btn.fillRoundedRect(bx, by, itemW - 5, itemH - 5, 6);
+        btn.fillStyle(isSelected ? 0x44AA44 : 0x3a3a5a, 1);
+        btn.fillRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
+        btn.lineStyle(2, isSelected ? 0x66DD66 : 0x5a5a7a, 1);
+        btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         npcMenu.add(btn);
 
-        const txt = sceneRef.add.text(bx + (itemW-5)/2, by + (itemH-5)/2, npc.emoji, {
-            font: '24px Arial'
+        // Emoji más grande
+        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 25, npc.emoji, {
+            font: '32px Arial'
         }).setOrigin(0.5);
-        npcMenu.add(txt);
+        npcMenu.add(emoji);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-5)/2, by + (itemH-5)/2, itemW-5, itemH-5, 0x000000, 0);
+        // Nombre del NPC
+        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 52, npc.name, {
+            font: 'bold 10px Arial',
+            fill: isSelected ? '#AAFFAA' : '#CCCCCC'
+        }).setOrigin(0.5);
+        npcMenu.add(name);
+
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         npcMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
