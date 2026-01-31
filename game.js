@@ -34,17 +34,12 @@ function getGroundLimit() {
 
 const config = {
     type: Phaser.AUTO,
-    width: screenWidth,
-    height: screenHeight,
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.EXPAND,
-        parent: 'game-container',
-        width: screenWidth,
-        height: screenHeight,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        expandParent: true
+        mode: Phaser.Scale.RESIZE,
+        width: '100%',
+        height: '100%'
     },
     physics: {
         default: 'matter',
@@ -122,6 +117,22 @@ let isDraggingWeapon = false;
 let scenarioElements = [];
 
 game = new Phaser.Game(config);
+
+// Forzar resize cuando el viewport cambie
+window.addEventListener('resize', () => {
+    if (game && game.scale) {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+    }
+});
+
+// También al cargar
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        if (game && game.scale) {
+            game.scale.resize(window.innerWidth, window.innerHeight);
+        }
+    }, 100);
+});
 
 function preload() {}
 
