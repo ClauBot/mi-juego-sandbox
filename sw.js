@@ -1,11 +1,12 @@
-const CACHE_NAME = 'ragdoll-sandbox-v4';
+const CACHE_NAME = 'ragdoll-sandbox-v5';
 const urlsToCache = [
     './',
     './index.html',
     './style.css',
     './game.js',
     './icon.svg',
-    './manifest.json'
+    './manifest.json',
+    './world-designs.html'
 ];
 
 // Instalar - cachear archivos

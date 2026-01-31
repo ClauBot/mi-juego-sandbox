@@ -1412,10 +1412,10 @@
             card.appendChild(preview);
             card.appendChild(info);
 
-            // Click para abrir el juego con ese mundo
+            // Click para abrir el juego con ese mundo en ventana nueva
             if (world.implemented) {
                 card.addEventListener('click', () => {
-                    window.location.href = `index.html?world=${world.id}&spawn=2`;
+                    window.open(`index.html?world=${world.id}&spawn=2`, '_blank');
                 });
             }
 

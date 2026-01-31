@@ -552,6 +552,7 @@ function initGameContent(scene) {
     const urlParams = new URLSearchParams(window.location.search);
     const worldParam = urlParams.get('world');
     const spawnParam = parseInt(urlParams.get('spawn')) || 0;
+    console.log('URL params - world:', worldParam, 'spawn:', spawnParam);
 
     const spawnY = realHeight - 200;
     const w = realWidth;
@@ -576,7 +577,11 @@ function initGameContent(scene) {
 
     // Si hay parámetro world, cambiar al mapa especificado
     if (worldParam) {
-        setTimeout(() => changeMap(worldParam), 100);
+        console.log('URL param world:', worldParam);
+        setTimeout(() => {
+            console.log('Cambiando a mapa:', worldParam);
+            changeMap(worldParam);
+        }, 500);
     }
 
     scene.input.on('pointerdown', onPointerDown, scene);
@@ -2642,13 +2647,6 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         pantsColor = 0x2F2F2F;
     }
 
-    const isSkeleton = (npcType === 'esqueleto');
-    const isNinja = (npcType === 'ninja');
-    const isPirate = (npcType === 'pirata');
-    const isClown = (npcType === 'clown');
-    const isKnight = (npcType === 'knight');
-    const isFairy = (npcType === 'fairy');
-
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
     const torsoHeight = 36;
@@ -2674,10 +2672,11 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         }
     };
 
-    // Ninja es 25% más ligero (cae más rápido por menos resistencia al aire)
+    // Ninja es 25% más ligero
+    const isNinja = (npcType === 'ninja');
     const densityMult = isNinja ? 0.75 : 1;
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, npcType);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2699,23 +2698,20 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     if (isZombie) {
         brainGraphics = scene.add.graphics();
         brainGraphics.setDepth(56);
-        // Herida/agujero en el cráneo
-        brainGraphics.fillStyle(0x8B0000, 1); // Rojo oscuro (sangre seca)
+        brainGraphics.fillStyle(0x8B0000, 1);
         brainGraphics.fillEllipse(4, -8, 10, 6);
-        // Cerebro rosado expuesto
-        brainGraphics.fillStyle(0xFFB6C1, 1); // Rosa cerebro
+        brainGraphics.fillStyle(0xFFB6C1, 1);
         brainGraphics.fillCircle(3, -7, 4);
         brainGraphics.fillCircle(6, -8, 3);
         brainGraphics.fillStyle(0xFF9999, 1);
         brainGraphics.fillCircle(4, -9, 2);
-        // Líneas del cerebro
         brainGraphics.lineStyle(1, 0xCC8888, 0.8);
         brainGraphics.lineBetween(1, -8, 5, -6);
         brainGraphics.lineBetween(4, -9, 7, -7);
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, npcType);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2723,15 +2719,15 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    // Alas del hada (gráficos que siguen al torso)
+    // Alas del hada
     let fairyWings = null;
-    if (isFairy) {
+    if (npcType === 'fairy') {
         fairyWings = scene.add.graphics();
-        fairyWings.setDepth(45); // Detrás del cuerpo
+        fairyWings.setDepth(45);
         torso.fairyWings = fairyWings;
     }
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, npcType);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2739,7 +2735,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, npcType);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2747,7 +2743,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, npcType);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2755,7 +2751,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, npcType);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2804,11 +2800,11 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false, isKnight = false, isFairy = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, npcType = 'normal') {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
-    if (isKnight) {
+    if (npcType === 'knight') {
         // CABALLERO CON ARMADURA
         if (isHead) {
             // Yelmo de caballero
@@ -2884,7 +2880,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             graphics.fillStyle(0xAAAAAA, 0.3);
             graphics.fillRect(1, 12, 3, 10);
         }
-    } else if (isClown) {
+    } else if (npcType === 'clown') {
         // PENNYWISE - Payaso de IT
         if (isHead) {
             // Cara blanca de payaso
@@ -2934,7 +2930,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             graphics.fillStyle(0x666666, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
         }
-    } else if (isPirate) {
+    } else if (npcType === 'pirata') {
         // JACK SPARROW - Pirata
         if (isHead) {
             // Cara bronceada
@@ -2987,7 +2983,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
                 graphics.fillRoundedRect(0, height - 10, width, 10, 2);
             }
         }
-    } else if (isSkeleton) {
+    } else if (npcType === 'esqueleto') {
         // Dibujar huesos de esqueleto
         const boneColor = 0xF5F5DC; // Hueso beige
         const darkBone = 0xCCCCBB; // Sombra del hueso
@@ -3035,7 +3031,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
             graphics.lineStyle(1, darkBone, 0.5);
             graphics.strokeRoundedRect(width/4, 0, width/2, height, 3);
         }
-    } else if (isNinja) {
+    } else if (npcType === 'ninja') {
         // Dibujar ninja con máscara
         if (isHead) {
             // Cabeza con máscara ninja negra
@@ -3083,7 +3079,7 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
         graphics.fillCircle(width/2 - 4, height/2 - 2, 2);
         graphics.fillCircle(width/2 + 4, height/2 - 2, 2);
         graphics.fillRect(width/2 - 3, height/2 + 5, 6, 2);
-    } else if (isFairy) {
+    } else if (npcType === 'fairy') {
         // HADA MÁGICA - colores pastel y brillos
         if (isHead) {
             // Cara del hada (piel clara con brillo)
