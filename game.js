@@ -183,7 +183,6 @@ const shopItems = {
         { id: 'granada', name: 'Granada', emoji: '💣', price: 0 },
         { id: 'espada', name: 'Espada', emoji: '🗡️', price: 25 },
         { id: 'bat', name: 'Bate', emoji: '🏏', price: 25 },
-        { id: 'cohete', name: 'Cohete', emoji: '🚀', price: 50 },
         { id: 'barril', name: 'Barril', emoji: '🛢️', price: 30 },
         { id: 'trampolin', name: 'Trampolín', emoji: '🛝', price: 40 },
         { id: 'katana', name: 'Katana', emoji: '⚔️', price: 75 },
@@ -1505,7 +1504,6 @@ function onPointerDown(pointer) {
             'granada': createGranada,
             'espada': createEspada,
             'bat': createBat,
-            'cohete': createCohete,
             'barril': createBarril,
             'trampolin': createTrampolin,
             'katana': createKatana,
@@ -1633,8 +1631,6 @@ function onPointerUp(pointer) {
         if (!selectedWeapon.hasMoved) {
             if (selectedWeapon.type === 'pistola') {
                 shootBullet(selectedWeapon);
-            } else if (selectedWeapon.type === 'cohete') {
-                activateCohete(selectedWeapon);
             } else if (selectedWeapon.type === 'barril') {
                 explodeBarril(selectedWeapon);
             } else if (selectedWeapon.type === 'arco') {
@@ -1696,75 +1692,6 @@ function playMotosierraSound() {
     gain.connect(audioContext.destination);
     osc.start();
     osc.stop(audioContext.currentTime + 0.3);
-}
-
-function activateCohete(weapon) {
-    if (weapon.isFlying) return;
-
-    weapon.isFlying = true;
-    playRocketSound();
-
-    // El cohete vuela por 3 segundos y luego explota
-    setTimeout(() => {
-        if (weapon && weapons.includes(weapon)) {
-            explodeCohete(weapon);
-        }
-    }, 3000);
-}
-
-function explodeCohete(weapon) {
-    const explosionX = weapon.x;
-    const explosionY = weapon.y;
-
-    // Explosión grande
-    const explosion = sceneRef.add.graphics();
-    explosion.setDepth(50);
-    explosion.fillStyle(0xFF4500, 0.9);
-    explosion.fillCircle(explosionX, explosionY, 30);
-    explosion.fillStyle(0xFFFF00, 0.7);
-    explosion.fillCircle(explosionX, explosionY, 50);
-    explosion.fillStyle(0xFF6600, 0.5);
-    explosion.fillCircle(explosionX, explosionY, 80);
-
-    sceneRef.tweens.add({
-        targets: explosion,
-        alpha: 0,
-        scale: 2,
-        duration: 400,
-        onComplete: () => explosion.destroy()
-    });
-
-    playExplosionSound();
-
-    // Empujar ragdolls (radio más grande que granada)
-    const radius = 200;
-    const force = 30;
-
-    ragdolls.forEach(ragdoll => {
-        ragdoll.parts.forEach(part => {
-            if (part && part.body) {
-                const dist = Phaser.Math.Distance.Between(explosionX, explosionY, part.x, part.y);
-                if (dist < radius) {
-                    const angle = Math.atan2(part.y - explosionY, part.x - explosionX);
-                    const f = (1 - dist / radius) * force;
-                    part.setVelocity(Math.cos(angle) * f, Math.sin(angle) * f - 8);
-
-                    if (ragdoll.isStanding) {
-                        ragdoll.isStanding = false;
-                        ragdoll.parts.forEach(p => p && p.body && p.setStatic(false));
-                    }
-                }
-            }
-        });
-    });
-
-    spawnBlood(explosionX, explosionY, 20);
-
-    // Eliminar cohete
-    if (weapon.graphics) weapon.graphics.destroy();
-    if (weapon.body) sceneRef.matter.world.remove(weapon.body);
-    const idx = weapons.indexOf(weapon);
-    if (idx > -1) weapons.splice(idx, 1);
 }
 
 function explodeBarril(weapon) {
@@ -1835,23 +1762,6 @@ function explodeBarril(weapon) {
     if (weapon.body) sceneRef.matter.world.remove(weapon.body);
     const idx = weapons.indexOf(weapon);
     if (idx > -1) weapons.splice(idx, 1);
-}
-
-function playRocketSound() {
-    if (!audioContext) return;
-
-    const osc = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(200, audioContext.currentTime);
-    osc.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.5);
-    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gain.gain.setValueAtTime(0.15, audioContext.currentTime + 2);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
-    osc.connect(gain);
-    gain.connect(audioContext.destination);
-    osc.start();
-    osc.stop(audioContext.currentTime + 3);
 }
 
 let clouds = [];
@@ -2593,7 +2503,6 @@ function createUI(scene) {
         { id: 'granada', emoji: '💣' },
         { id: 'espada', emoji: '🗡️' },
         { id: 'bat', emoji: '🏏' },
-        { id: 'cohete', emoji: '🚀' },
         { id: 'barril', emoji: '🛢️' },
         { id: 'trampolin', emoji: '🛝' },
         { id: 'katana', emoji: '⚔️' },
@@ -2832,7 +2741,6 @@ function drawWeaponButton(x, y, size) {
         'granada': '💣',
         'espada': '🗡️',
         'bat': '🏏',
-        'cohete': '🚀',
         'barril': '🛢️',
         'trampolin': '🛝'
     };
@@ -3397,50 +3305,6 @@ function createBat(scene, x, y) {
             friction: 0.7,
             frictionAir: 0.02,
             restitution: 0.4,
-            collisionFilter: {
-                category: 0x0004,
-                mask: 0x0001 | 0x0002
-            }
-        })
-    };
-
-    weapons.push(weapon);
-    return weapon;
-}
-
-function createCohete(scene, x, y) {
-    const rocket = scene.add.graphics();
-    rocket.setDepth(10);
-
-    // Cuerpo
-    rocket.fillStyle(0xFF0000, 1);
-    rocket.fillRect(-20, -6, 40, 14);
-
-    // Punta
-    rocket.fillStyle(0xFFFFFF, 1);
-    rocket.fillTriangle(20, -6, 20, 8, 35, 1);
-
-    // Aletas
-    rocket.fillStyle(0x333333, 1);
-    rocket.fillTriangle(-20, -6, -30, -12, -20, 0);
-    rocket.fillTriangle(-20, 8, -30, 14, -20, 2);
-
-    // Fuego (se animará)
-    rocket.fillStyle(0xFFA500, 1);
-    rocket.fillTriangle(-20, -4, -35, 1, -20, 6);
-
-    rocket.setPosition(x, y);
-
-    const weapon = {
-        graphics: rocket,
-        type: 'cohete',
-        x: x,
-        y: y,
-        isFlying: false,
-        body: scene.matter.add.rectangle(x, y, 50, 15, {
-            friction: 0.3,
-            frictionAir: 0.005,
-            restitution: 0.2,
             collisionFilter: {
                 category: 0x0004,
                 mask: 0x0001 | 0x0002
@@ -4037,17 +3901,6 @@ function updateMapEffects() {
         ragdolls.forEach(r => r.parts.forEach(p => p && attractObjects(p, true)));
         weapons.forEach(w => w.type !== 'trampolin' && attractObjects(w));
     }
-
-    // Actualizar cohetes voladores
-    weapons.forEach(weapon => {
-        if (weapon.type === 'cohete' && weapon.isFlying) {
-            const angle = weapon.body.angle;
-            sceneRef.matter.body.setVelocity(weapon.body, {
-                x: Math.cos(angle) * 12,
-                y: Math.sin(angle) * 12
-            });
-        }
-    });
 
     // === EFECTOS DE NUEVOS MAPAS ===
 
