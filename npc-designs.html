@@ -169,8 +169,8 @@
             },
             {
                 id: 'fairy', name: 'Hada', emoji: '🧚',
-                implemented: false,
-                desc: 'Piel brillante rosada, pelo rubio/rosa, ojos grandes azules con pestanas, alas transparentes con brillo (en la espalda), vestido de petalos verde/rosa, corona de flores, particulas de polvo magico'
+                implemented: true,
+                desc: 'Piel rosa claro, mejillas sonrosadas, ojos purpura grandes con brillo, corona/tiara de flores doradas y rosas, vestido lila con petalos rosas, cinturon de flores verde con flores amarillas, alas translucidas animadas que aletean, brillitos en las alas'
             },
             {
                 id: 'mermaid', name: 'Sirena', emoji: '🧜',
@@ -1215,6 +1215,110 @@
                         ctx.lineTo(width, height - 5);
                         ctx.fill();
                     }
+                }
+            } else if (isFairy) {
+                // HADA MÁGICA
+                if (isHead) {
+                    // Cara del hada (piel rosa claro)
+                    fillStyle(ctx, 0xFFE4E1);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mejillas rosadas
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.globalAlpha = 0.6;
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 5, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Ojos púrpura grandes
+                    fillStyle(ctx, 0x9370DB);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 2.5, 2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 2.5, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas con brillo
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 2, 0.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 - 2, 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Boca sonriente
+                    strokeStyle(ctx, 0xFF69B4);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 4, 2, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
+                    // Corona de flores
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 8, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/2 - 9, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 5, height/2 - 8, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 8, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/2 - 9, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 5, height/2 - 8, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Vestido de hada con pétalos
+                    fillStyle(ctx, 0xDDA0DD);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Pétalos del vestido
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height);
+                    ctx.lineTo(width/4, height - 8);
+                    ctx.lineTo(width/2 - 3, height);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 3, height);
+                    ctx.lineTo(width/2 + 3, height - 10);
+                    ctx.lineTo(width, height);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Detalles brillantes
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.arc(width/4, height/3, 2, 0, Math.PI * 2);
+                    ctx.arc(width * 3/4, height/2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/4, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    // Cinturón de flores
+                    fillStyle(ctx, 0x98FB98);
+                    ctx.fillRect(0, height/3, width, 4);
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.arc(width/4, height/3 + 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/3 + 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width * 3/4, height/3 + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Brazos/piernas del hada (piel clara)
+                    fillStyle(ctx, 0xFFE4E1);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Brillo mágico
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.globalAlpha = 0.4;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
                 }
             } else if (isGenie) {
                 if (isHead) {
