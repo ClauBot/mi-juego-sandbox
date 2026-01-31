@@ -2630,6 +2630,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     const isPirate = (npcType === 'pirata');
     const isClown = (npcType === 'clown');
     const isKnight = (npcType === 'knight');
+    const isFairy = (npcType === 'fairy');
 
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
@@ -2659,7 +2660,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     // Ninja es 25% más ligero (cae más rápido por menos resistencia al aire)
     const densityMult = isNinja ? 0.75 : 1;
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2697,7 +2698,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2705,7 +2706,15 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    // Alas del hada (gráficos que siguen al torso)
+    let fairyWings = null;
+    if (isFairy) {
+        fairyWings = scene.add.graphics();
+        fairyWings.setDepth(45); // Detrás del cuerpo
+        torso.fairyWings = fairyWings;
+    }
+
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2713,7 +2722,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2721,7 +2730,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2729,7 +2738,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton, isNinja, isPirate, isClown, isKnight, isFairy);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2778,7 +2787,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false, isKnight = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false, isNinja = false, isPirate = false, isClown = false, isKnight = false, isFairy = false) {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
@@ -3057,6 +3066,70 @@ function createPartTexture(scene, name, width, height, color, isHead = false, is
         graphics.fillCircle(width/2 - 4, height/2 - 2, 2);
         graphics.fillCircle(width/2 + 4, height/2 - 2, 2);
         graphics.fillRect(width/2 - 3, height/2 + 5, 6, 2);
+    } else if (isFairy) {
+        // HADA MÁGICA - colores pastel y brillos
+        if (isHead) {
+            // Cara del hada (piel clara con brillo)
+            graphics.fillStyle(0xFFE4E1, 1); // Rosa claro
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Mejillas rosadas
+            graphics.fillStyle(0xFFB6C1, 0.6);
+            graphics.fillCircle(width/2 - 5, height/2 + 2, 3);
+            graphics.fillCircle(width/2 + 5, height/2 + 2, 3);
+            // Ojos grandes brillantes
+            graphics.fillStyle(0x9370DB, 1); // Púrpura
+            graphics.fillEllipse(width/2 - 4, height/2 - 1, 5, 4);
+            graphics.fillEllipse(width/2 + 4, height/2 - 1, 5, 4);
+            // Pupilas con brillo
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 2);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 2);
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 2, 1);
+            graphics.fillCircle(width/2 + 3, height/2 - 2, 1);
+            // Boca pequeña sonriente
+            graphics.lineStyle(1, 0xFF69B4, 1);
+            graphics.beginPath();
+            graphics.arc(width/2, height/2 + 4, 3, 0, Math.PI, false);
+            graphics.strokePath();
+            // Corona/tiara de flores
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 8, 2);
+            graphics.fillCircle(width/2, height/2 - 9, 2);
+            graphics.fillCircle(width/2 + 5, height/2 - 8, 2);
+            graphics.fillStyle(0xFF69B4, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 8, 1);
+            graphics.fillCircle(width/2, height/2 - 9, 1);
+            graphics.fillCircle(width/2 + 5, height/2 - 8, 1);
+        } else if (name === 'torso') {
+            // Vestido de hada con pétalos
+            graphics.fillStyle(0xDDA0DD, 1); // Plum/lila
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Pétalos del vestido
+            graphics.fillStyle(0xFF69B4, 0.8);
+            graphics.fillTriangle(0, height, width/4, height - 10, width/2 - 5, height);
+            graphics.fillTriangle(width/2 - 5, height, width/2 + 5, height - 12, width, height);
+            graphics.fillTriangle(width * 3/4, height, width, height - 8, width, height);
+            // Detalles brillantes
+            graphics.fillStyle(0xFFFFFF, 0.5);
+            graphics.fillCircle(width/4, height/3, 2);
+            graphics.fillCircle(width * 3/4, height/2, 2);
+            graphics.fillCircle(width/2, height/4, 2);
+            // Cinturón de flores
+            graphics.fillStyle(0x98FB98, 1);
+            graphics.fillRect(0, height/3, width, 4);
+            graphics.fillStyle(0xFFFF00, 1);
+            graphics.fillCircle(width/4, height/3 + 2, 2);
+            graphics.fillCircle(width/2, height/3 + 2, 2);
+            graphics.fillCircle(width * 3/4, height/3 + 2, 2);
+        } else {
+            // Brazos/piernas del hada (piel clara)
+            graphics.fillStyle(0xFFE4E1, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Brillo mágico
+            graphics.fillStyle(0xFFFFFF, 0.4);
+            graphics.fillCircle(width/2, height/3, 2);
+        }
     } else {
         graphics.fillStyle(color, 1);
         graphics.fillRoundedRect(0, 0, width, height, 3);
@@ -6524,6 +6597,45 @@ function updateBlink() {
         if (ragdoll.brainGraphics) {
             ragdoll.brainGraphics.setPosition(head.x, head.y);
             ragdoll.brainGraphics.setRotation(head.rotation);
+        }
+
+        // Actualizar alas del hada
+        const torso = ragdoll.parts[1];
+        if (torso && torso.fairyWings) {
+            torso.fairyWings.clear();
+            torso.fairyWings.setPosition(torso.x, torso.y);
+            torso.fairyWings.setRotation(torso.rotation);
+
+            // Alas animadas (aletean)
+            const wingFlap = Math.sin(Date.now() / 100) * 0.3;
+            const wingScale = 1 + Math.sin(Date.now() / 150) * 0.1;
+
+            // Ala izquierda (superior)
+            torso.fairyWings.fillStyle(0xE6E6FA, 0.7); // Lavanda
+            torso.fairyWings.fillEllipse(-20 - wingFlap * 5, -5, 18 * wingScale, 25);
+            torso.fairyWings.fillStyle(0xDDA0DD, 0.5);
+            torso.fairyWings.fillEllipse(-18 - wingFlap * 5, -5, 12 * wingScale, 18);
+
+            // Ala izquierda (inferior)
+            torso.fairyWings.fillStyle(0xE6E6FA, 0.6);
+            torso.fairyWings.fillEllipse(-15 - wingFlap * 3, 10, 12 * wingScale, 15);
+
+            // Ala derecha (superior)
+            torso.fairyWings.fillStyle(0xE6E6FA, 0.7);
+            torso.fairyWings.fillEllipse(20 + wingFlap * 5, -5, 18 * wingScale, 25);
+            torso.fairyWings.fillStyle(0xDDA0DD, 0.5);
+            torso.fairyWings.fillEllipse(18 + wingFlap * 5, -5, 12 * wingScale, 18);
+
+            // Ala derecha (inferior)
+            torso.fairyWings.fillStyle(0xE6E6FA, 0.6);
+            torso.fairyWings.fillEllipse(15 + wingFlap * 3, 10, 12 * wingScale, 15);
+
+            // Brillitos en las alas
+            torso.fairyWings.fillStyle(0xFFFFFF, 0.8);
+            torso.fairyWings.fillCircle(-15, -8, 2);
+            torso.fairyWings.fillCircle(15, -8, 2);
+            torso.fairyWings.fillCircle(-10, 5, 1.5);
+            torso.fairyWings.fillCircle(10, 5, 1.5);
         }
 
         // Parpadear cada 30 segundos
