@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Designs - Sandbox Mayhem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 2em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .section-title {
+            text-align: center;
+            font-size: 1.3em;
+            margin: 30px 0 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .world-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .world-card.implemented { border: 2px solid #44AA44; }
+        .world-card.pending { border: 2px solid #FFAA00; }
+        .world-preview {
+            height: 120px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .world-preview .emoji {
+            font-size: 3em;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        .world-info { padding: 15px; }
+        .world-name { font-size: 1.2em; font-weight: bold; margin-bottom: 5px; }
+        .world-status {
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .status-done { background: #44AA44; }
+        .status-pending { background: #FFAA00; color: #000; }
+        .world-price { color: #FFD700; font-size: 0.9em; margin: 5px 0; }
+        .world-desc {
+            font-size: 0.85em;
+            color: #AAA;
+            margin: 8px 0;
+        }
+        .world-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .feature {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+        }
+        .world-physics {
+            font-size: 0.8em;
+            color: #88CCFF;
+            margin-top: 8px;
+            background: rgba(0,100,200,0.2);
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+
+        /* Preview backgrounds */
+        .preview-normal { background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 60%, #228B22 80%, #654321 100%); }
+        .preview-volcan { background: linear-gradient(180deg, #8B0000 0%, #FF4500 30%, #4a4a4a 70%, #2d2d2d 100%); }
+        .preview-tornado { background: linear-gradient(180deg, #4a5568 0%, #2d3748 50%, #1a202c 100%); }
+        .preview-rayos { background: linear-gradient(180deg, #1a1a2e 0%, #2d2d4a 50%, #4a4a6a 100%); }
+        .preview-lunar { background: linear-gradient(180deg, #000011 0%, #000022 60%, #606060 90%, #404040 100%); }
+        .preview-zombie { background: linear-gradient(180deg, #2d4a2d 0%, #1a2e1a 50%, #0d1a0d 100%); }
+        .preview-agujero { background: radial-gradient(circle, #000000 0%, #1a0033 30%, #330066 70%, #4a0080 100%); }
+        .preview-agua { background: linear-gradient(180deg, #87CEEB 0%, #4a90c2 40%, #2266aa 70%, #1a4a7a 100%); }
+        .preview-lava { background: linear-gradient(180deg, #4a2a1a 0%, #8B0000 50%, #FF4500 80%, #FF6600 100%); }
+        .preview-hielo { background: linear-gradient(180deg, #E0FFFF 0%, #B0E0E6 40%, #87CEEB 70%, #ADD8E6 100%); }
+        .preview-desierto { background: linear-gradient(180deg, #FFD700 0%, #F4A460 40%, #D2691E 70%, #8B4513 100%); }
+        .preview-bosque { background: linear-gradient(180deg, #228B22 0%, #006400 40%, #004400 70%, #003300 100%); }
+        .preview-noche { background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #2a2a3e 100%); }
+        .preview-arcoiris { background: linear-gradient(180deg, #FF0000 0%, #FF7F00 17%, #FFFF00 33%, #00FF00 50%, #0000FF 67%, #4B0082 83%, #8F00FF 100%); }
+        .preview-ciudad { background: linear-gradient(180deg, #4a5568 0%, #2d3748 60%, #1a202c 80%, #111111 100%); }
+        .preview-playa { background: linear-gradient(180deg, #40E0D0 0%, #48D1CC 40%, #F4A460 70%, #DEB887 100%); }
+        .preview-niebla { background: linear-gradient(180deg, #A0A0A0 0%, #808080 50%, #606060 100%); }
+        .preview-espacio { background: linear-gradient(180deg, #000011 0%, #000022 50%, #000033 100%); }
+        .preview-jungla { background: linear-gradient(180deg, #228B22 0%, #32CD32 30%, #006400 70%, #004400 100%); }
+        .preview-oceano { background: linear-gradient(180deg, #1E90FF 0%, #0000CD 40%, #000080 70%, #00004a 100%); }
+        .preview-apocalipsis { background: linear-gradient(180deg, #8B0000 0%, #2F4F4F 50%, #1C1C1C 100%); }
+        .preview-dulces { background: linear-gradient(180deg, #FFB6C1 0%, #FF69B4 30%, #FF1493 70%, #C71585 100%); }
+        .preview-montanas { background: linear-gradient(180deg, #87CEEB 0%, #B0C4DE 40%, #708090 70%, #2F4F4F 100%); }
+        .preview-pantano { background: linear-gradient(180deg, #556B2F 0%, #6B8E23 30%, #8B4513 70%, #2F4F4F 100%); }
+        .preview-cristales { background: linear-gradient(135deg, #E0FFFF 0%, #00CED1 25%, #4169E1 50%, #9400D3 75%, #FF1493 100%); }
+        .preview-ruinas { background: linear-gradient(180deg, #D2B48C 0%, #8B7355 40%, #696969 70%, #2F4F4F 100%); }
+        .preview-tormenta { background: linear-gradient(180deg, #2F2F2F 0%, #4A4A4A 30%, #696969 60%, #1C1C1C 100%); }
+    </style>
+</head>
+<body>
+    <h1>World Designs Dashboard</h1>
+    <p class="subtitle">Catalogo de mundos - Sandbox Mayhem</p>
+
+    <div class="section-title">IMPLEMENTADOS</div>
+    <div class="grid" id="implemented-grid"></div>
+
+    <div class="section-title">PROPUESTAS NUEVAS</div>
+    <div class="grid" id="pending-grid"></div>
+
+    <script>
+        const worlds = [
+            // IMPLEMENTADOS
+            {
+                id: 'normal', name: 'Normal', emoji: '🌳', price: 0, implemented: true,
+                desc: 'Escenario clasico con cielo azul, pasto verde y gravedad normal.',
+                features: ['🌳 Arboles', '🌸 Flores', '☀️ Sol', '☁️ Nubes'],
+                physics: 'Gravedad: 1.0 | Friccion: Normal'
+            },
+            {
+                id: 'volcan', name: 'Volcan', emoji: '🌋', price: 0, implemented: true,
+                desc: 'Volcan activo con lava cayendo, rocas voladoras y cielo rojo.',
+                features: ['🔥 Lava', '💨 Humo', '🪨 Rocas', '🔴 Cielo rojo'],
+                physics: 'Gravedad: 1.0 | Dano: Lava quema'
+            },
+            {
+                id: 'tornado', name: 'Tornado', emoji: '🌪️', price: 50, implemented: true,
+                desc: 'Tornado gigante en el centro que lanza todo lo que toca.',
+                features: ['🌪️ Tornado', '💨 Viento', '🍃 Hojas', '☁️ Cielo gris'],
+                physics: 'Vortice central | Empuje: Muy Alto'
+            },
+            {
+                id: 'rayos', name: 'Tormenta', emoji: '⚡', price: 50, implemented: true,
+                desc: 'Tormenta electrica con rayos frecuentes y lluvia intensa.',
+                features: ['⚡ Rayos', '🌧️ Lluvia', '🌩️ Nubes', '💨 Viento'],
+                physics: 'Rayos aleatorios | Dano: Electrico'
+            },
+            {
+                id: 'lunar', name: 'Luna', emoji: '🌙', price: 75, implemented: true,
+                desc: 'Superficie lunar con gravedad baja y cielo estrellado.',
+                features: ['🌙 Luna grande', '⭐ Estrellas', '🕳️ Crateres', '🌑 Cielo negro'],
+                physics: 'Gravedad: 0.3 | Saltos altos'
+            },
+            {
+                id: 'zombie', name: 'Zombie', emoji: '🧟', price: 100, implemented: true,
+                desc: 'Apocalipsis zombie. Los ragdolls persiguen con piel verde.',
+                features: ['🧟 Zombies', '🧠 Cerebros', '🌫️ Niebla', '🌲 Arboles muertos'],
+                physics: 'AI: Persigue | Velocidad: Lenta'
+            },
+            {
+                id: 'agujero', name: 'Agujero Negro', emoji: '🕳️', price: 150, implemented: true,
+                desc: 'Agujero negro en el centro que atrae todo.',
+                features: ['🕳️ Agujero negro', '✨ Particulas', '🌀 Distorsion', '⬛ Oscuridad'],
+                physics: 'Atraccion: Constante | Radio: Infinito'
+            },
+            {
+                id: 'agua', name: 'Agua', emoji: '🌊', price: 60, implemented: true,
+                desc: 'Mapa subacuatico. Los ragdolls flotan y hay burbujas.',
+                features: ['🫧 Burbujas', '🌊 Olas', '🐠 Peces', '🪸 Corales'],
+                physics: 'Gravedad: 0.2 | Flotacion: SI'
+            },
+            {
+                id: 'lava', name: 'Lava', emoji: '🌋', price: 80, implemented: true,
+                desc: 'Piso de lava burbujeante que quema al contacto.',
+                features: ['🔥 Lava', '💨 Vapor', '🪨 Rocas', '🟠 Cielo naranja'],
+                physics: 'Piso: Lava | Dano: Continuo'
+            },
+            {
+                id: 'hielo', name: 'Hielo', emoji: '❄️', price: 70, implemented: true,
+                desc: 'Mundo congelado con piso resbaloso y copos de nieve.',
+                features: ['❄️ Nieve', '🧊 Hielo', '⛄ Nevado', '💨 Ventisca'],
+                physics: 'Friccion: 0.1 | Resbaloso'
+            },
+            {
+                id: 'desierto', name: 'Desierto', emoji: '🏜️', price: 0, implemented: true,
+                desc: 'Desierto caliente con dunas de arena y cactus.',
+                features: ['🌵 Cactus', '☀️ Sol fuerte', '🏜️ Dunas', '🦎 Lagartijas'],
+                physics: 'Gravedad: Normal | Calor visual'
+            },
+            {
+                id: 'playa', name: 'Playa', emoji: '🏖️', price: 0, implemented: true,
+                desc: 'Playa tropical con arena, agua y palmeras.',
+                features: ['🌴 Palmeras', '🦀 Cangrejos', '🌊 Olas', '🐚 Conchas'],
+                physics: 'Agua parcial | Arena: Friccion alta'
+            },
+            {
+                id: 'bosque', name: 'Bosque', emoji: '🌲', price: 40, implemented: true,
+                desc: 'Bosque denso con muchos arboles y sombras.',
+                features: ['🌲 Pinos', '🍄 Hongos', '🦌 Venados', '🍂 Hojas'],
+                physics: 'Gravedad: Normal | Sombras'
+            },
+            {
+                id: 'noche', name: 'Noche', emoji: '🌃', price: 45, implemented: true,
+                desc: 'Escenario nocturno con estrellas y luna.',
+                features: ['🌙 Luna', '⭐ Estrellas', '🦉 Buhos', '🌃 Oscuridad'],
+                physics: 'Gravedad: Normal | Visual: Oscuro'
+            },
+            {
+                id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 90, implemented: true,
+                desc: 'Ciudad con edificios, calles y luces.',
+                features: ['🏢 Edificios', '🚗 Carros', '🚦 Semaforos', '💡 Luces'],
+                physics: 'Gravedad: Normal | Obstaculos'
+            },
+            {
+                id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 55, implemented: true,
+                desc: 'Mapa con niebla densa que reduce visibilidad.',
+                features: ['🌫️ Niebla', '👻 Misterio', '🌲 Siluetas', '💨 Humedad'],
+                physics: 'Visibilidad: Baja | Atmosfera densa'
+            },
+            {
+                id: 'espacio', name: 'Espacio', emoji: '🚀', price: 120, implemented: true,
+                desc: 'Espacio exterior sin gravedad con estrellas.',
+                features: ['🌟 Estrellas', '🪐 Planetas', '☄️ Meteoros', '🛸 Naves'],
+                physics: 'Gravedad: 0 | Flotacion total'
+            },
+            {
+                id: 'arcoiris', name: 'Arcoiris', emoji: '🌈', price: 85, implemented: true,
+                desc: 'Mundo colorido con arcoiris permanente.',
+                features: ['🌈 Arcoiris', '☁️ Nubes rosa', '✨ Brillos', '🦄 Magico'],
+                physics: 'Gravedad: Normal | Visual: Colorido'
+            },
+
+            // PROPUESTAS NUEVAS
+            {
+                id: 'jungla', name: 'Jungla', emoji: '🌴', price: 80, implemented: false,
+                desc: 'Selva tropical densa con lianas, animales exoticos y lluvia.',
+                features: ['🌴 Palmeras', '🦜 Loros', '🐒 Monos', '🌧️ Lluvia tropical'],
+                physics: 'Lianas para columpiarse | Humedad'
+            },
+            {
+                id: 'oceano', name: 'Oceano Profundo', emoji: '🐋', price: 90, implemented: false,
+                desc: 'Fondo del mar con peces, medusas brillantes y presion.',
+                features: ['🐠 Peces', '🪼 Medusas', '🦈 Tiburones', '🫧 Burbujas'],
+                physics: 'Gravedad: 0.15 | Corrientes marinas'
+            },
+            {
+                id: 'apocalipsis', name: 'Apocalipsis', emoji: '☠️', price: 150, implemented: false,
+                desc: 'Mundo destruido con edificios en ruinas, fuego y cenizas.',
+                features: ['🏚️ Ruinas', '🔥 Fuego', '💀 Calaveras', '🌫️ Ceniza'],
+                physics: 'Gravedad: Normal | Escombros cayendo'
+            },
+            {
+                id: 'dulces', name: 'Mundo de Dulces', emoji: '🍭', price: 100, implemented: false,
+                desc: 'Todo hecho de caramelos, chocolate y gomitas.',
+                features: ['🍬 Caramelos', '🍫 Chocolate', '🧁 Cupcakes', '☁️ Nubes de algodon'],
+                physics: 'Piso pegajoso | Rebote en gomitas'
+            },
+            {
+                id: 'montanas', name: 'Montanas Nevadas', emoji: '🏔️', price: 85, implemented: false,
+                desc: 'Picos nevados con avalanchas ocasionales y viento fuerte.',
+                features: ['❄️ Nieve', '🌬️ Ventisca', '🏔️ Picos', '🦅 Aguilas'],
+                physics: 'Avalanchas aleatorias | Viento fuerte'
+            },
+            {
+                id: 'pantano', name: 'Pantano', emoji: '🐊', price: 70, implemented: false,
+                desc: 'Agua sucia, arboles muertos y niebla espesa.',
+                features: ['🐸 Ranas', '🐊 Cocodrilos', '🌫️ Niebla', '🦟 Mosquitos'],
+                physics: 'Agua viscosa | Movimiento lento'
+            },
+            {
+                id: 'cristales', name: 'Cueva de Cristales', emoji: '💎', price: 120, implemented: false,
+                desc: 'Cueva subterranea llena de cristales brillantes de colores.',
+                features: ['💎 Cristales', '✨ Brillos', '🦇 Murcielagos', '🌈 Reflejos'],
+                physics: 'Luz refractada | Eco de sonidos'
+            },
+            {
+                id: 'ruinas', name: 'Ruinas Antiguas', emoji: '🏛️', price: 110, implemented: false,
+                desc: 'Templo antiguo con columnas rotas, trampas y tesoros.',
+                features: ['🏺 Vasijas', '🪤 Trampas', '💰 Tesoros', '🐍 Serpientes'],
+                physics: 'Trampas de picos | Bloques que caen'
+            },
+            {
+                id: 'supertormenta', name: 'Supertormenta', emoji: '⛈️', price: 95, implemented: false,
+                desc: 'Tormenta extrema con rayos constantes, lluvia intensa y tornado.',
+                features: ['⚡ Rayos x3', '🌧️ Lluvia', '🌪️ Mini-tornados', '🌊 Inundacion'],
+                physics: 'Viento: Muy Alto | Dano: Continuo'
+            }
+        ];
+
+        const implementedGrid = document.getElementById('implemented-grid');
+        const pendingGrid = document.getElementById('pending-grid');
+
+        worlds.forEach(world => {
+            const card = document.createElement('div');
+            card.className = `world-card ${world.implemented ? 'implemented' : 'pending'}`;
+
+            const previewClass = `preview-${world.id}`;
+
+            card.innerHTML = `
+                <div class="world-preview ${previewClass}">
+                    <span class="emoji">${world.emoji}</span>
+                </div>
+                <div class="world-info">
+                    <div class="world-name">${world.name}</div>
+                    <div class="world-status ${world.implemented ? 'status-done' : 'status-pending'}">
+                        ${world.implemented ? 'IMPLEMENTADO' : 'PROPUESTA'}
+                    </div>
+                    <div class="world-price">${world.price === 0 ? 'GRATIS' : '💎 ' + world.price}</div>
+                    <div class="world-desc">${world.desc}</div>
+                    <div class="world-features">
+                        ${world.features.map(f => `<span class="feature">${f}</span>`).join('')}
+                    </div>
+                    <div class="world-physics">${world.physics}</div>
+                </div>
+            `;
+
+            if (world.implemented) {
+                implementedGrid.appendChild(card);
+            } else {
+                pendingGrid.appendChild(card);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weapon Designs - Sandbox Mayhem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 2em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .section-title {
+            text-align: center;
+            font-size: 1.3em;
+            margin: 30px 0 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .weapon-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .weapon-card.melee { border: 2px solid #FF6B6B; }
+        .weapon-card.ranged { border: 2px solid #4ECDC4; }
+        .weapon-card.explosive { border: 2px solid #FFE66D; }
+        .weapon-card.special { border: 2px solid #95E1D3; }
+        .weapon-card.utility { border: 2px solid #A8E6CF; }
+        .weapon-emoji { font-size: 3em; margin: 10px 0; }
+        .weapon-name { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
+        .weapon-type {
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .type-melee { background: #FF6B6B; }
+        .type-ranged { background: #4ECDC4; }
+        .type-explosive { background: #FFE66D; color: #000; }
+        .type-special { background: #95E1D3; color: #000; }
+        .type-utility { background: #A8E6CF; color: #000; }
+        .weapon-price { color: #FFD700; font-size: 0.9em; margin: 5px 0; }
+        .weapon-desc {
+            font-size: 0.8em;
+            color: #AAA;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+        }
+        .weapon-effect {
+            font-size: 0.75em;
+            color: #88FF88;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weapon Designs Dashboard</h1>
+    <p class="subtitle">Catalogo de armas - Sandbox Mayhem</p>
+
+    <div class="section-title">CUERPO A CUERPO</div>
+    <div class="grid" id="melee-grid"></div>
+
+    <div class="section-title">ARMAS DE RANGO</div>
+    <div class="grid" id="ranged-grid"></div>
+
+    <div class="section-title">EXPLOSIVOS</div>
+    <div class="grid" id="explosive-grid"></div>
+
+    <div class="section-title">ARMAS ESPECIALES</div>
+    <div class="grid" id="special-grid"></div>
+
+    <div class="section-title">UTILIDAD</div>
+    <div class="grid" id="utility-grid"></div>
+
+    <script>
+        const weapons = [
+            // MELEE
+            { id: 'cuchillo', name: 'Cuchillo', emoji: '🔪', price: 0, type: 'melee',
+              desc: 'Arma blanca basica. Causa dano al contacto.',
+              effect: 'Dano: Bajo | Velocidad: Rapida' },
+            { id: 'espada', name: 'Espada', emoji: '🗡️', price: 25, type: 'melee',
+              desc: 'Hoja larga con mas alcance que el cuchillo.',
+              effect: 'Dano: Medio | Alcance: Medio' },
+            { id: 'bat', name: 'Bate', emoji: '🏏', price: 25, type: 'melee',
+              desc: 'Bate de beisbol. Golpea y empuja ragdolls.',
+              effect: 'Dano: Medio | Empuje: Alto' },
+            { id: 'katana', name: 'Katana', emoji: '⚔️', price: 75, type: 'melee',
+              desc: 'Espada japonesa larga y afilada.',
+              effect: 'Dano: Alto | Alcance: Largo' },
+            { id: 'hacha', name: 'Hacha', emoji: '🪓', price: 55, type: 'melee',
+              desc: 'Hacha pesada que causa mucho dano.',
+              effect: 'Dano: Alto | Velocidad: Lenta' },
+            { id: 'martillo', name: 'Martillo', emoji: '🔨', price: 45, type: 'melee',
+              desc: 'Martillo que aplasta y empuja.',
+              effect: 'Dano: Medio | Empuje: Muy Alto' },
+            { id: 'motosierra', name: 'Motosierra', emoji: '🪚', price: 100, type: 'melee',
+              desc: 'Click para encender/apagar. Causa dano continuo cuando esta encendida.',
+              effect: 'Dano: Muy Alto (continuo) | Sonido: SI' },
+
+            // RANGED
+            { id: 'pistola', name: 'Pistola', emoji: '🔫', price: 0, type: 'ranged',
+              desc: 'Arma de fuego basica. Click para disparar balas que empujan.',
+              effect: 'Dano: Bajo | Balas: Infinitas' },
+            { id: 'arco', name: 'Arco', emoji: '🏹', price: 60, type: 'ranged',
+              desc: 'Dispara flechas que se clavan en ragdolls.',
+              effect: 'Dano: Medio | Precision: Alta' },
+            { id: 'lanzallamas', name: 'Lanzallamas', emoji: '🔥', price: 150, type: 'ranged',
+              desc: 'Dispara fuego continuo que quema ragdolls.',
+              effect: 'Dano: Alto (continuo) | Rango: Corto' },
+            { id: 'laser', name: 'Laser', emoji: '🔦', price: 180, type: 'ranged',
+              desc: 'Rayo laser instantaneo que atraviesa multiples objetivos.',
+              effect: 'Dano: Medio | Penetracion: SI' },
+            { id: 'boomerang', name: 'Boomerang', emoji: '🪃', price: 85, type: 'ranged',
+              desc: 'Vuelve despues de lanzarlo. Golpea ida y vuelta.',
+              effect: 'Dano: Bajo x2 | Retorno: SI' },
+
+            // EXPLOSIVE
+            { id: 'granada', name: 'Granada', emoji: '💣', price: 0, type: 'explosive',
+              desc: 'Explota despues de 5 segundos. Timer visible.',
+              effect: 'Dano: Alto (area) | Timer: 5s' },
+            { id: 'cohete', name: 'Cohete', emoji: '🚀', price: 50, type: 'explosive',
+              desc: 'Proyectil que explota al impactar.',
+              effect: 'Dano: Alto | Velocidad: Rapida' },
+            { id: 'barril', name: 'Barril', emoji: '🛢️', price: 30, type: 'explosive',
+              desc: 'Barril explosivo. Explota al recibir dano.',
+              effect: 'Dano: Muy Alto (area) | Trigger: Impacto' },
+            { id: 'dinamita', name: 'Dinamita', emoji: '🧨', price: 120, type: 'explosive',
+              desc: 'Multiples cargas que explotan en cadena.',
+              effect: 'Dano: Muy Alto | Explosiones: 3' },
+            { id: 'nuke', name: 'Nuke', emoji: '☢️', price: 500, type: 'explosive',
+              desc: 'Bomba nuclear. Explosion masiva despues de 8 segundos.',
+              effect: 'Dano: MAXIMO | Timer: 8s | Radio: Enorme' },
+
+            // SPECIAL
+            { id: 'portal', name: 'Portal', emoji: '🌀', price: 200, type: 'special',
+              desc: 'Coloca 2 portales. Los ragdolls que entran salen por el otro.',
+              effect: 'Teletransporte bidireccional' },
+            { id: 'iman', name: 'Iman', emoji: '🧲', price: 80, type: 'special',
+              desc: 'Atrae ragdolls hacia el. Radio de atraccion grande.',
+              effect: 'Fuerza: Media | Radio: Grande' },
+            { id: 'ventilador', name: 'Ventilador', emoji: '💨', price: 90, type: 'special',
+              desc: 'Sopla hacia arriba. Los ragdolls flotan.',
+              effect: 'Empuje: Vertical | Continuo: SI' },
+
+            // UTILITY
+            { id: 'trampolin', name: 'Trampolin', emoji: '🛝', price: 40, type: 'utility',
+              desc: 'Los ragdolls rebotan al caer sobre el.',
+              effect: 'Rebote: 2x altura' },
+            { id: 'escudo', name: 'Escudo', emoji: '🛡️', price: 70, type: 'utility',
+              desc: 'Bloquea proyectiles y golpes.',
+              effect: 'Proteccion: Frontal | Durabilidad: Alta' },
+            { id: 'piedra', name: 'Piedra', emoji: '🪨', price: 10, type: 'utility',
+              desc: 'Roca simple. Puede ser lanzada o usada como obstaculo.',
+              effect: 'Dano: Bajo | Peso: Alto' },
+            { id: 'cactus', name: 'Cactus', emoji: '🌵', price: 35, type: 'utility',
+              desc: 'Planta espinosa. Causa dano al tocar.',
+              effect: 'Dano: Bajo (continuo) | Decorativo: SI' },
+            { id: 'yunque', name: 'Yunque', emoji: '⚒️', price: 100, type: 'utility',
+              desc: 'Objeto muy pesado. Aplasta todo debajo.',
+              effect: 'Dano: Muy Alto | Peso: Maximo' }
+        ];
+
+        const grids = {
+            melee: document.getElementById('melee-grid'),
+            ranged: document.getElementById('ranged-grid'),
+            explosive: document.getElementById('explosive-grid'),
+            special: document.getElementById('special-grid'),
+            utility: document.getElementById('utility-grid')
+        };
+
+        weapons.forEach(weapon => {
+            const card = document.createElement('div');
+            card.className = `weapon-card ${weapon.type}`;
+
+            card.innerHTML = `
+                <div class="weapon-emoji">${weapon.emoji}</div>
+                <div class="weapon-name">${weapon.name}</div>
+                <div class="weapon-type type-${weapon.type}">${weapon.type.toUpperCase()}</div>
+                <div class="weapon-price">${weapon.price === 0 ? 'GRATIS' : '💎 ' + weapon.price}</div>
+                <div class="weapon-desc">${weapon.desc}</div>
+                <div class="weapon-effect">${weapon.effect}</div>
+            `;
+
+            grids[weapon.type].appendChild(card);
+        });
+    </script>
+</body>
+</html>
