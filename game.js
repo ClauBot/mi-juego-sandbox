@@ -188,7 +188,19 @@ const shopItems = {
         { id: 'pirata', name: 'Pirata', emoji: '🏴‍☠️', price: 75 },
         { id: 'knight', name: 'Caballero', emoji: '🛡️', price: 200 },
         { id: 'wizard', name: 'Mago', emoji: '🧙', price: 250 },
-        { id: 'demon', name: 'Demonio', emoji: '👹', price: 300 }
+        { id: 'demon', name: 'Demonio', emoji: '👹', price: 300 },
+        { id: 'vampire', name: 'Vampiro', emoji: '🧛', price: 175 },
+        { id: 'fairy', name: 'Hada', emoji: '🧚', price: 125 },
+        { id: 'mermaid', name: 'Sirena', emoji: '🧜', price: 200 },
+        { id: 'genie', name: 'Genio', emoji: '🧞', price: 350 },
+        { id: 'superhero', name: 'Superhéroe', emoji: '🦸', price: 400 },
+        { id: 'villain', name: 'Villano', emoji: '🦹', price: 400 },
+        { id: 'zombie', name: 'Zombie', emoji: '🧟', price: 100 },
+        { id: 'ghost', name: 'Fantasma', emoji: '👻', price: 150 },
+        { id: 'clown', name: 'Payaso', emoji: '🤡', price: 75 },
+        { id: 'astronaut', name: 'Astronauta', emoji: '🧑‍🚀', price: 250 },
+        { id: 'king', name: 'Rey', emoji: '🤴', price: 500 },
+        { id: 'queen', name: 'Reina', emoji: '👸', price: 500 }
     ],
     weapons: [
         { id: 'pistola', name: 'Pistola', emoji: '🔫', price: 0 },
@@ -205,7 +217,16 @@ const shopItems = {
         { id: 'iman', name: 'Imán', emoji: '🧲', price: 80 },
         { id: 'lanzallamas', name: 'Lanzallamas', emoji: '🔥', price: 150 },
         { id: 'portal', name: 'Portal', emoji: '🌀', price: 200 },
-        { id: 'ventilador', name: 'Ventilador', emoji: '💨', price: 90 }
+        { id: 'ventilador', name: 'Ventilador', emoji: '💨', price: 90 },
+        { id: 'hacha', name: 'Hacha', emoji: '🪓', price: 55 },
+        { id: 'martillo', name: 'Martillo', emoji: '🔨', price: 45 },
+        { id: 'dinamita', name: 'Dinamita', emoji: '🧨', price: 120 },
+        { id: 'laser', name: 'Láser', emoji: '🔦', price: 180 },
+        { id: 'escudo', name: 'Escudo', emoji: '🛡️', price: 70 },
+        { id: 'boomerang', name: 'Boomerang', emoji: '🪃', price: 85 },
+        { id: 'piedra', name: 'Piedra', emoji: '🪨', price: 10 },
+        { id: 'cactus', name: 'Cactus', emoji: '🌵', price: 35 },
+        { id: 'yunque', name: 'Yunque', emoji: '⚒️', price: 100 }
     ],
     worlds: [
         { id: 'normal', name: 'Normal', emoji: '🌳', price: 0 },
@@ -216,7 +237,14 @@ const shopItems = {
         { id: 'blackhole', name: 'Agujero Negro', emoji: '🕳️', price: 150 },
         { id: 'agua', name: 'Agua', emoji: '🌊', price: 75 },
         { id: 'lava', name: 'Lava', emoji: '🌋', price: 125 },
-        { id: 'hielo', name: 'Hielo', emoji: '🧊', price: 75 }
+        { id: 'hielo', name: 'Hielo', emoji: '🧊', price: 75 },
+        { id: 'desierto', name: 'Desierto', emoji: '🏜️', price: 60 },
+        { id: 'bosque', name: 'Bosque', emoji: '🌲', price: 50 },
+        { id: 'noche', name: 'Noche', emoji: '🌃', price: 40 },
+        { id: 'arcoiris', name: 'Arcoíris', emoji: '🌈', price: 100 },
+        { id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 125 },
+        { id: 'playa', name: 'Playa', emoji: '🏖️', price: 75 },
+        { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 60 }
     ]
 };
 
@@ -4843,9 +4871,16 @@ function createShopMenu(scene) {
     }).setOrigin(0.5);
     shopMenu.add(title);
 
+    // Subtítulo
+    const subtitle = scene.add.text(w/2, 60, 'Solo items que no tienes', {
+        font: '14px Arial',
+        fill: '#AAAAAA'
+    }).setOrigin(0.5);
+    shopMenu.add(subtitle);
+
     // Mayhems display
-    const mayhemsShop = scene.add.text(w/2, 65, '💎 ' + mayhems + ' Mayhems', {
-        font: 'bold 20px Arial',
+    const mayhemsShop = scene.add.text(w/2, 85, '💎 ' + mayhems + ' Mayhems', {
+        font: 'bold 18px Arial',
         fill: '#FFFFFF'
     }).setOrigin(0.5);
     shopMenu.add(mayhemsShop);
@@ -4853,108 +4888,45 @@ function createShopMenu(scene) {
 
     // Tabs
     const tabs = ['NPCs', 'Armas', 'Mundos'];
-    let currentTab = 0;
-    const tabBtns = [];
-    const itemContainers = [];
+    shopMenu.currentTab = 0;
+    shopMenu.tabBtns = [];
+    shopMenu.itemContainers = [];
 
     tabs.forEach((tab, i) => {
         const tabX = w/2 - 120 + i * 120;
         const tabBtn = scene.add.graphics();
         tabBtn.fillStyle(i === 0 ? 0x27AE60 : 0x444444, 1);
-        tabBtn.fillRoundedRect(tabX - 50, 95, 100, 35, 6);
+        tabBtn.fillRoundedRect(tabX - 50, 110, 100, 30, 6);
         shopMenu.add(tabBtn);
-        tabBtns.push(tabBtn);
+        shopMenu.tabBtns.push(tabBtn);
 
-        const tabTxt = scene.add.text(tabX, 112, tab, {
-            font: 'bold 16px Arial',
+        const tabTxt = scene.add.text(tabX, 125, tab, {
+            font: 'bold 14px Arial',
             fill: '#FFFFFF'
         }).setOrigin(0.5);
         shopMenu.add(tabTxt);
 
-        const tabRect = scene.add.rectangle(tabX, 112, 100, 35, 0x000000, 0);
+        const tabRect = scene.add.rectangle(tabX, 125, 100, 30, 0x000000, 0);
         tabRect.setInteractive();
         shopMenu.add(tabRect);
         tabRect.on('pointerdown', () => {
-            currentTab = i;
-            tabBtns.forEach((btn, j) => {
+            shopMenu.currentTab = i;
+            shopMenu.tabBtns.forEach((btn, j) => {
                 btn.clear();
                 btn.fillStyle(j === i ? 0x27AE60 : 0x444444, 1);
-                btn.fillRoundedRect(w/2 - 170 + j * 120, 95, 100, 35, 6);
+                btn.fillRoundedRect(w/2 - 170 + j * 120, 110, 100, 30, 6);
             });
-            itemContainers.forEach((cont, j) => cont.setVisible(j === i));
+            shopMenu.itemContainers.forEach((cont, j) => cont.setVisible(j === i));
         });
     });
 
-    // Contenedores de items
+    // Contenedores de items (se llenan dinámicamente)
     const categories = ['npcs', 'weapons', 'worlds'];
     categories.forEach((cat, catIdx) => {
-        const container = scene.add.container(0, 140);
+        const container = scene.add.container(0, 150);
         container.setVisible(catIdx === 0);
         shopMenu.add(container);
-        itemContainers.push(container);
-
-        const items = shopItems[cat];
-        const cols = isMobile ? 2 : 4;
-        const itemW = isMobile ? (w - 40) / 2 : 150;
-        const itemH = 80;
-        const startX = isMobile ? 20 : (w - cols * itemW) / 2;
-
-        items.forEach((item, i) => {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const x = startX + col * itemW;
-            const y = row * (itemH + 10);
-
-            const isUnlocked = unlockedItems[cat].includes(item.id);
-
-            const itemBg = scene.add.graphics();
-            itemBg.fillStyle(isUnlocked ? 0x2ECC71 : 0x34495E, 1);
-            itemBg.fillRoundedRect(x, y, itemW - 10, itemH, 8);
-            container.add(itemBg);
-
-            const emoji = scene.add.text(x + 30, y + itemH/2, item.emoji, {
-                font: '28px Arial'
-            }).setOrigin(0.5);
-            container.add(emoji);
-
-            const name = scene.add.text(x + 60, y + 20, item.name, {
-                font: 'bold 14px Arial',
-                fill: '#FFFFFF'
-            });
-            container.add(name);
-
-            const priceText = isUnlocked ? '✓ Desbloqueado' : (item.price === 0 ? 'GRATIS' : '💎 ' + item.price);
-            const price = scene.add.text(x + 60, y + 45, priceText, {
-                font: '12px Arial',
-                fill: isUnlocked ? '#2ECC71' : (item.price === 0 ? '#00FF00' : '#FFD700')
-            });
-            container.add(price);
-
-            if (!isUnlocked) {
-                const buyRect = scene.add.rectangle(x + itemW/2 - 5, y + itemH/2, itemW - 10, itemH, 0x000000, 0);
-                buyRect.setInteractive();
-                container.add(buyRect);
-                buyRect.on('pointerdown', () => {
-                    if (item.price === 0 || mayhems >= item.price) {
-                        mayhems -= item.price;
-                        unlockedItems[cat].push(item.id);
-                        saveSaveData();
-                        updateMayhemsDisplay();
-                        shopMenu.mayhemsDisplay.setText('💎 ' + mayhems + ' Mayhems');
-                        // Actualizar visual
-                        itemBg.clear();
-                        itemBg.fillStyle(0x2ECC71, 1);
-                        itemBg.fillRoundedRect(x, y, itemW - 10, itemH, 8);
-                        price.setText('✓ Desbloqueado');
-                        price.setFill('#2ECC71');
-                        buyRect.removeInteractive();
-                        showNotification('🎉 ' + item.name + ' desbloqueado!');
-                    } else {
-                        showNotification('❌ No tienes suficientes Mayhems');
-                    }
-                });
-            }
-        });
+        shopMenu.itemContainers.push(container);
     });
 
     // Botón cerrar
@@ -4973,12 +4945,91 @@ function createShopMenu(scene) {
     closeRect.on('pointerdown', () => closeShop());
 }
 
+function refreshShopItems() {
+    if (!shopMenu || !shopMenu.itemContainers) return;
+
+    const w = game.scale.width;
+    const categories = ['npcs', 'weapons', 'worlds'];
+
+    categories.forEach((cat, catIdx) => {
+        const container = shopMenu.itemContainers[catIdx];
+        container.removeAll(true);
+
+        // Solo mostrar items NO desbloqueados
+        const lockedItems = shopItems[cat].filter(item => !unlockedItems[cat].includes(item.id));
+
+        if (lockedItems.length === 0) {
+            const allDone = sceneRef.add.text(w/2, 50, '✅ ¡Tienes todo!', {
+                font: 'bold 20px Arial',
+                fill: '#2ECC71'
+            }).setOrigin(0.5);
+            container.add(allDone);
+            return;
+        }
+
+        const cols = isMobile ? 2 : 4;
+        const itemW = isMobile ? (w - 40) / 2 : 150;
+        const itemH = 80;
+        const startX = isMobile ? 20 : (w - cols * itemW) / 2;
+
+        lockedItems.forEach((item, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = startX + col * itemW;
+            const y = row * (itemH + 10);
+
+            const itemBg = sceneRef.add.graphics();
+            itemBg.fillStyle(0x34495E, 1);
+            itemBg.fillRoundedRect(x, y, itemW - 10, itemH, 8);
+            container.add(itemBg);
+
+            const emoji = sceneRef.add.text(x + 30, y + itemH/2, item.emoji, {
+                font: '28px Arial'
+            }).setOrigin(0.5);
+            container.add(emoji);
+
+            const name = sceneRef.add.text(x + 60, y + 20, item.name, {
+                font: 'bold 14px Arial',
+                fill: '#FFFFFF'
+            });
+            container.add(name);
+
+            const priceText = item.price === 0 ? 'GRATIS' : '💎 ' + item.price;
+            const price = sceneRef.add.text(x + 60, y + 45, priceText, {
+                font: '12px Arial',
+                fill: item.price === 0 ? '#00FF00' : '#FFD700'
+            });
+            container.add(price);
+
+            const buyRect = sceneRef.add.rectangle(x + itemW/2 - 5, y + itemH/2, itemW - 10, itemH, 0x000000, 0);
+            buyRect.setInteractive();
+            container.add(buyRect);
+            buyRect.on('pointerdown', () => {
+                if (item.price === 0 || mayhems >= item.price) {
+                    mayhems -= item.price;
+                    unlockedItems[cat].push(item.id);
+                    saveSaveData();
+                    updateMayhemsDisplay();
+                    shopMenu.mayhemsDisplay.setText('💎 ' + mayhems + ' Mayhems');
+                    showNotification('🎉 ' + item.name + ' desbloqueado!');
+                    // Refrescar para quitar el item comprado
+                    refreshShopItems();
+                } else {
+                    showNotification('❌ No tienes suficientes Mayhems');
+                }
+            });
+        });
+    });
+}
+
 function openShop() {
     shopOpen = true;
     shopMenu.setVisible(true);
     if (shopMenu.mayhemsDisplay) {
         shopMenu.mayhemsDisplay.setText('💎 ' + mayhems + ' Mayhems');
     }
+    // Refrescar items para mostrar solo los no desbloqueados
+    refreshShopItems();
 }
 
 function closeShop() {
