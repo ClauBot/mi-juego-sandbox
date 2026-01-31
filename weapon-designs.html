@@ -20,12 +20,16 @@
             font-size: 1.3em;
             margin: 30px 0 20px;
             padding: 10px;
-            background: rgba(255,255,255,0.1);
             border-radius: 10px;
         }
+        .section-melee { background: rgba(255,107,107,0.3); }
+        .section-ranged { background: rgba(78,205,196,0.3); }
+        .section-explosive { background: rgba(255,230,109,0.3); }
+        .section-special { background: rgba(149,225,211,0.3); }
+        .section-utility { background: rgba(168,230,207,0.3); }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             max-width: 1400px;
             margin: 0 auto;
@@ -41,8 +45,27 @@
         .weapon-card.explosive { border: 2px solid #FFE66D; }
         .weapon-card.special { border: 2px solid #95E1D3; }
         .weapon-card.utility { border: 2px solid #A8E6CF; }
-        .weapon-emoji { font-size: 3em; margin: 10px 0; }
-        .weapon-name { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
+        .weapon-preview {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .weapon-preview canvas {
+            image-rendering: pixelated;
+        }
+        .weapon-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        .weapon-emoji { font-size: 1.5em; }
+        .weapon-name { font-size: 1.1em; font-weight: bold; }
         .weapon-type {
             font-size: 0.7em;
             padding: 2px 8px;
@@ -74,24 +97,26 @@
 </head>
 <body>
     <h1>Weapon Designs Dashboard</h1>
-    <p class="subtitle">Catalogo de armas - Sandbox Mayhem</p>
+    <p class="subtitle">Catalogo de armas (3x escala) - Sandbox Mayhem</p>
 
-    <div class="section-title">CUERPO A CUERPO</div>
+    <div class="section-title section-melee">CUERPO A CUERPO</div>
     <div class="grid" id="melee-grid"></div>
 
-    <div class="section-title">ARMAS DE RANGO</div>
+    <div class="section-title section-ranged">ARMAS DE RANGO</div>
     <div class="grid" id="ranged-grid"></div>
 
-    <div class="section-title">EXPLOSIVOS</div>
+    <div class="section-title section-explosive">EXPLOSIVOS</div>
     <div class="grid" id="explosive-grid"></div>
 
-    <div class="section-title">ARMAS ESPECIALES</div>
+    <div class="section-title section-special">ARMAS ESPECIALES</div>
     <div class="grid" id="special-grid"></div>
 
-    <div class="section-title">UTILIDAD</div>
+    <div class="section-title section-utility">UTILIDAD</div>
     <div class="grid" id="utility-grid"></div>
 
     <script>
+        const SCALE = 3;
+
         const weapons = [
             // MELEE
             { id: 'cuchillo', name: 'Cuchillo', emoji: '🔪', price: 0, type: 'melee',
@@ -113,12 +138,12 @@
               desc: 'Martillo que aplasta y empuja.',
               effect: 'Dano: Medio | Empuje: Muy Alto' },
             { id: 'motosierra', name: 'Motosierra', emoji: '🪚', price: 100, type: 'melee',
-              desc: 'Click para encender/apagar. Causa dano continuo cuando esta encendida.',
+              desc: 'Click para encender/apagar. Causa dano continuo.',
               effect: 'Dano: Muy Alto (continuo) | Sonido: SI' },
 
             // RANGED
             { id: 'pistola', name: 'Pistola', emoji: '🔫', price: 0, type: 'ranged',
-              desc: 'Arma de fuego basica. Click para disparar balas que empujan.',
+              desc: 'Arma de fuego basica. Click para disparar balas.',
               effect: 'Dano: Bajo | Balas: Infinitas' },
             { id: 'arco', name: 'Arco', emoji: '🏹', price: 60, type: 'ranged',
               desc: 'Dispara flechas que se clavan en ragdolls.',
@@ -127,7 +152,7 @@
               desc: 'Dispara fuego continuo que quema ragdolls.',
               effect: 'Dano: Alto (continuo) | Rango: Corto' },
             { id: 'laser', name: 'Laser', emoji: '🔦', price: 180, type: 'ranged',
-              desc: 'Rayo laser instantaneo que atraviesa multiples objetivos.',
+              desc: 'Rayo laser instantaneo que atraviesa objetivos.',
               effect: 'Dano: Medio | Penetracion: SI' },
             { id: 'boomerang', name: 'Boomerang', emoji: '🪃', price: 85, type: 'ranged',
               desc: 'Vuelve despues de lanzarlo. Golpea ida y vuelta.',
@@ -137,25 +162,22 @@
             { id: 'granada', name: 'Granada', emoji: '💣', price: 0, type: 'explosive',
               desc: 'Explota despues de 5 segundos. Timer visible.',
               effect: 'Dano: Alto (area) | Timer: 5s' },
-            { id: 'cohete', name: 'Cohete', emoji: '🚀', price: 50, type: 'explosive',
-              desc: 'Proyectil que explota al impactar.',
-              effect: 'Dano: Alto | Velocidad: Rapida' },
             { id: 'barril', name: 'Barril', emoji: '🛢️', price: 30, type: 'explosive',
               desc: 'Barril explosivo. Explota al recibir dano.',
               effect: 'Dano: Muy Alto (area) | Trigger: Impacto' },
             { id: 'dinamita', name: 'Dinamita', emoji: '🧨', price: 120, type: 'explosive',
-              desc: 'Multiples cargas que explotan en cadena.',
-              effect: 'Dano: Muy Alto | Explosiones: 3' },
+              desc: 'Cartucho de dinamita con mecha.',
+              effect: 'Dano: Alto | Timer: 3s' },
             { id: 'nuke', name: 'Nuke', emoji: '☢️', price: 500, type: 'explosive',
-              desc: 'Bomba nuclear. Explosion masiva despues de 8 segundos.',
+              desc: 'Bomba nuclear. Explosion masiva despues de 8s.',
               effect: 'Dano: MAXIMO | Timer: 8s | Radio: Enorme' },
 
             // SPECIAL
             { id: 'portal', name: 'Portal', emoji: '🌀', price: 200, type: 'special',
-              desc: 'Coloca 2 portales. Los ragdolls que entran salen por el otro.',
+              desc: 'Coloca 2 portales. Teletransporta ragdolls.',
               effect: 'Teletransporte bidireccional' },
             { id: 'iman', name: 'Iman', emoji: '🧲', price: 80, type: 'special',
-              desc: 'Atrae ragdolls hacia el. Radio de atraccion grande.',
+              desc: 'Atrae ragdolls hacia el centro.',
               effect: 'Fuerza: Media | Radio: Grande' },
             { id: 'ventilador', name: 'Ventilador', emoji: '💨', price: 90, type: 'special',
               desc: 'Sopla hacia arriba. Los ragdolls flotan.',
@@ -179,6 +201,490 @@
               effect: 'Dano: Muy Alto | Peso: Maximo' }
         ];
 
+        function drawWeapon(weaponId) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size based on weapon
+            let w = 80, h = 50;
+            if (['granada', 'barril', 'portal', 'iman'].includes(weaponId)) {
+                w = 50; h = 50;
+            } else if (['hacha', 'martillo', 'dinamita', 'escudo'].includes(weaponId)) {
+                w = 40; h = 60;
+            } else if (['arco'].includes(weaponId)) {
+                w = 40; h = 60;
+            } else if (['boomerang'].includes(weaponId)) {
+                w = 40; h = 40;
+            }
+
+            canvas.width = w * SCALE;
+            canvas.height = h * SCALE;
+            ctx.scale(SCALE, SCALE);
+
+            // Center offset
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            switch(weaponId) {
+                case 'pistola':
+                    // Cuerpo
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-20, -5, 40, 12);
+                    // Canon
+                    ctx.fillStyle = '#222222';
+                    ctx.fillRect(15, -3, 20, 8);
+                    // Mango
+                    ctx.fillStyle = '#4a3728';
+                    ctx.fillRect(-15, 7, 12, 18);
+                    // Gatillo
+                    ctx.fillStyle = '#222222';
+                    ctx.fillRect(-5, 7, 3, 8);
+                    break;
+
+                case 'cuchillo':
+                    // Mango
+                    ctx.fillStyle = '#4a3728';
+                    ctx.fillRect(-25, -4, 20, 10);
+                    // Hoja
+                    ctx.fillStyle = '#CCCCCC';
+                    ctx.fillRect(-5, -3, 35, 8);
+                    // Punta
+                    ctx.beginPath();
+                    ctx.moveTo(30, -3);
+                    ctx.lineTo(30, 5);
+                    ctx.lineTo(40, 1);
+                    ctx.fill();
+                    // Filo brillante
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(-5, -3, 35, 2);
+                    break;
+
+                case 'granada':
+                    // Cuerpo
+                    ctx.fillStyle = '#556B2F';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Tapa
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-4, -18, 8, 8);
+                    // Anillo
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(6, -14, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'espada':
+                    // Mango
+                    ctx.fillStyle = '#8B4513';
+                    ctx.fillRect(-35, -4, 20, 10);
+                    // Guardia
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(-15, -8, 6, 18);
+                    // Hoja
+                    ctx.fillStyle = '#C0C0C0';
+                    ctx.fillRect(-9, -4, 55, 10);
+                    // Punta
+                    ctx.beginPath();
+                    ctx.moveTo(46, -4);
+                    ctx.lineTo(46, 6);
+                    ctx.lineTo(60, 1);
+                    ctx.fill();
+                    // Filo
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(-9, -4, 55, 2);
+                    break;
+
+                case 'bat':
+                    // Mango
+                    ctx.fillStyle = '#8B4513';
+                    ctx.fillRect(-35, -3, 25, 8);
+                    // Cuerpo
+                    ctx.fillStyle = '#DEB887';
+                    ctx.fillRect(-10, -6, 50, 14);
+                    // Punta
+                    ctx.beginPath();
+                    ctx.arc(40, 1, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'katana':
+                    // Mango
+                    ctx.fillStyle = '#8B0000';
+                    ctx.fillRect(-40, -3, 15, 8);
+                    // Guardia
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(-25, -4, 4, 10);
+                    // Hoja
+                    ctx.fillStyle = '#E8E8E8';
+                    ctx.fillRect(-21, -2, 70, 6);
+                    // Punta
+                    ctx.beginPath();
+                    ctx.moveTo(49, -2);
+                    ctx.lineTo(49, 4);
+                    ctx.lineTo(60, 1);
+                    ctx.fill();
+                    // Filo
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(-21, -2, 70, 1);
+                    break;
+
+                case 'hacha':
+                    // Mango
+                    ctx.fillStyle = '#4a3728';
+                    ctx.fillRect(-3, -20, 6, 40);
+                    // Cabeza
+                    ctx.fillStyle = '#888888';
+                    ctx.fillRect(-15, -20, 20, 15);
+                    // Filo
+                    ctx.beginPath();
+                    ctx.moveTo(-15, -20);
+                    ctx.lineTo(-15, -5);
+                    ctx.lineTo(-20, -12);
+                    ctx.fill();
+                    break;
+
+                case 'martillo':
+                    // Mango
+                    ctx.fillStyle = '#4a3728';
+                    ctx.fillRect(-3, -5, 6, 35);
+                    // Cabeza
+                    ctx.fillStyle = '#555555';
+                    ctx.fillRect(-12, -15, 24, 12);
+                    break;
+
+                case 'motosierra':
+                    // Cuerpo naranja
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(-30, -8, 25, 18);
+                    // Barra
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-5, -4, 45, 10);
+                    // Dientes
+                    ctx.fillStyle = '#666666';
+                    for (let i = 0; i < 40; i += 5) {
+                        ctx.beginPath();
+                        ctx.moveTo(-5 + i, -4);
+                        ctx.lineTo(-5 + i + 3, -7);
+                        ctx.lineTo(-5 + i + 5, -4);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.moveTo(-5 + i, 6);
+                        ctx.lineTo(-5 + i + 3, 9);
+                        ctx.lineTo(-5 + i + 5, 6);
+                        ctx.fill();
+                    }
+                    break;
+
+                case 'arco':
+                    // Arco de madera
+                    ctx.strokeStyle = '#8B4513';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 25, -Math.PI/2 - 0.5, Math.PI/2 + 0.5);
+                    ctx.stroke();
+                    // Cuerda
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -22);
+                    ctx.lineTo(0, 22);
+                    ctx.stroke();
+                    break;
+
+                case 'lanzallamas':
+                    // Cuerpo
+                    ctx.fillStyle = '#444444';
+                    ctx.fillRect(-25, -5, 35, 12);
+                    // Tanque
+                    ctx.fillStyle = '#FF6600';
+                    ctx.fillRect(-30, -3, 8, 8);
+                    // Boquilla
+                    ctx.fillStyle = '#222222';
+                    ctx.fillRect(10, -4, 20, 10);
+                    // Llama
+                    ctx.fillStyle = '#FF4400';
+                    ctx.beginPath();
+                    ctx.moveTo(30, 0);
+                    ctx.lineTo(38, -5);
+                    ctx.lineTo(35, 0);
+                    ctx.lineTo(38, 5);
+                    ctx.fill();
+                    break;
+
+                case 'laser':
+                    // Cuerpo
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-25, -8, 50, 16);
+                    // Punta laser
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.arc(25, 0, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Rayo
+                    ctx.strokeStyle = '#FF0000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(30, 0);
+                    ctx.lineTo(40, 0);
+                    ctx.stroke();
+                    break;
+
+                case 'boomerang':
+                    ctx.fillStyle = '#8B4513';
+                    // Forma de L
+                    ctx.beginPath();
+                    ctx.roundRect(-18, -3, 20, 6, 3);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.roundRect(-3, -18, 6, 20, 3);
+                    ctx.fill();
+                    // Decoracion
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(-8, 0, 2, 0, Math.PI * 2);
+                    ctx.arc(0, -8, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'barril':
+                    // Cuerpo
+                    ctx.fillStyle = '#8B0000';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Bandas
+                    ctx.strokeStyle = '#333333';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                    ctx.stroke();
+                    // Simbolo peligro
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -10);
+                    ctx.lineTo(-8, 5);
+                    ctx.lineTo(8, 5);
+                    ctx.fill();
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(-2, -6, 4, 8);
+                    ctx.beginPath();
+                    ctx.arc(0, 5, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'dinamita':
+                    // Cartucho
+                    ctx.fillStyle = '#CC0000';
+                    ctx.fillRect(-5, -15, 10, 30);
+                    // Mecha
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.fillRect(-2, -18, 4, 5);
+                    // Chispa
+                    ctx.fillStyle = '#FF8800';
+                    ctx.beginPath();
+                    ctx.arc(0, -20, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'nuke':
+                    // Cuerpo
+                    ctx.fillStyle = '#333333';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Simbolo radiacion
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.beginPath();
+                    ctx.arc(-5, 0, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.moveTo(-5, -5);
+                    ctx.lineTo(-5, 5);
+                    ctx.lineTo(2, 0);
+                    ctx.fill();
+                    // Aleta
+                    ctx.fillStyle = '#FF0000';
+                    ctx.fillRect(15, -3, 8, 6);
+                    break;
+
+                case 'portal':
+                    // Portal cyan/magenta
+                    ctx.strokeStyle = '#00FFFF';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                    ctx.stroke();
+                    // Centro
+                    ctx.fillStyle = 'rgba(0,255,255,0.3)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'iman':
+                    // Polo rojo
+                    ctx.fillStyle = '#FF0000';
+                    ctx.fillRect(-18, -15, 15, 30);
+                    // Polo azul
+                    ctx.fillStyle = '#0000FF';
+                    ctx.fillRect(3, -15, 15, 30);
+                    // Centro gris
+                    ctx.fillStyle = '#888888';
+                    ctx.fillRect(-3, -15, 6, 15);
+                    // Letras
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('N', -10, 5);
+                    ctx.fillText('S', 10, 5);
+                    break;
+
+                case 'ventilador':
+                    // Base
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-20, 5, 40, 8);
+                    // Cuerpo
+                    ctx.fillStyle = '#555555';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Aspas
+                    ctx.fillStyle = '#888888';
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i / 3) * Math.PI * 2;
+                        ctx.save();
+                        ctx.rotate(angle);
+                        ctx.fillRect(-3, -12, 6, 10);
+                        ctx.restore();
+                    }
+                    // Centro
+                    ctx.fillStyle = '#333333';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'trampolin':
+                    // Base
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-35, 5, 70, 10);
+                    // Superficie
+                    ctx.fillStyle = '#00BFFF';
+                    ctx.fillRect(-30, -5, 60, 10);
+                    // Resortes
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 2;
+                    for (let i = -25; i <= 25; i += 12) {
+                        ctx.beginPath();
+                        ctx.moveTo(i, 5);
+                        ctx.lineTo(i, -5);
+                        ctx.stroke();
+                    }
+                    break;
+
+                case 'escudo':
+                    // Escudo
+                    ctx.fillStyle = '#8B4513';
+                    ctx.beginPath();
+                    ctx.roundRect(-12, -18, 24, 36, 8);
+                    ctx.fill();
+                    // Centro dorado
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Borde
+                    ctx.strokeStyle = '#654321';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(-12, -18, 24, 36, 8);
+                    ctx.stroke();
+                    break;
+
+                case 'piedra':
+                    ctx.fillStyle = '#808080';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 18, 14, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Textura
+                    ctx.fillStyle = '#606060';
+                    ctx.beginPath();
+                    ctx.ellipse(-5, -3, 5, 4, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#707070';
+                    ctx.beginPath();
+                    ctx.ellipse(6, 4, 4, 3, -0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'cactus':
+                    // Tallo principal
+                    ctx.fillStyle = '#228B22';
+                    ctx.fillRect(-6, -20, 12, 40);
+                    // Brazos
+                    ctx.fillRect(-18, -10, 12, 6);
+                    ctx.fillRect(-18, -10, 6, 15);
+                    ctx.fillRect(6, -5, 12, 6);
+                    ctx.fillRect(12, -5, 6, 12);
+                    // Espinas
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 1;
+                    for (let y = -15; y < 15; y += 8) {
+                        ctx.beginPath();
+                        ctx.moveTo(-6, y);
+                        ctx.lineTo(-10, y - 2);
+                        ctx.moveTo(6, y);
+                        ctx.lineTo(10, y - 2);
+                        ctx.stroke();
+                    }
+                    break;
+
+                case 'yunque':
+                    // Base
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(-18, 5, 36, 10);
+                    // Cuerpo
+                    ctx.fillStyle = '#444444';
+                    ctx.fillRect(-15, -10, 30, 15);
+                    // Pico
+                    ctx.fillStyle = '#555555';
+                    ctx.beginPath();
+                    ctx.moveTo(-15, -10);
+                    ctx.lineTo(-20, -5);
+                    ctx.lineTo(-15, 5);
+                    ctx.fill();
+                    // Cuerno
+                    ctx.fillStyle = '#555555';
+                    ctx.beginPath();
+                    ctx.moveTo(15, -10);
+                    ctx.lineTo(25, -8);
+                    ctx.lineTo(15, 0);
+                    ctx.fill();
+                    break;
+
+                default:
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-15, -10, 30, 20);
+            }
+
+            ctx.restore();
+            return canvas;
+        }
+
         const grids = {
             melee: document.getElementById('melee-grid'),
             ranged: document.getElementById('ranged-grid'),
@@ -191,14 +697,39 @@
             const card = document.createElement('div');
             card.className = `weapon-card ${weapon.type}`;
 
-            card.innerHTML = `
-                <div class="weapon-emoji">${weapon.emoji}</div>
-                <div class="weapon-name">${weapon.name}</div>
-                <div class="weapon-type type-${weapon.type}">${weapon.type.toUpperCase()}</div>
-                <div class="weapon-price">${weapon.price === 0 ? 'GRATIS' : '💎 ' + weapon.price}</div>
-                <div class="weapon-desc">${weapon.desc}</div>
-                <div class="weapon-effect">${weapon.effect}</div>
+            const preview = document.createElement('div');
+            preview.className = 'weapon-preview';
+            preview.appendChild(drawWeapon(weapon.id));
+
+            const header = document.createElement('div');
+            header.className = 'weapon-header';
+            header.innerHTML = `
+                <span class="weapon-emoji">${weapon.emoji}</span>
+                <span class="weapon-name">${weapon.name}</span>
             `;
+
+            const typeTag = document.createElement('div');
+            typeTag.className = `weapon-type type-${weapon.type}`;
+            typeTag.textContent = weapon.type.toUpperCase();
+
+            const price = document.createElement('div');
+            price.className = 'weapon-price';
+            price.textContent = weapon.price === 0 ? 'GRATIS' : '💎 ' + weapon.price;
+
+            const desc = document.createElement('div');
+            desc.className = 'weapon-desc';
+            desc.textContent = weapon.desc;
+
+            const effect = document.createElement('div');
+            effect.className = 'weapon-effect';
+            effect.textContent = weapon.effect;
+
+            card.appendChild(preview);
+            card.appendChild(header);
+            card.appendChild(typeTag);
+            card.appendChild(price);
+            card.appendChild(desc);
+            card.appendChild(effect);
 
             grids[weapon.type].appendChild(card);
         });
