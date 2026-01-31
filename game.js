@@ -368,9 +368,78 @@ function create() {
     }, 100);
 }
 
+// Contador global de visitantes
+async function checkVisitorCount() {
+    try {
+        // Usar CountAPI para contar visitantes globales
+        const response = await fetch('https://api.countapi.xyz/hit/sandboxmayhem/visits');
+        const data = await response.json();
+        const visitorNumber = data.value;
+
+        console.log('Visitante número:', visitorNumber);
+
+        // Cada 100 visitantes gana 1,000,000 mayhems!
+        if (visitorNumber % 100 === 0) {
+            mayhems += 1000000;
+            saveSaveData();
+            // Mostrar mensaje de premio
+            setTimeout(() => {
+                if (sceneRef) {
+                    showPrizeMessage(sceneRef, visitorNumber);
+                }
+            }, 1000);
+        }
+
+        return visitorNumber;
+    } catch (e) {
+        console.log('Error contando visitantes:', e);
+        return 0;
+    }
+}
+
+function showPrizeMessage(scene, visitorNumber) {
+    const w = game.scale.width;
+    const h = game.scale.height;
+
+    // Fondo del mensaje
+    const msgBg = scene.add.graphics();
+    msgBg.fillStyle(0xFFD700, 1);
+    msgBg.fillRoundedRect(w/2 - 150, h/2 - 80, 300, 160, 20);
+    msgBg.lineStyle(4, 0xFF8C00, 1);
+    msgBg.strokeRoundedRect(w/2 - 150, h/2 - 80, 300, 160, 20);
+    msgBg.setDepth(200);
+
+    const title = scene.add.text(w/2, h/2 - 50, '🎉 GANASTE! 🎉', {
+        font: 'bold 24px Arial',
+        fill: '#000000'
+    }).setOrigin(0.5).setDepth(201);
+
+    const msg = scene.add.text(w/2, h/2, 'Visitante #' + visitorNumber, {
+        font: '18px Arial',
+        fill: '#333333'
+    }).setOrigin(0.5).setDepth(201);
+
+    const prize = scene.add.text(w/2, h/2 + 35, '+1,000,000 MAYHEMS!', {
+        font: 'bold 20px Arial',
+        fill: '#FF0000'
+    }).setOrigin(0.5).setDepth(201);
+
+    // Cerrar después de 5 segundos
+    setTimeout(() => {
+        msgBg.destroy();
+        title.destroy();
+        msg.destroy();
+        prize.destroy();
+        updateMayhemsDisplay();
+    }, 5000);
+}
+
 function initGameContent(scene) {
     // Cargar datos guardados (mayhems, items desbloqueados, etc.)
     loadSaveData();
+
+    // Contar visitante
+    checkVisitorCount();
 
     // Obtener dimensiones del viewport actual
     const realWidth = window.innerWidth;
