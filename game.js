@@ -5,8 +5,18 @@
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const isLowPerf = isMobile || navigator.hardwareConcurrency <= 4;
-const screenWidth = window.innerWidth;
-const screenHeight = window.innerHeight;
+
+// Obtener dimensiones reales del viewport (importante para móvil)
+function getViewportSize() {
+    const vv = window.visualViewport;
+    return {
+        width: vv ? vv.width : window.innerWidth,
+        height: vv ? vv.height : window.innerHeight
+    };
+}
+const viewport = getViewportSize();
+const screenWidth = viewport.width;
+const screenHeight = viewport.height;
 
 // Constantes de optimización para móvil
 const MAX_BLOOD_PARTICLES = isLowPerf ? 15 : 50;
@@ -29,10 +39,12 @@ const config = {
     parent: 'game-container',
     backgroundColor: '#87CEEB',
     scale: {
-        mode: Phaser.Scale.RESIZE,
+        mode: Phaser.Scale.EXPAND,
+        parent: 'game-container',
+        width: screenWidth,
+        height: screenHeight,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: '100%',
-        height: '100%'
+        expandParent: true
     },
     physics: {
         default: 'matter',
@@ -1045,7 +1057,12 @@ function playSplatSound() {
     } catch (e) {}
 }
 
-function onResize(gameSize) {}
+function onResize(gameSize) {
+    // Actualizar botón de música cuando cambia el tamaño
+    if (musicButton) {
+        updateMusicButton();
+    }
+}
 
 function update() {
     frameCount++;
