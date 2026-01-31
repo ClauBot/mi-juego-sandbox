@@ -116,22 +116,23 @@ let selectedWeapon = null;
 let isDraggingWeapon = false;
 let scenarioElements = [];
 
+// Guardar tamaño inicial para detectar cambios grandes
+const initialSize = { w: window.innerWidth, h: window.innerHeight };
+
 game = new Phaser.Game(config);
 
-// Forzar resize cuando el viewport cambie
+// Si el tamaño cambia mucho (ej: rotación o cambio de modo), recargar
+let resizeTimeout;
 window.addEventListener('resize', () => {
-    if (game && game.scale) {
-        game.scale.resize(window.innerWidth, window.innerHeight);
-    }
-});
-
-// También al cargar
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        if (game && game.scale) {
-            game.scale.resize(window.innerWidth, window.innerHeight);
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const newW = window.innerWidth;
+        const newH = window.innerHeight;
+        // Si cambió más de 100px en cualquier dirección, recargar
+        if (Math.abs(newW - initialSize.w) > 100 || Math.abs(newH - initialSize.h) > 100) {
+            location.reload();
         }
-    }, 100);
+    }, 300);
 });
 
 function preload() {}
