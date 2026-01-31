@@ -3526,11 +3526,15 @@ function changeMap(mapId) {
         sceneRef.mapOverlay.setDepth(-8);
     }
 
-    // Por defecto mostrar elementos normales
+    // Por defecto mostrar elementos normales y ocultar todos los suelos especiales
     if (sun) sun.setVisible(true);
     if (groundGraphics) groundGraphics.setVisible(true);
     if (groundGraphics && groundGraphics.lunarGround) groundGraphics.lunarGround.setVisible(false);
     if (groundGraphics && groundGraphics.iceGround) groundGraphics.iceGround.setVisible(false);
+    if (groundGraphics && groundGraphics.sandGround) groundGraphics.sandGround.setVisible(false);
+    if (groundGraphics && groundGraphics.beachGround) groundGraphics.beachGround.setVisible(false);
+    if (groundGraphics && groundGraphics.rockGround) groundGraphics.rockGround.setVisible(false);
+    if (groundGraphics && groundGraphics.desertGround) groundGraphics.desertGround.setVisible(false);
     if (earthGraphics) earthGraphics.setVisible(false);
     if (starsGraphics) starsGraphics.setVisible(false);
     treesGraphics.forEach(t => { if (t) t.setVisible(true); });
