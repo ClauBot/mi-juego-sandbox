@@ -4,8 +4,23 @@
 // ============================================
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isLowPerf = isMobile || navigator.hardwareConcurrency <= 4;
 const screenWidth = window.innerWidth;
 const screenHeight = window.innerHeight;
+
+// Constantes de optimización para móvil
+const MAX_BLOOD_PARTICLES = isLowPerf ? 15 : 50;
+const MAX_RAGDOLLS = isLowPerf ? 6 : 15;
+const PHYSICS_UPDATE_SKIP = isLowPerf ? 2 : 1; // Actualizar física cada N frames
+let frameCount = 0;
+
+// Función para obtener la Y del suelo dinámicamente
+function getGroundY() {
+    return game.scale.height - 50;
+}
+function getGroundLimit() {
+    return game.scale.height - 65; // Donde los objetos dejan de caer
+}
 
 const config = {
     type: Phaser.AUTO,
@@ -23,11 +38,25 @@ const config = {
         default: 'matter',
         matter: {
             gravity: { y: 0.8 },
-            debug: false
+            debug: false,
+            // Optimizaciones para móvil
+            positionIterations: isLowPerf ? 4 : 6,
+            velocityIterations: isLowPerf ? 3 : 4,
+            constraintIterations: isLowPerf ? 2 : 2
         }
     },
     input: {
         activePointers: 3
+    },
+    render: {
+        // Desactivar antialiasing en móvil para mejor rendimiento
+        antialias: !isLowPerf,
+        pixelArt: isLowPerf
+    },
+    fps: {
+        // Limitar FPS en móvil
+        target: isLowPerf ? 30 : 60,
+        forceSetTimeOut: isLowPerf
     },
     scene: {
         preload: preload,
@@ -53,11 +82,32 @@ let audioContext = null;
 let musicPlaying = false;
 let musicButton;
 let musicGain = null;
-let currentWeapon = null; // 'pistola' o 'cuchillo'
+let currentWeapon = null; // 'pistola', 'cuchillo', 'granada', 'caja', 'barril', 'cuerda'
 let weapons = [];
 let weaponMenuOpen = false;
 let weaponButton;
 let weaponMenu;
+
+// === NUEVAS FEATURES ===
+let bullets = [];
+let grenades = [];
+let boxes = [];
+let ropes = [];
+let ropeStart = null;
+let teamKills = [0, 0, 0, 0];
+let killScoreText;
+let volumeMusic = 0.5;
+let volumeEffects = 0.5;
+let effectsGain = null;
+let timeOfDay = 0;
+let currentScenario = 'pradera';
+let skyGraphics;
+let stars = [];
+let moon;
+let snowflakes = [];
+let selectedWeapon = null;
+let isDraggingWeapon = false;
+let scenarioElements = [];
 
 game = new Phaser.Game(config);
 
@@ -97,8 +147,30 @@ function create() {
     this.input.on('pointerup', onPointerUp, this);
     this.input.on('pointerupoutside', onPointerUp, this);
 
-    // Colisiones
+    // Colisiones (optimizado para móvil)
+    let lastCollisionTime = 0;
+    const collisionCooldown = isLowPerf ? 100 : 50; // ms entre efectos de colisión
+
     this.matter.world.on('collisionstart', (event) => {
+        const now = Date.now();
+
+        // En móvil, limitar frecuencia de efectos
+        if (isLowPerf && now - lastCollisionTime < collisionCooldown) {
+            // Solo procesar daño sin efectos visuales/sonoros
+            event.pairs.forEach(pair => {
+                const bodyA = pair.bodyA;
+                const bodyB = pair.bodyB;
+                const vel = Math.abs(bodyA.velocity?.x || 0) + Math.abs(bodyA.velocity?.y || 0) +
+                    Math.abs(bodyB.velocity?.x || 0) + Math.abs(bodyB.velocity?.y || 0);
+                if (vel > 12) {
+                    const x = pair.collision.supports[0]?.x || bodyA.position.x;
+                    const y = pair.collision.supports[0]?.y || bodyA.position.y;
+                    damageRagdollAt(x, y, Math.floor(vel / 2));
+                }
+            });
+            return;
+        }
+
         event.pairs.forEach(pair => {
             const bodyA = pair.bodyA;
             const bodyB = pair.bodyB;
@@ -107,11 +179,14 @@ function create() {
                 Math.abs(bodyB.velocity?.x || 0) + Math.abs(bodyB.velocity?.y || 0);
 
             if (vel > 12) {
+                lastCollisionTime = now;
                 const x = pair.collision.supports[0]?.x || bodyA.position.x;
                 const y = pair.collision.supports[0]?.y || bodyA.position.y;
 
-                if (Math.random() < 0.25) {
-                    spawnBlood(x, y, Math.min(5, Math.floor(vel / 8)));
+                // Menos probabilidad de sangre en móvil
+                const bloodChance = isLowPerf ? 0.15 : 0.25;
+                if (Math.random() < bloodChance) {
+                    spawnBlood(x, y, Math.min(isLowPerf ? 3 : 5, Math.floor(vel / 8)));
                 }
                 playHitSound(vel / 30);
 
@@ -119,6 +194,8 @@ function create() {
                 damageRagdollAt(x, y, Math.floor(vel / 2));
             } else if (vel > 6) {
                 playHitSound(vel / 40);
+                const x = pair.collision.supports[0]?.x || bodyA.position.x;
+                const y = pair.collision.supports[0]?.y || bodyA.position.y;
                 damageRagdollAt(x, y, Math.floor(vel / 4));
             }
         });
@@ -158,6 +235,49 @@ function playTechnoLoop() {
 
     barCount++;
 
+    // === MODO SIMPLIFICADO PARA MÓVIL ===
+    if (isLowPerf) {
+        // Kick simple - solo 4 golpes
+        const kickSimple = [1, 0, 1, 0, 1, 0, 1, 0];
+        for (let i = 0; i < 8; i += 2) {
+            if (kickSimple[i]) {
+                playKick(now + i * beatTime / 2);
+            }
+        }
+
+        // Snare solo en 2 y 4
+        playSnare(now + beatTime);
+        playSnare(now + beatTime * 3);
+
+        // Hi-hats reducidos (8 en vez de 16)
+        for (let i = 0; i < 8; i++) {
+            const vol = i % 2 === 0 ? 0.4 : 0.2;
+            playHiHat(now + i * beatTime / 2, vol);
+        }
+
+        // Bass simplificado (4 notas en vez de 8)
+        const bassSimple = [36, 39, 41, 43];
+        for (let i = 0; i < 4; i++) {
+            playBass(now + i * beatTime, bassSimple[i % 4]);
+        }
+
+        // Melodía reducida (4 notas)
+        const melodySimple = [72, 75, 79, 75];
+        for (let i = 0; i < 4; i++) {
+            playSynth(now + i * beatTime, melodySimple[i], beatTime - 0.02);
+        }
+
+        // Sin guitarras, pads ni risers en móvil
+
+        if (barCount % 4 === 0) {
+            currentPattern++;
+        }
+
+        setTimeout(() => playTechnoLoop(), beatTime * 4 * 1000 - 50);
+        return;
+    }
+
+    // === MODO COMPLETO PARA DESKTOP ===
     // Kick - patrón más interesante
     const kickPattern = [1, 0, 0, 1, 1, 0, 1, 0];
     for (let i = 0; i < 8; i++) {
@@ -368,8 +488,23 @@ function playBass(time, note) {
     const freq = 440 * Math.pow(2, (note - 69) / 12);
 
     const osc = audioContext.createOscillator();
-    const osc2 = audioContext.createOscillator();
     const gain = audioContext.createGain();
+
+    // Simplificado para móvil - un solo oscilador
+    if (isLowPerf) {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.3, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+        osc.connect(gain);
+        gain.connect(musicGain);
+        osc.start(time);
+        osc.stop(time + 0.17);
+        return;
+    }
+
+    // Versión completa para desktop
+    const osc2 = audioContext.createOscillator();
     const filter = audioContext.createBiquadFilter();
 
     osc.type = 'sawtooth';
@@ -923,67 +1058,84 @@ function playSplatSound() {
 function onResize(gameSize) {}
 
 function update() {
-    // Mover nubes
-    updateClouds();
+    frameCount++;
+
+    // Actualizar nubes solo cada 2 frames en móvil
+    if (!isLowPerf || frameCount % 2 === 0) {
+        updateClouds();
+    }
 
     // Actualizar posición de armas
     updateWeapons();
 
-    // Actualizar barras de vida
-    updateAllHealthBars();
+    // Actualizar barras de vida solo cada 3 frames (posición)
+    if (frameCount % 3 === 0) {
+        updateAllHealthBars();
+    }
 
-    // Verificar si alguien está cerca del sol
-    checkSunBurn();
+    // Verificar sol cada 5 frames en móvil
+    if (!isLowPerf || frameCount % 5 === 0) {
+        checkSunBurn();
+    }
 
-    // Sangre
-    for (let i = bloodParticles.length - 1; i >= 0; i--) {
-        const blood = bloodParticles[i];
-        blood.life--;
+    // Sangre - actualizar solo cada 2 frames en móvil
+    if (!isLowPerf || frameCount % 2 === 0) {
+        for (let i = bloodParticles.length - 1; i >= 0; i--) {
+            const blood = bloodParticles[i];
+            blood.life -= isLowPerf ? 2 : 1;
 
-        if (blood.life <= 0) {
-            blood.graphics.destroy();
-            bloodParticles.splice(i, 1);
-        } else {
-            blood.vy += 0.3;
-            blood.x += blood.vx;
-            blood.y += blood.vy;
+            if (blood.life <= 0) {
+                blood.graphics.destroy();
+                bloodParticles.splice(i, 1);
+            } else {
+                blood.vy += 0.3;
+                blood.x += blood.vx;
+                blood.y += blood.vy;
 
-            if (blood.y > 545) {
-                blood.y = 545;
-                blood.vy = 0;
-                blood.vx *= 0.8;
-                blood.life = Math.min(blood.life, 80);
+                if (blood.y > getGroundLimit()) {
+                    blood.y = getGroundLimit();
+                    blood.vy = 0;
+                    blood.vx *= 0.8;
+                    blood.life = Math.min(blood.life, 80);
+                }
+
+                blood.graphics.setPosition(blood.x, blood.y);
+                blood.graphics.setAlpha(Math.min(1, blood.life / 40));
             }
-
-            blood.graphics.setPosition(blood.x, blood.y);
-            blood.graphics.setAlpha(Math.min(1, blood.life / 40));
         }
     }
+
+    // Actualizar física de ragdolls (puede saltar frames en móvil)
+    const shouldUpdatePhysics = !isLowPerf || frameCount % PHYSICS_UPDATE_SKIP === 0;
 
     ragdolls.forEach(ragdoll => {
         const [head, torso, armL, armR, legL, legR] = ragdoll.parts;
 
-        if (ragdoll.isStanding && !ragdoll.isBeingDragged) {
-            if (torso && torso.body) {
-                const currentAngle = torso.body.angle;
-                if (Math.abs(currentAngle) > 0.05) {
-                    sceneRef.matter.body.setAngle(torso.body, currentAngle * 0.9);
+        // Los que están siendo arrastrados siempre se actualizan
+        if (ragdoll.isBeingDragged || shouldUpdatePhysics) {
+            if (ragdoll.isStanding && !ragdoll.isBeingDragged) {
+                if (torso && torso.body) {
+                    const currentAngle = torso.body.angle;
+                    if (Math.abs(currentAngle) > 0.05) {
+                        sceneRef.matter.body.setAngle(torso.body, currentAngle * 0.9);
+                    }
+                    sceneRef.matter.body.setAngularVelocity(torso.body, 0);
                 }
-                sceneRef.matter.body.setAngularVelocity(torso.body, 0);
+            }
+
+            // Limitar rotación
+            if (torso && torso.body) {
+                const torsoAngle = torso.body.angle;
+                if (head && head.body) limitAngle(head, torsoAngle, 0.7);
+                if (armL && armL.body) limitAngle(armL, torsoAngle, 2.0);
+                if (armR && armR.body) limitAngle(armR, torsoAngle, 2.0);
+                if (legL && legL.body) limitAngle(legL, torsoAngle, 1.5);
+                if (legR && legR.body) limitAngle(legR, torsoAngle, 1.5);
             }
         }
 
-        // Limitar rotación
-        if (torso && torso.body) {
-            const torsoAngle = torso.body.angle;
-            if (head && head.body) limitAngle(head, torsoAngle, 0.7);
-            if (armL && armL.body) limitAngle(armL, torsoAngle, 2.0);
-            if (armR && armR.body) limitAngle(armR, torsoAngle, 2.0);
-            if (legL && legL.body) limitAngle(legL, torsoAngle, 1.5);
-            if (legR && legR.body) limitAngle(legR, torsoAngle, 1.5);
-        }
-
-        // Límites de pantalla y NO SALTAR
+        // Límites de pantalla siempre se verifican (importante para UX)
+        const screenW = game.scale.width;
         ragdoll.parts.forEach(part => {
             if (part && part.body) {
                 // NO permitir saltos - limitar velocidad Y negativa
@@ -995,22 +1147,22 @@ function update() {
                     part.setPosition(20, part.y);
                     part.setVelocityX(Math.abs(part.body.velocity.x) * 0.3);
                 }
-                if (part.x > 780) {
-                    part.setPosition(780, part.y);
+                if (part.x > screenW - 20) {
+                    part.setPosition(screenW - 20, part.y);
                     part.setVelocityX(-Math.abs(part.body.velocity.x) * 0.3);
                 }
                 if (part.y < 20) {
                     part.setPosition(part.x, 20);
                     part.setVelocityY(Math.abs(part.body.velocity.y) * 0.3);
                 }
-                if (part.y > 535) {
-                    part.setPosition(part.x, 535);
+                if (part.y > getGroundLimit()) {
+                    part.setPosition(part.x, getGroundLimit());
                 }
             }
         });
 
-        // Fricción en reposo
-        if (!ragdoll.isStanding && !ragdoll.isBeingDragged) {
+        // Fricción en reposo - solo si deberían actualizarse
+        if (shouldUpdatePhysics && !ragdoll.isStanding && !ragdoll.isBeingDragged) {
             let totalVel = 0;
             ragdoll.parts.forEach(p => {
                 if (p && p.body) {
@@ -1031,7 +1183,16 @@ function update() {
 }
 
 function spawnBlood(x, y, amount) {
-    amount = Math.min(amount, 5);
+    // Limitar cantidad según dispositivo
+    amount = Math.min(amount, isLowPerf ? 3 : 5);
+
+    // No crear más si ya hay muchas partículas
+    if (bloodParticles.length >= MAX_BLOOD_PARTICLES) {
+        // Eliminar las más viejas
+        const toRemove = bloodParticles.splice(0, amount);
+        toRemove.forEach(p => p.graphics.destroy());
+    }
+
     if (amount > 2) playSplatSound();
 
     for (let i = 0; i < amount; i++) {
@@ -1049,7 +1210,7 @@ function spawnBlood(x, y, amount) {
             y: y,
             vx: Phaser.Math.FloatBetween(-3, 3),
             vy: Phaser.Math.FloatBetween(-4, -1),
-            life: Phaser.Math.Between(60, 120),
+            life: Phaser.Math.Between(isLowPerf ? 40 : 60, isLowPerf ? 80 : 120),
             size: size
         });
     }
@@ -1212,12 +1373,14 @@ function createSky(scene) {
         sun.lineBetween(x1, y1, x2, y2);
     }
 
-    // Crear nubes
+    // Crear nubes (menos en móvil)
     createCloud(scene, 100, 50, 1.2);
     createCloud(scene, 300, 80, 0.8);
     createCloud(scene, 500, 40, 1.0);
-    createCloud(scene, 150, 100, 0.6);
-    createCloud(scene, 600, 90, 0.9);
+    if (!isLowPerf) {
+        createCloud(scene, 150, 100, 0.6);
+        createCloud(scene, 600, 90, 0.9);
+    }
 }
 
 function createCloud(scene, x, y, scale) {
@@ -1353,7 +1516,7 @@ function createAppleTree(scene, x) {
     const tree = scene.add.graphics();
     tree.setDepth(0);
 
-    const groundY = 545;
+    const groundY = game.scale.height - 55;
 
     // Tronco
     tree.fillStyle(0x8B4513, 1);
@@ -1464,10 +1627,11 @@ function createGround(scene) {
     createAppleTree(scene, 150);
     createAppleTree(scene, w - 150);
 
-    // Flores decorativas
+    // Flores decorativas (menos en móvil)
     const flowerColors = [0xFF69B4, 0xFF1493, 0xFFB6C1, 0xFF4500, 0xFFFF00, 0x9370DB, 0x00CED1, 0xFF6347];
+    const numFlowers = isLowPerf ? 8 : 20;
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < numFlowers; i++) {
         const fx = 30 + Math.random() * (w - 60);
         const fy = groundY - 15 + Math.random() * 10;
         const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
@@ -1509,7 +1673,7 @@ function createRagdoll(scene, x, y, color) {
     const shirtColor = color;
     const pantsColor = 0x333333;
 
-    const groundY = 550;
+    const groundY = game.scale.height - 50;
     const legHeight = 30;
     const torsoHeight = 36;
 
@@ -1677,6 +1841,24 @@ function createUI(scene) {
     const spawnZone = scene.add.zone(panelX + btnSize/2, 15 + btnSize/2, btnSize, btnSize);
     spawnZone.setInteractive();
     spawnZone.on('pointerdown', () => {
+        // Limitar cantidad de ragdolls
+        if (ragdolls.length >= MAX_RAGDOLLS) {
+            // Mostrar mensaje
+            const maxText = sceneRef.add.text(game.scale.width / 2, 100, 'Máximo ' + MAX_RAGDOLLS + ' muñecos', {
+                font: 'bold 16px Arial',
+                fill: '#FF4444',
+                stroke: '#FFFFFF',
+                strokeThickness: 2
+            }).setOrigin(0.5).setDepth(100);
+            sceneRef.tweens.add({
+                targets: maxText,
+                alpha: 0,
+                y: 80,
+                duration: 1000,
+                onComplete: () => maxText.destroy()
+            });
+            return;
+        }
         const newX = Phaser.Math.Between(100, game.scale.width - 100);
         createRagdoll(sceneRef, newX, game.scale.height - 200, teamColors[currentTeam]);
     });
