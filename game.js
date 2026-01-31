@@ -200,7 +200,8 @@ const shopItems = {
         { id: 'clown', name: 'Payaso', emoji: '🤡', price: 75 },
         { id: 'astronaut', name: 'Astronauta', emoji: '🧑‍🚀', price: 250 },
         { id: 'king', name: 'Rey', emoji: '🤴', price: 500 },
-        { id: 'queen', name: 'Reina', emoji: '👸', price: 500 }
+        { id: 'queen', name: 'Reina', emoji: '👸', price: 500 },
+        { id: 'esqueleto', name: 'Esqueleto', emoji: '💀', price: 80 }
     ],
     weapons: [
         { id: 'pistola', name: 'Pistola', emoji: '🔫', price: 0 },
@@ -2323,6 +2324,11 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
             shirtColor = 0x222222;
             pantsColor = 0x111111;
             break;
+        case 'esqueleto':
+            skinColor = 0xF5F5DC; // Hueso beige
+            shirtColor = 0xE8E8D0; // Costillas
+            pantsColor = 0xDDDDCC; // Huesos piernas
+            break;
     }
 
     if (isZombie) {
@@ -3198,11 +3204,12 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillEllipse(game.scale.width * 0.7, 150, 180, 90);
             break;
         case 'niebla':
-            sceneRef.matter.world.setGravity(0, 0.8);
+            sceneRef.matter.world.setGravity(0, 0.2); // Baja gravedad
             // Niebla: ocultar sol, árboles, flores - solo nubes blancas
             if (sun) sun.setVisible(false);
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
             // Fondo blanco puro
             sceneRef.mapOverlay.fillStyle(0xFFFFFF, 1);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
@@ -3219,6 +3226,8 @@ function changeMap(mapId) {
                 const fogY = Math.random() * game.scale.height;
                 sceneRef.mapOverlay.fillEllipse(fogX, fogY, 250 + Math.random() * 100, 100 + Math.random() * 50);
             }
+            // Crear un esqueleto al entrar al mapa
+            createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0xFFFFFF, 'esqueleto');
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
