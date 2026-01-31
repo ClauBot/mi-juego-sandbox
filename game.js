@@ -1559,7 +1559,45 @@ function onPointerDown(pointer) {
         };
 
         if (weaponCreators[currentWeapon]) {
-            weaponCreators[currentWeapon](sceneRef, pointer.x, pointer.y);
+            // Verificar si el click está cerca de la mano de un NPC
+            let nearestArm = null;
+            let nearestRagdoll = null;
+            let nearestDist = 60;
+
+            ragdolls.forEach(ragdoll => {
+                // Brazos son índices 2 (izquierdo) y 3 (derecho)
+                [2, 3].forEach(armIdx => {
+                    const arm = ragdoll.parts[armIdx];
+                    if (arm && arm.body) {
+                        const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, arm.x, arm.y);
+                        if (dist < nearestDist) {
+                            nearestDist = dist;
+                            nearestArm = arm;
+                            nearestRagdoll = ragdoll;
+                        }
+                    }
+                });
+            });
+
+            // Si está cerca de un brazo, darle el arma al NPC
+            if (nearestArm && nearestRagdoll) {
+                const weapon = weaponCreators[currentWeapon](sceneRef, nearestArm.x, nearestArm.y);
+                if (weapon && weapon.body) {
+                    // Crear constraint para unir arma al brazo
+                    const constraint = sceneRef.matter.add.constraint(nearestArm.body, weapon.body, 5, 0.9, {
+                        pointA: { x: 0, y: 10 },
+                        pointB: { x: 0, y: 0 }
+                    });
+                    weapon.heldBy = nearestRagdoll;
+                    weapon.heldConstraint = constraint;
+                    nearestRagdoll.heldWeapon = weapon;
+                    showNotification('🤝 ' + currentWeapon + ' equipada!');
+                }
+            } else {
+                // Colocar arma normalmente
+                weaponCreators[currentWeapon](sceneRef, pointer.x, pointer.y);
+            }
+
             playGrabSound();
             // Deseleccionar arma después de colocarla
             currentWeapon = null;
