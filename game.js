@@ -2354,6 +2354,8 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         pantsColor = 0x2F2F2F;
     }
 
+    const isSkeleton = (npcType === 'esqueleto');
+
     const groundY = Math.max(game.scale.height, window.innerHeight) - 50;
     const legHeight = 30;
     const torsoHeight = 36;
@@ -2379,7 +2381,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         }
     };
 
-    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true);
+    const headTexture = createPartTexture(scene, 'head', 22, 22, skinColor, true, isSkeleton);
     const head = scene.matter.add.sprite(x, headY, headTexture, null, {
         ...partOptions,
         shape: { type: 'circle', radius: 11 },
@@ -2417,7 +2419,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
         head.brainGraphics = brainGraphics;
     }
 
-    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor);
+    const torsoTexture = createPartTexture(scene, 'torso', 28, 36, shirtColor, false, isSkeleton);
     const torso = scene.matter.add.sprite(x, torsoY, torsoTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 28, height: 36 },
@@ -2425,7 +2427,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(torso);
 
-    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor);
+    const armLTexture = createPartTexture(scene, 'armL', 10, 22, skinColor, false, isSkeleton);
     const armL = scene.matter.add.sprite(x - 19, torsoY, armLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2433,7 +2435,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armL);
 
-    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor);
+    const armRTexture = createPartTexture(scene, 'armR', 10, 22, skinColor, false, isSkeleton);
     const armR = scene.matter.add.sprite(x + 19, torsoY, armRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 10, height: 22 },
@@ -2441,7 +2443,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(armR);
 
-    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor);
+    const legLTexture = createPartTexture(scene, 'legL', 12, 30, pantsColor, false, isSkeleton);
     const legL = scene.matter.add.sprite(x - 8, legY, legLTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2449,7 +2451,7 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     });
     parts.push(legL);
 
-    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor);
+    const legRTexture = createPartTexture(scene, 'legR', 12, 30, pantsColor, false, isSkeleton);
     const legR = scene.matter.add.sprite(x + 8, legY, legRTexture, null, {
         ...partOptions,
         shape: { type: 'rectangle', width: 12, height: 30 },
@@ -2498,11 +2500,59 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
     return ragdoll;
 }
 
-function createPartTexture(scene, name, width, height, color, isHead = false) {
+function createPartTexture(scene, name, width, height, color, isHead = false, isSkeleton = false) {
     const key = name + '_' + color + '_' + Date.now() + '_' + Math.random();
     const graphics = scene.make.graphics({ add: false });
 
-    if (isHead) {
+    if (isSkeleton) {
+        // Dibujar huesos de esqueleto
+        const boneColor = 0xF5F5DC; // Hueso beige
+        const darkBone = 0xCCCCBB; // Sombra del hueso
+
+        if (isHead) {
+            // Calavera
+            graphics.fillStyle(boneColor, 1);
+            graphics.fillCircle(width/2, height/2, width/2);
+            // Cuencas de los ojos (negras y grandes)
+            graphics.fillStyle(0x000000, 1);
+            graphics.fillEllipse(width/2 - 4, height/2 - 2, 5, 6);
+            graphics.fillEllipse(width/2 + 4, height/2 - 2, 5, 6);
+            // Agujero de la nariz
+            graphics.fillTriangle(width/2, height/2 + 2, width/2 - 2, height/2 + 5, width/2 + 2, height/2 + 5);
+            // Dientes
+            graphics.fillStyle(boneColor, 1);
+            graphics.fillRect(width/2 - 5, height/2 + 6, 10, 4);
+            graphics.lineStyle(1, 0x000000, 1);
+            for (let i = 0; i < 5; i++) {
+                graphics.lineBetween(width/2 - 4 + i*2, height/2 + 6, width/2 - 4 + i*2, height/2 + 10);
+            }
+        } else if (name === 'torso') {
+            // Costillas
+            graphics.fillStyle(boneColor, 1);
+            // Columna vertebral
+            graphics.fillRect(width/2 - 2, 0, 4, height);
+            // Costillas
+            for (let i = 0; i < 5; i++) {
+                const y = 4 + i * 7;
+                graphics.fillEllipse(width/2 - 8, y, 12, 3);
+                graphics.fillEllipse(width/2 + 8, y, 12, 3);
+            }
+            // Líneas de sombra
+            graphics.lineStyle(1, darkBone, 0.5);
+            graphics.strokeRect(width/2 - 2, 0, 4, height);
+        } else {
+            // Huesos de brazos/piernas
+            graphics.fillStyle(boneColor, 1);
+            // Hueso con extremos redondeados
+            graphics.fillRoundedRect(width/4, 0, width/2, height, 3);
+            // Extremos del hueso (más anchos)
+            graphics.fillEllipse(width/2, 3, width - 2, 6);
+            graphics.fillEllipse(width/2, height - 3, width - 2, 6);
+            // Sombra
+            graphics.lineStyle(1, darkBone, 0.5);
+            graphics.strokeRoundedRect(width/4, 0, width/2, height, 3);
+        }
+    } else if (isHead) {
         graphics.fillStyle(color, 1);
         graphics.fillCircle(width/2, height/2, width/2);
         graphics.fillStyle(0x000000, 1);
