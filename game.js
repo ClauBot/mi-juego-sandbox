@@ -3691,11 +3691,16 @@ function changeMap(mapId) {
             createRagdoll(sceneRef, game.scale.width / 2, game.scale.height - 150, 0x666666, 'esqueleto');
             break;
         case 'desierto':
+            console.log('Cambiando a desierto...');
             sceneRef.matter.world.setGravity(0, 0.8);
             // Desierto: sol grande, sin árboles ni flores, suelo de arena naranja
             if (sun) sun.setVisible(true);
             if (groundGraphics) groundGraphics.setVisible(false);
-            if (groundGraphics && groundGraphics.desertGround) groundGraphics.desertGround.setVisible(true);
+            console.log('desertGround existe:', groundGraphics && groundGraphics.desertGround);
+            if (groundGraphics && groundGraphics.desertGround) {
+                groundGraphics.desertGround.setVisible(true);
+                console.log('desertGround visible:', groundGraphics.desertGround.visible);
+            }
             treesGraphics.forEach(t => { if (t) t.setVisible(false); });
             flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
             clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
