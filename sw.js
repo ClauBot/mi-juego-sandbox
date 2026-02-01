@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ragdoll-sandbox-v6';
+const CACHE_NAME = 'ragdoll-sandbox-v8';
 const urlsToCache = [
     './',
     './index.html',

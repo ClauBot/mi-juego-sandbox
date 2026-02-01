@@ -20,7 +20,7 @@ const screenHeight = viewport.height;
 
 // Constantes de optimización para móvil
 const MAX_BLOOD_PARTICLES = isLowPerf ? 15 : 50;
-const MAX_RAGDOLLS = isLowPerf ? 6 : 15;
+const MAX_RAGDOLLS = 35;
 const PHYSICS_UPDATE_SKIP = isLowPerf ? 2 : 1; // Actualizar física cada N frames
 let frameCount = 0;
 
@@ -56,9 +56,10 @@ const config = {
         activePointers: 3
     },
     render: {
-        // Desactivar antialiasing en móvil para mejor rendimiento
-        antialias: !isLowPerf,
-        pixelArt: isLowPerf
+        // Siempre usar antialiasing para que no se vea pixelado
+        antialias: true,
+        pixelArt: false,
+        roundPixels: false
     },
     fps: {
         // Limitar FPS en móvil
@@ -99,6 +100,8 @@ let weaponMenu;
 let npcMenuOpen = false;
 let npcButton;
 let npcMenu;
+let npcMenuPage = 0;
+let npcMenuItemsPerPage = 9;
 let currentNpcType = 'normal';
 
 // === NUEVAS FEATURES ===
@@ -120,6 +123,8 @@ let moon;
 let snowflakes = [];
 let selectedWeapon = null;
 let isDraggingWeapon = false;
+let lastWeaponTapTime = 0;
+let lastWeaponTapped = null;
 let scenarioElements = [];
 
 // === SISTEMA DE MAPAS ===
@@ -267,7 +272,6 @@ const shopItems = {
         { id: 'lunar', name: 'Lunar', emoji: '🌙', price: 75 },
         { id: 'zombie', name: 'Zombie', emoji: '🧟', price: 100 },
         { id: 'blackhole', name: 'Agujero Negro', emoji: '🕳️', price: 150 },
-        { id: 'agua', name: 'Agua', emoji: '🌊', price: 75 },
         { id: 'lava', name: 'Lava', emoji: '🌋', price: 125 },
         { id: 'hielo', name: 'Hielo', emoji: '🧊', price: 75 },
         { id: 'desierto', name: 'Desierto', emoji: '🏜️', price: 60 },
@@ -275,7 +279,6 @@ const shopItems = {
         { id: 'noche', name: 'Noche', emoji: '🌃', price: 40 },
         { id: 'arcoiris', name: 'Arcoíris', emoji: '🌈', price: 100 },
         { id: 'ciudad', name: 'Ciudad', emoji: '🏙️', price: 125 },
-        { id: 'playa', name: 'Playa', emoji: '🏖️', price: 75 },
         { id: 'niebla', name: 'Niebla', emoji: '🌫️', price: 60 },
         { id: 'espacio', name: 'Espacio', emoji: '🚀', price: 100 },
         { id: 'jungla', name: 'Jungla', emoji: '🌴', price: 80 },
@@ -285,8 +288,7 @@ const shopItems = {
         { id: 'montanas', name: 'Montañas', emoji: '🏔️', price: 85 },
         { id: 'pantano', name: 'Pantano', emoji: '🐊', price: 70 },
         { id: 'cristales', name: 'Cristales', emoji: '💎', price: 120 },
-        { id: 'ruinas', name: 'Ruinas', emoji: '🏛️', price: 110 },
-        { id: 'tormenta', name: 'Tormenta', emoji: '⛈️', price: 95 }
+        { id: 'ruinas', name: 'Ruinas', emoji: '🏛️', price: 110 }
     ]
 };
 
@@ -302,7 +304,7 @@ function getDiscountedPrice(originalPrice) {
 const defaultUnlocked = {
     npcs: ['normal', 'esqueleto'],
     weapons: ['pistola', 'cuchillo', 'granada'],
-    worlds: ['normal', 'volcan', 'desierto', 'playa']
+    worlds: ['normal', 'volcan', 'desierto']
 };
 
 // Cargar datos guardados
@@ -668,38 +670,6 @@ function initGameContent(scene) {
                     spawnBlood(x, y, Math.min(8, Math.floor(vel / 4)));
                     playHitSound(vel / 20);
 
-                    // Armas puntiagudas se entierran en los NPCs
-                    const sharpWeapons = ['cuchillo', 'espada', 'katana', 'hacha', 'flecha'];
-                    weapons.forEach(weapon => {
-                        if (!weapon.body || weapon.stuckTo) return;
-                        if (!sharpWeapons.includes(weapon.type)) return;
-                        if (weapon.body !== bodyA && weapon.body !== bodyB) return;
-
-                        // Encontrar la parte del ragdoll golpeada
-                        const otherBody = (weapon.body === bodyA) ? bodyB : bodyA;
-                        if (otherBody.collisionFilter?.category !== 0x0002) return;
-
-                        // Solo enterrarse si hay velocidad suficiente
-                        if (vel < 8) return;
-
-                        // Crear constraint para pegar el arma al ragdoll
-                        try {
-                            const constraint = Phaser.Physics.Matter.Matter.Constraint.create({
-                                bodyA: weapon.body,
-                                bodyB: otherBody,
-                                pointA: { x: 0, y: 0 },
-                                pointB: { x: 0, y: 0 },
-                                stiffness: 0.9,
-                                length: 0
-                            });
-                            sceneRef.matter.world.add(constraint);
-                            weapon.stuckTo = otherBody;
-                            weapon.stuckConstraint = constraint;
-
-                            // Efecto visual: más sangre al enterrarse
-                            spawnBlood(x, y, 10);
-                        } catch(e) {}
-                    });
                 } else if (!isGroundCollision) {
                     // Solo hacer sonido y sangre si NO es colisión con suelo
                     const bloodChance = isLowPerf ? 0.15 : 0.25;
@@ -1868,6 +1838,17 @@ function onPointerDown(pointer) {
     });
 
     if (clickedWeapon) {
+        const now = Date.now();
+        // Doble toque = eliminar arma
+        if (lastWeaponTapped === clickedWeapon && now - lastWeaponTapTime < 350) {
+            deleteWeapon(clickedWeapon);
+            lastWeaponTapped = null;
+            lastWeaponTapTime = 0;
+            return;
+        }
+        lastWeaponTapped = clickedWeapon;
+        lastWeaponTapTime = now;
+
         selectedWeapon = clickedWeapon;
         isDraggingWeapon = true;
         selectedWeapon.dragStartX = pointer.x;
@@ -2081,6 +2062,16 @@ function onPointerUp(pointer) {
 
     // Soltar arma
     if (isDraggingWeapon && selectedWeapon) {
+        // Eliminar si se arrastra fuera de la pantalla
+        const margin = 30;
+        if (pointer.x < margin || pointer.x > game.scale.width - margin ||
+            pointer.y < margin || pointer.y > game.scale.height - margin) {
+            deleteWeapon(selectedWeapon);
+            selectedWeapon = null;
+            isDraggingWeapon = false;
+            return;
+        }
+
         // Si no se movió mucho, activar arma
         if (!selectedWeapon.hasMoved) {
             if (selectedWeapon.type === 'pistola') {
@@ -4628,8 +4619,9 @@ function createUI(scene) {
     // Orden de derecha a izquierda: [Color] [NPC] [Armas] [Mapa]
     // (Botón X movido al menú hamburguesa para evitar borrados accidentales)
 
-    // Botón equipo (color) - más a la derecha
-    const teamX = screenW - margin - btnSize;
+    // Botón equipo (color) - más a la derecha (con offset extra a la izquierda)
+    const extraLeftOffset = isMobile ? 20 : 30;
+    const teamX = screenW - margin - btnSize - extraLeftOffset;
     teamButton = scene.add.graphics();
     drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
 
@@ -4976,9 +4968,8 @@ function updateWeaponMenu() {
         weaponMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
             currentWeapon = weapon.id;
-            weaponMenu.setVisible(false);
-            weaponMenuOpen = false;
-            drawWeaponButton();
+            // El menú se queda abierto para seleccionar más armas
+            updateWeaponMenu(); // Actualizar selección visual
         });
     });
 }
@@ -5125,14 +5116,22 @@ function updateNpcMenu() {
 
     // Obtener NPCs desbloqueados
     const unlockedNpcs = shopItems.npcs.filter(npc => unlockedItems.npcs.includes(npc.id));
+    const totalNpcs = unlockedNpcs.length;
+    const maxPages = Math.ceil(totalNpcs / npcMenuItemsPerPage);
+
+    // Validar página actual
+    if (npcMenuPage >= maxPages) npcMenuPage = maxPages - 1;
+    if (npcMenuPage < 0) npcMenuPage = 0;
 
     const cols = 3;
+    const rows = 3;
     const itemW = 80;
-    const itemH = 75;
+    const itemH = 70;
     const menuW = cols * itemW + 15;
-    const menuH = Math.ceil(unlockedNpcs.length / cols) * itemH + 15;
+    const navH = maxPages > 1 ? 35 : 0;
+    const menuH = rows * itemH + 15 + navH;
 
-    // Fondo más oscuro con borde
+    // Fondo del menú
     const menuBg = sceneRef.add.graphics();
     menuBg.fillStyle(0x1a1a2e, 0.98);
     menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
@@ -5140,7 +5139,11 @@ function updateNpcMenu() {
     menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
     npcMenu.add(menuBg);
 
-    unlockedNpcs.forEach((npc, i) => {
+    // NPCs de la página actual
+    const startIdx = npcMenuPage * npcMenuItemsPerPage;
+    const pageNpcs = unlockedNpcs.slice(startIdx, startIdx + npcMenuItemsPerPage);
+
+    pageNpcs.forEach((npc, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
         const bx = -menuW/2 + 8 + col * itemW;
@@ -5148,7 +5151,6 @@ function updateNpcMenu() {
 
         const isSelected = currentNpcType === npc.id;
 
-        // Botón con borde visible
         const btn = sceneRef.add.graphics();
         btn.fillStyle(isSelected ? 0x44AA44 : 0x3a3a5a, 1);
         btn.fillRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
@@ -5156,15 +5158,13 @@ function updateNpcMenu() {
         btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         npcMenu.add(btn);
 
-        // Emoji más grande
-        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 25, npc.emoji, {
-            font: '32px Arial'
+        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, npc.emoji, {
+            font: '28px Arial'
         }).setOrigin(0.5);
         npcMenu.add(emoji);
 
-        // Nombre del NPC
-        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 52, npc.name, {
-            font: 'bold 10px Arial',
+        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 48, npc.name, {
+            font: 'bold 9px Arial',
             fill: isSelected ? '#AAFFAA' : '#CCCCCC'
         }).setOrigin(0.5);
         npcMenu.add(name);
@@ -5175,11 +5175,48 @@ function updateNpcMenu() {
         zoneGraphic.on('pointerdown', () => {
             currentNpcType = npc.id;
             spawnNpc(npc.id);
-            npcMenu.setVisible(false);
-            npcMenuOpen = false;
-            drawNpcButton();
+            // El menú se queda abierto para poner más NPCs
+            updateNpcMenu(); // Actualizar selección visual
         });
     });
+
+    // Navegación si hay más de una página
+    if (maxPages > 1) {
+        const navY = rows * itemH + 12;
+
+        // Botón anterior
+        if (npcMenuPage > 0) {
+            const prevBtn = sceneRef.add.text(-menuW/2 + 25, navY + 12, '◀', {
+                font: 'bold 22px Arial',
+                fill: '#AAAAFF'
+            }).setOrigin(0.5).setInteractive();
+            npcMenu.add(prevBtn);
+            prevBtn.on('pointerdown', () => {
+                npcMenuPage--;
+                updateNpcMenu();
+            });
+        }
+
+        // Indicador de página
+        const pageText = sceneRef.add.text(0, navY + 12, `${npcMenuPage + 1}/${maxPages}`, {
+            font: 'bold 14px Arial',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5);
+        npcMenu.add(pageText);
+
+        // Botón siguiente
+        if (npcMenuPage < maxPages - 1) {
+            const nextBtn = sceneRef.add.text(menuW/2 - 25, navY + 12, '▶', {
+                font: 'bold 22px Arial',
+                fill: '#AAAAFF'
+            }).setOrigin(0.5).setInteractive();
+            npcMenu.add(nextBtn);
+            nextBtn.on('pointerdown', () => {
+                npcMenuPage++;
+                updateNpcMenu();
+            });
+        }
+    }
 }
 
 function spawnNpc(npcType) {
@@ -5301,22 +5338,6 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillStyle(0x110022, 0.6);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
-        case 'agua':
-            sceneRef.matter.world.setGravity(0, 0.3); // Flotan bajo el agua
-            // SUBMARINO: ocultar sol, árboles, flores, nubes - mostrar arena
-            if (sun) sun.setVisible(false);
-            if (groundGraphics) groundGraphics.setVisible(false);
-            if (groundGraphics && groundGraphics.sandGround) groundGraphics.sandGround.setVisible(true);
-            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
-            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
-            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
-            // Fondo azul profundo submarino
-            sceneRef.mapOverlay.fillStyle(0x001133, 0.7);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
-            // Gradiente de luz desde arriba
-            sceneRef.mapOverlay.fillStyle(0x003366, 0.4);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
-            break;
         case 'lava':
             sceneRef.matter.world.setGravity(0, 0.8);
             // VOLCÁN: ocultar árboles, flores - mostrar roca
@@ -5357,7 +5378,7 @@ function changeMap(mapId) {
             }
             break;
         case 'espacio':
-            sceneRef.matter.world.setGravity(0, 0.05); // Casi sin gravedad
+            sceneRef.matter.world.setGravity(0, 0); // Sin gravedad (0g)
             // Espacio: ocultar sol, árboles, flores, nubes - mostrar estrellas
             if (sun) sun.setVisible(false);
             if (groundGraphics) groundGraphics.setVisible(false);
@@ -5418,14 +5439,16 @@ function changeMap(mapId) {
             break;
         case 'bosque':
             sceneRef.matter.world.setGravity(0, 0.8);
-            // Bosque: muchos árboles, cielo verde oscuro
-            if (sun) sun.setVisible(true);
-            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
-            flowersGraphics.forEach(f => { if (f) f.setVisible(true); });
-            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
-            // Cielo verde bosque
-            sceneRef.mapOverlay.fillStyle(0x228B22, 0.3);
+            // Bosque: sin manzanos, con hongos
+            if (sun) sun.setVisible(false); // Bosque oscuro
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); }); // Sin manzanos
+            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
+            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
+            // Cielo verde bosque oscuro
+            sceneRef.mapOverlay.fillStyle(0x0D3B0D, 0.6);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
+            sceneRef.mapOverlay.fillStyle(0x1C4B1C, 0.4);
+            sceneRef.mapOverlay.fillRect(0, game.scale.height / 2, game.scale.width, game.scale.height / 2);
             break;
         case 'noche':
             sceneRef.matter.world.setGravity(0, 0.8);
@@ -5465,26 +5488,6 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillStyle(0x708090, 0.4);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             break;
-        case 'playa':
-            console.log('PLAYA: changeMap ejecutado');
-            sceneRef.matter.world.setGravity(0, 0.8);
-            // Playa tropical al atardecer
-            if (sun) sun.setVisible(false); // Usamos sol custom grande
-            if (groundGraphics) groundGraphics.setVisible(false);
-            if (groundGraphics && groundGraphics.beachGround) groundGraphics.beachGround.setVisible(true);
-            treesGraphics.forEach(t => { if (t) t.setVisible(false); });
-            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
-            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(false); });
-            // Cielo de atardecer (naranja -> rosa -> azul)
-            sceneRef.mapOverlay.fillStyle(0xFF4500, 0.5);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height * 0.25);
-            sceneRef.mapOverlay.fillStyle(0xFF6347, 0.4);
-            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.15, game.scale.width, game.scale.height * 0.25);
-            sceneRef.mapOverlay.fillStyle(0xFFB6C1, 0.35);
-            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.35, game.scale.width, game.scale.height * 0.25);
-            sceneRef.mapOverlay.fillStyle(0x87CEEB, 0.3);
-            sceneRef.mapOverlay.fillRect(0, game.scale.height * 0.55, game.scale.width, game.scale.height * 0.45);
-            break;
         case 'volcan':
             sceneRef.matter.world.setGravity(0, 0.8);
             // Volcán: cielo rojo/naranja, sin árboles, humo
@@ -5502,9 +5505,9 @@ function changeMap(mapId) {
             break;
         case 'jungla':
             sceneRef.matter.world.setGravity(0, 0.8);
-            // Jungla: muy verde, muchas plantas
+            // Jungla: muy verde, muchas plantas (sin árboles de manzana)
             if (sun) sun.setVisible(true);
-            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
+            treesGraphics.forEach(t => { if (t) t.setVisible(false); }); // Ocultar manzanos
             flowersGraphics.forEach(f => { if (f) f.setVisible(true); });
             clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
             // Cielo verde tropical
@@ -5615,19 +5618,6 @@ function changeMap(mapId) {
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
             sceneRef.mapOverlay.fillStyle(0xFFD700, 0.2);
             sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 3);
-            break;
-        case 'tormenta':
-            sceneRef.matter.world.setGravity(0, 0.8);
-            // Supertormenta: muy oscuro, lluvia intensa
-            if (sun) sun.setVisible(false);
-            treesGraphics.forEach(t => { if (t) t.setVisible(true); });
-            flowersGraphics.forEach(f => { if (f) f.setVisible(false); });
-            clouds.forEach(c => { if (c.graphics) c.graphics.setVisible(true); });
-            // Cielo tormentoso extremo
-            sceneRef.mapOverlay.fillStyle(0x1C1C1C, 0.8);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height);
-            sceneRef.mapOverlay.fillStyle(0x4A4A4A, 0.4);
-            sceneRef.mapOverlay.fillRect(0, 0, game.scale.width, game.scale.height / 2);
             break;
         default:
             sceneRef.matter.world.setGravity(0, 0.8);
@@ -6737,101 +6727,6 @@ function updateMapEffects() {
 
     // === EFECTOS DE NUEVOS MAPAS ===
 
-    // Agua - SUBMARINO con peces, algas, corrientes
-    if (currentMap === 'agua') {
-        if (!sceneRef.waterGraphics) {
-            sceneRef.waterGraphics = sceneRef.add.graphics();
-            sceneRef.waterGraphics.setDepth(1);
-        }
-        sceneRef.waterGraphics.clear();
-
-        // Rayos de luz desde arriba
-        sceneRef.waterGraphics.fillStyle(0x88DDFF, 0.1);
-        for (let i = 0; i < 6; i++) {
-            const rayX = i * 150 + Math.sin(Date.now()/2000 + i) * 30;
-            sceneRef.waterGraphics.beginPath();
-            sceneRef.waterGraphics.moveTo(rayX, 0);
-            sceneRef.waterGraphics.lineTo(rayX - 50, game.scale.height);
-            sceneRef.waterGraphics.lineTo(rayX + 80, game.scale.height);
-            sceneRef.waterGraphics.closePath();
-            sceneRef.waterGraphics.fillPath();
-        }
-
-        // Algas moviéndose en el fondo
-        for (let i = 0; i < 12; i++) {
-            const algaX = 50 + i * 70;
-            const algaHeight = 60 + (i % 3) * 30;
-            const sway = Math.sin(Date.now()/800 + i) * 15;
-
-            sceneRef.waterGraphics.lineStyle(6, 0x228B22, 0.8);
-            sceneRef.waterGraphics.beginPath();
-            sceneRef.waterGraphics.moveTo(algaX, game.scale.height - 50);
-            sceneRef.waterGraphics.quadraticCurveTo(
-                algaX + sway, game.scale.height - 50 - algaHeight/2,
-                algaX + sway * 1.5, game.scale.height - 50 - algaHeight
-            );
-            sceneRef.waterGraphics.strokePath();
-
-            // Hojitas
-            sceneRef.waterGraphics.fillStyle(0x32CD32, 0.7);
-            sceneRef.waterGraphics.fillEllipse(algaX + sway * 0.7, game.scale.height - 50 - algaHeight * 0.4, 8, 4);
-            sceneRef.waterGraphics.fillEllipse(algaX + sway * 1.2, game.scale.height - 50 - algaHeight * 0.7, 6, 3);
-        }
-
-        // Burbujas subiendo
-        for (let i = 0; i < 20; i++) {
-            const bx = (i * 97 + Date.now()/15) % game.scale.width;
-            const by = game.scale.height - 50 - ((Date.now()/8 + i * 40) % (game.scale.height - 100));
-            const wobble = Math.sin(Date.now()/200 + i) * 5;
-            sceneRef.waterGraphics.fillStyle(0xAADDFF, 0.6);
-            sceneRef.waterGraphics.fillCircle(bx + wobble, by, 2 + i % 4);
-        }
-
-        // Peces nadando
-        const fishColors = [0xFF6B35, 0xFFD700, 0xFF69B4, 0x00CED1, 0x9370DB];
-        for (let i = 0; i < 5; i++) {
-            const fishX = ((Date.now()/10 * (0.5 + i * 0.3)) + i * 200) % (game.scale.width + 100) - 50;
-            const fishY = 100 + i * 80 + Math.sin(Date.now()/500 + i) * 30;
-            const fishSize = 15 + i * 5;
-            const fishColor = fishColors[i % fishColors.length];
-
-            // Cuerpo
-            sceneRef.waterGraphics.fillStyle(fishColor, 0.9);
-            sceneRef.waterGraphics.fillEllipse(fishX, fishY, fishSize, fishSize * 0.5);
-            // Cola
-            sceneRef.waterGraphics.beginPath();
-            sceneRef.waterGraphics.moveTo(fishX - fishSize, fishY);
-            sceneRef.waterGraphics.lineTo(fishX - fishSize - 10, fishY - 8);
-            sceneRef.waterGraphics.lineTo(fishX - fishSize - 10, fishY + 8);
-            sceneRef.waterGraphics.closePath();
-            sceneRef.waterGraphics.fillPath();
-            // Ojo
-            sceneRef.waterGraphics.fillStyle(0xFFFFFF, 1);
-            sceneRef.waterGraphics.fillCircle(fishX + fishSize * 0.4, fishY - 2, 3);
-            sceneRef.waterGraphics.fillStyle(0x000000, 1);
-            sceneRef.waterGraphics.fillCircle(fishX + fishSize * 0.45, fishY - 2, 1.5);
-        }
-
-        // Corrientes de agua (partículas moviéndose)
-        sceneRef.waterGraphics.lineStyle(2, 0x66BBDD, 0.3);
-        for (let i = 0; i < 8; i++) {
-            const cx = (Date.now()/20 + i * 100) % (game.scale.width + 200) - 100;
-            const cy = 150 + i * 60;
-            sceneRef.waterGraphics.lineBetween(cx, cy, cx + 50, cy + Math.sin(Date.now()/300 + i) * 10);
-        }
-
-        // Aplicar corriente a ragdolls
-        ragdolls.forEach(r => r.parts.forEach(p => {
-            if (p?.body) {
-                const currentForce = Math.sin(Date.now()/1000) * 0.1;
-                p.setVelocity(p.body.velocity.x + currentForce, p.body.velocity.y);
-            }
-        }));
-
-    } else if (sceneRef.waterGraphics) {
-        sceneRef.waterGraphics.clear();
-    }
-
     // Lava - VOLCÁN con partículas de fuego y daño
     if (currentMap === 'lava') {
         if (!sceneRef.lavaGraphics) {
@@ -6948,25 +6843,54 @@ function updateMapEffects() {
         sceneRef.iceGraphics.closePath();
         sceneRef.iceGraphics.fillPath();
 
-        // Pingüino de fondo
-        const pengX = game.scale.width - 250;
-        const pengY = game.scale.height - 90;
-        // Cuerpo
-        sceneRef.iceGraphics.fillStyle(0x000000, 1);
-        sceneRef.iceGraphics.fillEllipse(pengX, pengY, 15, 25);
-        // Panza blanca
-        sceneRef.iceGraphics.fillStyle(0xFFFFFF, 1);
-        sceneRef.iceGraphics.fillEllipse(pengX, pengY + 5, 10, 18);
-        // Cabeza
-        sceneRef.iceGraphics.fillStyle(0x000000, 1);
-        sceneRef.iceGraphics.fillCircle(pengX, pengY - 20, 10);
-        // Ojos
-        sceneRef.iceGraphics.fillStyle(0xFFFFFF, 1);
-        sceneRef.iceGraphics.fillCircle(pengX - 4, pengY - 22, 3);
-        sceneRef.iceGraphics.fillCircle(pengX + 4, pengY - 22, 3);
-        // Pico
-        sceneRef.iceGraphics.fillStyle(0xFFA500, 1);
-        sceneRef.iceGraphics.fillTriangle(pengX, pengY - 18, pengX - 4, pengY - 15, pengX + 4, pengY - 15);
+        // Muchos pingüinos
+        const penguins = [
+            { x: 80, y: game.scale.height - 85, scale: 1 },
+            { x: 180, y: game.scale.height - 90, scale: 1.2 },
+            { x: 300, y: game.scale.height - 82, scale: 0.9 },
+            { x: 420, y: game.scale.height - 88, scale: 1.1 },
+            { x: 550, y: game.scale.height - 85, scale: 1 },
+            { x: game.scale.width - 250, y: game.scale.height - 90, scale: 1 },
+            { x: game.scale.width - 120, y: game.scale.height - 85, scale: 0.85 },
+            { x: game.scale.width - 60, y: game.scale.height - 80, scale: 0.7 },
+        ];
+
+        penguins.forEach((peng, i) => {
+            const waddle = Math.sin(Date.now() / 300 + i * 2) * 3;
+            const px = peng.x + waddle;
+            const py = peng.y;
+            const s = peng.scale;
+
+            // Cuerpo
+            sceneRef.iceGraphics.fillStyle(0x000000, 1);
+            sceneRef.iceGraphics.fillEllipse(px, py, 15 * s, 25 * s);
+            // Panza blanca
+            sceneRef.iceGraphics.fillStyle(0xFFFFFF, 1);
+            sceneRef.iceGraphics.fillEllipse(px, py + 5 * s, 10 * s, 18 * s);
+            // Cabeza
+            sceneRef.iceGraphics.fillStyle(0x000000, 1);
+            sceneRef.iceGraphics.fillCircle(px, py - 20 * s, 10 * s);
+            // Ojos
+            sceneRef.iceGraphics.fillStyle(0xFFFFFF, 1);
+            sceneRef.iceGraphics.fillCircle(px - 4 * s, py - 22 * s, 3 * s);
+            sceneRef.iceGraphics.fillCircle(px + 4 * s, py - 22 * s, 3 * s);
+            // Pupilas
+            sceneRef.iceGraphics.fillStyle(0x000000, 1);
+            sceneRef.iceGraphics.fillCircle(px - 4 * s, py - 22 * s, 1.5 * s);
+            sceneRef.iceGraphics.fillCircle(px + 4 * s, py - 22 * s, 1.5 * s);
+            // Pico
+            sceneRef.iceGraphics.fillStyle(0xFFA500, 1);
+            sceneRef.iceGraphics.fillTriangle(px, py - 18 * s, px - 4 * s, py - 14 * s, px + 4 * s, py - 14 * s);
+            // Patas
+            sceneRef.iceGraphics.fillStyle(0xFFA500, 1);
+            sceneRef.iceGraphics.fillEllipse(px - 6 * s, py + 22 * s, 5 * s, 3 * s);
+            sceneRef.iceGraphics.fillEllipse(px + 6 * s, py + 22 * s, 5 * s, 3 * s);
+            // Alas
+            sceneRef.iceGraphics.fillStyle(0x1a1a1a, 1);
+            const wingFlap = Math.sin(Date.now() / 200 + i) * 5;
+            sceneRef.iceGraphics.fillEllipse(px - 14 * s, py + wingFlap, 5 * s, 12 * s);
+            sceneRef.iceGraphics.fillEllipse(px + 14 * s, py - wingFlap, 5 * s, 12 * s);
+        });
 
         // Nieve acumulada en el suelo
         sceneRef.iceGraphics.fillStyle(0xFFFFFF, 0.6);
@@ -7104,304 +7028,156 @@ function updateMapEffects() {
         sceneRef.desertGraphics.clear();
     }
 
-    // Playa - palmeras con cocos y agua con fisica
-    if (currentMap === 'playa') {
-        console.log('PLAYA: Dibujando efectos');
-        if (!sceneRef.beachGraphics) {
-            sceneRef.beachGraphics = sceneRef.add.graphics();
-            sceneRef.beachGraphics.setDepth(-6);
-            console.log('PLAYA: Graphics creado');
+    // === ARCOÍRIS - TODO CAMBIA DE COLOR ===
+    if (currentMap === 'arcoiris') {
+        if (!sceneRef.rainbowGraphics) {
+            sceneRef.rainbowGraphics = sceneRef.add.graphics();
+            sceneRef.rainbowGraphics.setDepth(50);
         }
-        sceneRef.beachGraphics.clear();
+        sceneRef.rainbowGraphics.clear();
+
+        const rainbowColors = [0xFF0000, 0xFF7F00, 0xFFFF00, 0x00FF00, 0x00FFFF, 0x0000FF, 0xFF00FF];
+        const colorIndex = Math.floor(Date.now() / 200) % rainbowColors.length;
+
+        // Arcoíris grande en el cielo
+        const w = game.scale.width;
+        const h = game.scale.height;
+        for (let i = 0; i < 7; i++) {
+            const radius = 250 - i * 20;
+            const col = rainbowColors[(i + Math.floor(Date.now() / 500)) % 7];
+            sceneRef.rainbowGraphics.lineStyle(18, col, 0.7);
+            sceneRef.rainbowGraphics.beginPath();
+            sceneRef.rainbowGraphics.arc(w / 2, h - 30, radius, Math.PI, 0, false);
+            sceneRef.rainbowGraphics.strokePath();
+        }
+
+        // Estrellas/destellos arcoíris
+        for (let i = 0; i < 10; i++) {
+            const sx = (i * 100 + Date.now() / 20) % w;
+            const sy = 50 + (i * 50) % (h / 2);
+            const sCol = rainbowColors[(i + Math.floor(Date.now() / 100)) % 7];
+            sceneRef.rainbowGraphics.fillStyle(sCol, 0.8);
+            sceneRef.rainbowGraphics.fillCircle(sx, sy, 5 + Math.sin(Date.now() / 200 + i) * 3);
+        }
+
+        // Colorear ragdolls con arcoíris
+        ragdolls.forEach((r, idx) => {
+            r.parts.forEach(p => {
+                if (p?.graphics) {
+                    const partColor = rainbowColors[(idx + Math.floor(Date.now() / 300)) % 7];
+                    p.graphics.setTint(partColor);
+                }
+            });
+        });
+
+        // Colorear armas con arcoíris
+        weapons.forEach((weapon, idx) => {
+            if (weapon.graphics) {
+                const weaponColor = rainbowColors[(idx + Math.floor(Date.now() / 250)) % 7];
+                weapon.graphics.setTint(weaponColor);
+            }
+        });
+
+    } else if (sceneRef.rainbowGraphics) {
+        sceneRef.rainbowGraphics.clear();
+        // Quitar tint de ragdolls y armas
+        ragdolls.forEach(r => r.parts.forEach(p => {
+            if (p?.graphics) p.graphics.clearTint();
+        }));
+        weapons.forEach(weapon => {
+            if (weapon.graphics) weapon.graphics.clearTint();
+        });
+    }
+
+    // === BOSQUE CON PINOS Y HONGOS ===
+    if (currentMap === 'bosque') {
+        if (!sceneRef.bosqueGraphics) {
+            sceneRef.bosqueGraphics = sceneRef.add.graphics();
+            sceneRef.bosqueGraphics.setDepth(-5);
+        }
+        sceneRef.bosqueGraphics.clear();
 
         const w = game.scale.width;
         const h = game.scale.height;
         const groundY = h - 50;
-        const waterStartX = w * 0.65; // El agua empieza a 2/3 de la pantalla
 
-        // === PALMERAS CON COCOS (izquierda, 2 palmeras) ===
-        const palmPositions = [80, 180];
-        palmPositions.forEach((palmX, idx) => {
-            const sway = Math.sin(Date.now()/1500 + idx) * 5;
+        // Pinos grandes
+        const pinePositions = [60, 180, 320, 480, 600, 720];
+        pinePositions.forEach((px, i) => {
+            const sway = Math.sin(Date.now() / 2000 + i) * 3;
+            const treeH = 140 + (i % 3) * 30;
 
-            // Tronco de palmera (curvo)
-            sceneRef.beachGraphics.lineStyle(18, 0x8B4513, 1);
-            sceneRef.beachGraphics.beginPath();
-            sceneRef.beachGraphics.moveTo(palmX, groundY - 10);
-            sceneRef.beachGraphics.quadraticCurveTo(
-                palmX + 15 + sway, groundY - 80,
-                palmX + 10 + sway, groundY - 150
-            );
-            sceneRef.beachGraphics.strokePath();
+            // Tronco
+            sceneRef.bosqueGraphics.fillStyle(0x4A3520, 1);
+            sceneRef.bosqueGraphics.fillRect(px - 8, groundY - treeH * 0.3, 16, treeH * 0.3);
 
-            // Textura del tronco (anillos)
-            sceneRef.beachGraphics.lineStyle(2, 0x6B3410, 0.5);
-            for (let ring = 0; ring < 8; ring++) {
-                const ringY = groundY - 20 - ring * 18;
-                const ringX = palmX + 5 + (ring / 8) * (10 + sway);
-                sceneRef.beachGraphics.lineBetween(ringX - 8, ringY, ringX + 8, ringY);
-            }
-
-            // Hojas de palmera
-            const leafTopX = palmX + 10 + sway;
-            const leafTopY = groundY - 150;
-            const leafAngles = [-2.5, -1.8, -1, -0.3, 0.3, 1, 1.8, 2.5];
-            leafAngles.forEach((angle, i) => {
-                const leafSway = Math.sin(Date.now()/800 + idx + i) * 3;
-                const leafLen = 60 + (i % 3) * 15;
-                const endX = leafTopX + Math.cos(angle) * leafLen + leafSway;
-                const endY = leafTopY + Math.sin(angle) * leafLen * 0.5 - 20;
-
-                // Hoja principal
-                sceneRef.beachGraphics.lineStyle(4, 0x228B22, 0.9);
-                sceneRef.beachGraphics.beginPath();
-                sceneRef.beachGraphics.moveTo(leafTopX, leafTopY);
-                sceneRef.beachGraphics.quadraticCurveTo(
-                    leafTopX + Math.cos(angle) * leafLen * 0.5 + leafSway,
-                    leafTopY + Math.sin(angle) * leafLen * 0.3 - 30,
-                    endX, endY
+            // Capas del pino
+            for (let layer = 0; layer < 4; layer++) {
+                const layerY = groundY - treeH * 0.3 - layer * 30;
+                const layerW = 50 - layer * 8;
+                sceneRef.bosqueGraphics.fillStyle(0x0B3B0B, 1);
+                sceneRef.bosqueGraphics.fillTriangle(
+                    px + sway, layerY - 40,
+                    px - layerW + sway, layerY,
+                    px + layerW + sway, layerY
                 );
-                sceneRef.beachGraphics.strokePath();
-
-                // Segmentos de la hoja
-                sceneRef.beachGraphics.lineStyle(2, 0x32CD32, 0.7);
-                for (let seg = 0.3; seg < 1; seg += 0.15) {
-                    const segX = leafTopX + (endX - leafTopX) * seg;
-                    const segY = leafTopY + (endY - leafTopY) * seg - 10 * (1 - seg);
-                    sceneRef.beachGraphics.lineBetween(segX, segY, segX + 8, segY + 6);
-                    sceneRef.beachGraphics.lineBetween(segX, segY, segX - 8, segY + 6);
-                }
-            });
-
-            // Cocos (no caen, son decorativos)
-            const cocoPositions = [
-                { x: leafTopX - 8, y: leafTopY + 5 },
-                { x: leafTopX + 5, y: leafTopY + 8 },
-                { x: leafTopX - 2, y: leafTopY + 12 }
-            ];
-            cocoPositions.forEach(coco => {
-                // Coco marrón
-                sceneRef.beachGraphics.fillStyle(0x8B4513, 1);
-                sceneRef.beachGraphics.fillCircle(coco.x + sway * 0.5, coco.y, 8);
-                // Brillo
-                sceneRef.beachGraphics.fillStyle(0xA0522D, 0.6);
-                sceneRef.beachGraphics.fillCircle(coco.x + sway * 0.5 - 2, coco.y - 2, 3);
-            });
-        });
-
-        // === AGUA EN 1/3 DERECHA INFERIOR ===
-        const waterHeight = h / 3;
-        const waterY = h - waterHeight;
-
-        // Fondo del agua (azul profundo)
-        sceneRef.beachGraphics.fillStyle(0x1E90FF, 0.7);
-        sceneRef.beachGraphics.fillRect(waterStartX, waterY, w - waterStartX, waterHeight);
-
-        // Gradiente más claro arriba
-        sceneRef.beachGraphics.fillStyle(0x87CEEB, 0.4);
-        sceneRef.beachGraphics.fillRect(waterStartX, waterY, w - waterStartX, waterHeight * 0.3);
-
-        // Olas animadas en la superficie
-        const waveTime = Date.now() / 500;
-        sceneRef.beachGraphics.fillStyle(0xADD8E6, 0.8);
-        sceneRef.beachGraphics.beginPath();
-        sceneRef.beachGraphics.moveTo(waterStartX - 20, waterY + 15);
-        for (let wx = waterStartX - 20; wx <= w; wx += 10) {
-            const waveY = waterY + Math.sin(waveTime + wx * 0.02) * 8;
-            sceneRef.beachGraphics.lineTo(wx, waveY);
-        }
-        sceneRef.beachGraphics.lineTo(w, h);
-        sceneRef.beachGraphics.lineTo(waterStartX - 20, h);
-        sceneRef.beachGraphics.closePath();
-        sceneRef.beachGraphics.fillPath();
-
-        // Espuma de las olas
-        sceneRef.beachGraphics.fillStyle(0xFFFFFF, 0.7);
-        for (let foam = 0; foam < 5; foam++) {
-            const foamX = waterStartX + foam * 30 + Math.sin(waveTime + foam) * 10;
-            const foamY = waterY + Math.sin(waveTime + foam * 0.5) * 5;
-            sceneRef.beachGraphics.fillEllipse(foamX, foamY, 15 + foam * 2, 5);
-        }
-
-        // Brillos en el agua
-        sceneRef.beachGraphics.fillStyle(0xFFFFFF, 0.4);
-        for (let sparkle = 0; sparkle < 8; sparkle++) {
-            const sx = waterStartX + 30 + (sparkle * 50 + Date.now()/100) % (w - waterStartX - 30);
-            const sy = waterY + 30 + (sparkle * 40) % (waterHeight - 50);
-            const sparkleSize = 2 + Math.sin(Date.now()/200 + sparkle) * 1;
-            sceneRef.beachGraphics.fillCircle(sx, sy, sparkleSize);
-        }
-
-        // === FISICA DEL AGUA ===
-        // Ragdolls flotan cuando estan en el agua
-        ragdolls.forEach(r => r.parts.forEach(p => {
-            if (p?.body) {
-                const inWater = p.x > waterStartX && p.y > waterY;
-                if (inWater) {
-                    // Flotar (empujar hacia arriba)
-                    const floatForce = -0.4;
-                    const drag = 0.95; // Resistencia del agua
-                    p.setVelocity(
-                        p.body.velocity.x * drag,
-                        p.body.velocity.y * drag + floatForce
-                    );
-
-                    // Burbujas ocasionales
-                    if (Math.random() < 0.02) {
-                        sceneRef.beachGraphics.fillStyle(0xADD8E6, 0.6);
-                        sceneRef.beachGraphics.fillCircle(p.x + (Math.random() - 0.5) * 10, p.y - 10, 3);
-                    }
-                }
-            }
-        }));
-
-        // Armas tambien flotan
-        weapons.forEach(weapon => {
-            if (weapon.body) {
-                const inWater = weapon.x > waterStartX && weapon.y > waterY;
-                if (inWater) {
-                    sceneRef.matter.body.setVelocity(weapon.body, {
-                        x: weapon.body.velocity.x * 0.95,
-                        y: weapon.body.velocity.y * 0.95 - 0.2
-                    });
-                }
-            }
-        });
-
-        // === SOL DE ATARDECER (grande, bajando) ===
-        const sunX = w - 100;
-        const sunY = 80 + Math.sin(Date.now()/10000) * 20;
-        // Resplandor exterior
-        sceneRef.beachGraphics.fillStyle(0xFF6347, 0.2);
-        sceneRef.beachGraphics.fillCircle(sunX, sunY, 80);
-        sceneRef.beachGraphics.fillStyle(0xFF4500, 0.3);
-        sceneRef.beachGraphics.fillCircle(sunX, sunY, 60);
-        // Sol principal
-        sceneRef.beachGraphics.fillStyle(0xFFD700, 1);
-        sceneRef.beachGraphics.fillCircle(sunX, sunY, 45);
-        // Brillo
-        sceneRef.beachGraphics.fillStyle(0xFFFF00, 0.7);
-        sceneRef.beachGraphics.fillCircle(sunX - 10, sunY - 10, 20);
-
-        // === GAVIOTAS VOLANDO ===
-        for (let g = 0; g < 4; g++) {
-            const gullX = (200 + g * 150 + Date.now()/20) % (w + 100) - 50;
-            const gullY = 60 + g * 30 + Math.sin(Date.now()/300 + g) * 15;
-            const wingUp = Math.sin(Date.now()/100 + g * 2) > 0;
-            sceneRef.beachGraphics.lineStyle(2, 0x333333, 0.8);
-            sceneRef.beachGraphics.beginPath();
-            sceneRef.beachGraphics.moveTo(gullX - 12, gullY + (wingUp ? -5 : 3));
-            sceneRef.beachGraphics.lineTo(gullX, gullY);
-            sceneRef.beachGraphics.lineTo(gullX + 12, gullY + (wingUp ? -5 : 3));
-            sceneRef.beachGraphics.strokePath();
-        }
-
-        // === NUBES ROSADAS DE ATARDECER ===
-        sceneRef.beachGraphics.fillStyle(0xFFB6C1, 0.6);
-        sceneRef.beachGraphics.fillEllipse(100, 50, 60, 25);
-        sceneRef.beachGraphics.fillEllipse(130, 45, 40, 20);
-        sceneRef.beachGraphics.fillEllipse(300, 70, 70, 30);
-        sceneRef.beachGraphics.fillEllipse(340, 65, 45, 22);
-        sceneRef.beachGraphics.fillStyle(0xFFA07A, 0.5);
-        sceneRef.beachGraphics.fillEllipse(500, 40, 55, 22);
-
-        // === CASTILLO DE ARENA ===
-        const castleX = waterStartX - 120;
-        const castleY = groundY;
-        // Base
-        sceneRef.beachGraphics.fillStyle(0xD2B48C, 1);
-        sceneRef.beachGraphics.fillRect(castleX - 35, castleY - 30, 70, 30);
-        // Torres
-        sceneRef.beachGraphics.fillStyle(0xDEB887, 1);
-        sceneRef.beachGraphics.fillRect(castleX - 35, castleY - 55, 18, 25);
-        sceneRef.beachGraphics.fillRect(castleX + 17, castleY - 55, 18, 25);
-        sceneRef.beachGraphics.fillRect(castleX - 9, castleY - 65, 18, 35);
-        // Almenas
-        sceneRef.beachGraphics.fillStyle(0xC4A67C, 1);
-        for (let a = 0; a < 3; a++) {
-            sceneRef.beachGraphics.fillRect(castleX - 35 + a * 7, castleY - 60, 5, 5);
-            sceneRef.beachGraphics.fillRect(castleX + 17 + a * 7, castleY - 60, 5, 5);
-        }
-        sceneRef.beachGraphics.fillRect(castleX - 9, castleY - 70, 5, 5);
-        sceneRef.beachGraphics.fillRect(castleX + 4, castleY - 70, 5, 5);
-        // Puerta
-        sceneRef.beachGraphics.fillStyle(0x8B7355, 1);
-        sceneRef.beachGraphics.fillRect(castleX - 5, castleY - 20, 10, 20);
-        // Bandera
-        const flagWave = Math.sin(Date.now()/200) * 3;
-        sceneRef.beachGraphics.lineStyle(2, 0x8B4513, 1);
-        sceneRef.beachGraphics.lineBetween(castleX, castleY - 65, castleX, castleY - 85);
-        sceneRef.beachGraphics.fillStyle(0xFF0000, 1);
-        sceneRef.beachGraphics.fillTriangle(castleX, castleY - 85, castleX + 15 + flagWave, castleY - 80, castleX, castleY - 75);
-
-        // === SOMBRILLA DE PLAYA ===
-        const umbrellaX = 350;
-        const umbrellaY = groundY;
-        // Poste
-        sceneRef.beachGraphics.lineStyle(4, 0x8B4513, 1);
-        sceneRef.beachGraphics.lineBetween(umbrellaX, umbrellaY - 5, umbrellaX, umbrellaY - 80);
-        // Sombrilla (rayas)
-        const colors = [0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF, 0xFF0000, 0xFFFFFF];
-        colors.forEach((color, i) => {
-            sceneRef.beachGraphics.fillStyle(color, 1);
-            sceneRef.beachGraphics.slice(umbrellaX, umbrellaY - 80, 50, Math.PI + i * (Math.PI / 6), Math.PI + (i + 1) * (Math.PI / 6), false);
-            sceneRef.beachGraphics.fillPath();
-        });
-
-        // === PECES EN EL AGUA ===
-        for (let f = 0; f < 5; f++) {
-            const fishX = waterStartX + 40 + ((f * 80 + Date.now()/15) % (w - waterStartX - 60));
-            const fishY = waterY + 50 + f * 35 + Math.sin(Date.now()/400 + f) * 10;
-            const fishColors = [0xFF6B35, 0xFFD700, 0x00CED1, 0xFF69B4, 0x32CD32];
-            sceneRef.beachGraphics.fillStyle(fishColors[f], 0.9);
-            // Cuerpo
-            sceneRef.beachGraphics.fillEllipse(fishX, fishY, 12, 6);
-            // Cola
-            sceneRef.beachGraphics.fillTriangle(fishX - 12, fishY, fishX - 20, fishY - 6, fishX - 20, fishY + 6);
-            // Ojo
-            sceneRef.beachGraphics.fillStyle(0x000000, 1);
-            sceneRef.beachGraphics.fillCircle(fishX + 5, fishY - 1, 2);
-        }
-
-        // === ESTRELLAS DE MAR EN LA ARENA ===
-        const starPositions = [{x: 260, y: groundY - 8}, {x: 420, y: groundY - 6}, {x: waterStartX - 30, y: groundY - 10}];
-        starPositions.forEach((star, i) => {
-            const starColors = [0xFF6347, 0xFFA500, 0xFF69B4];
-            sceneRef.beachGraphics.fillStyle(starColors[i], 1);
-            for (let p = 0; p < 5; p++) {
-                const angle = (p * 72 - 90) * Math.PI / 180;
-                const innerAngle = ((p * 72) + 36 - 90) * Math.PI / 180;
-                const outerR = 10, innerR = 4;
-                sceneRef.beachGraphics.fillTriangle(
-                    star.x, star.y,
-                    star.x + Math.cos(angle) * outerR, star.y + Math.sin(angle) * outerR,
-                    star.x + Math.cos(innerAngle) * innerR, star.y + Math.sin(innerAngle) * innerR
+                // Nieve/luz en punta
+                sceneRef.bosqueGraphics.fillStyle(0x1C5B1C, 0.6);
+                sceneRef.bosqueGraphics.fillTriangle(
+                    px + sway, layerY - 40,
+                    px - layerW / 2 + sway, layerY - 20,
+                    px + layerW / 2 + sway, layerY - 20
                 );
             }
         });
 
-        // === CANGREJOS CAMINANDO ===
-        const crab1X = waterStartX - 50 + Math.sin(Date.now()/2000) * 30;
-        const crab1Y = groundY - 15;
-        drawCrab(sceneRef.beachGraphics, crab1X, crab1Y, 0xFF6347);
+        // Hongos coloridos
+        const mushroomPositions = [
+            { x: 100, y: groundY - 5, color: 0xFF0000, spots: 0xFFFFFF },
+            { x: 250, y: groundY - 8, color: 0xFF6B00, spots: 0xFFFFCC },
+            { x: 380, y: groundY - 4, color: 0x8B4513, spots: 0xFFFFFF },
+            { x: 520, y: groundY - 6, color: 0xFF0000, spots: 0xFFFFFF },
+            { x: 650, y: groundY - 7, color: 0x9932CC, spots: 0xFFB6C1 },
+            { x: 150, y: groundY - 3, color: 0xFFD700, spots: 0xFFF8DC },
+            { x: 450, y: groundY - 5, color: 0x228B22, spots: 0x90EE90 },
+        ];
+        mushroomPositions.forEach((m, i) => {
+            const bounce = Math.sin(Date.now() / 500 + i) * 2;
+            // Tallo
+            sceneRef.bosqueGraphics.fillStyle(0xFAEBD7, 1);
+            sceneRef.bosqueGraphics.fillRect(m.x - 4, m.y - 15 + bounce, 8, 15);
+            // Sombrero
+            sceneRef.bosqueGraphics.fillStyle(m.color, 1);
+            sceneRef.bosqueGraphics.fillEllipse(m.x, m.y - 18 + bounce, 18, 10);
+            // Manchas
+            sceneRef.bosqueGraphics.fillStyle(m.spots, 0.9);
+            sceneRef.bosqueGraphics.fillCircle(m.x - 5, m.y - 20 + bounce, 3);
+            sceneRef.bosqueGraphics.fillCircle(m.x + 6, m.y - 17 + bounce, 2);
+            sceneRef.bosqueGraphics.fillCircle(m.x, m.y - 22 + bounce, 2);
+        });
 
-        const crab2X = 280 + Math.sin(Date.now()/2500 + 2) * 40;
-        const crab2Y = groundY - 12;
-        drawCrab(sceneRef.beachGraphics, crab2X, crab2Y, 0xFF4500);
+        // Luciérnagas
+        for (let i = 0; i < 8; i++) {
+            const fx = 50 + (i * 100 + Date.now() / 30) % (w - 100);
+            const fy = 100 + (i * 70) % (h - 200) + Math.sin(Date.now() / 300 + i) * 20;
+            const glow = Math.sin(Date.now() / 200 + i * 2) > 0;
+            if (glow) {
+                sceneRef.bosqueGraphics.fillStyle(0xFFFF00, 0.3);
+                sceneRef.bosqueGraphics.fillCircle(fx, fy, 8);
+                sceneRef.bosqueGraphics.fillStyle(0xFFFF00, 0.8);
+                sceneRef.bosqueGraphics.fillCircle(fx, fy, 3);
+            }
+        }
 
-        const crab3X = 120 + Math.sin(Date.now()/3000 + 4) * 25;
-        const crab3Y = groundY - 10;
-        drawCrab(sceneRef.beachGraphics, crab3X, crab3Y, 0xE9967A, 0.7);
+        // Niebla baja
+        sceneRef.bosqueGraphics.fillStyle(0x556B2F, 0.2);
+        for (let i = 0; i < 6; i++) {
+            const fogX = (i * 180 + Date.now() / 80) % (w + 200) - 100;
+            sceneRef.bosqueGraphics.fillEllipse(fogX, groundY - 30, 120, 30);
+        }
 
-        // === CONCHAS EN LA ARENA ===
-        sceneRef.beachGraphics.fillStyle(0xFFF5EE, 0.9);
-        sceneRef.beachGraphics.fillEllipse(310, groundY - 5, 6, 4);
-        sceneRef.beachGraphics.fillEllipse(480, groundY - 4, 5, 3);
-        sceneRef.beachGraphics.fillStyle(0xFFE4C4, 0.9);
-        sceneRef.beachGraphics.fillEllipse(220, groundY - 6, 7, 4);
-
-    } else if (sceneRef.beachGraphics) {
-        sceneRef.beachGraphics.clear();
+    } else if (sceneRef.bosqueGraphics) {
+        sceneRef.bosqueGraphics.clear();
     }
 
     // === VOLCÁN EN ERUPCIÓN ===
@@ -7786,8 +7562,92 @@ function updateMapEffects() {
             sceneRef.pantanoGraphics.fillEllipse(fogX, h * 0.4 + i * 30, 150, 40);
         }
 
+        // === COCODRILO cada 30 segundos ===
+        if (!sceneRef.crocoTimer) sceneRef.crocoTimer = Date.now();
+        if (!sceneRef.crocoActive && Date.now() - sceneRef.crocoTimer > 30000 && ragdolls.length > 0) {
+            // Elegir NPC random como víctima
+            const victimIdx = Math.floor(Math.random() * ragdolls.length);
+            sceneRef.crocoTarget = ragdolls[victimIdx];
+            sceneRef.crocoX = -80;
+            sceneRef.crocoActive = true;
+            sceneRef.crocoBiting = false;
+        }
+
+        if (sceneRef.crocoActive && sceneRef.crocoTarget) {
+            const target = sceneRef.crocoTarget;
+            const targetX = target.parts[0]?.x || w / 2;
+            const crocoY = groundY - 25;
+
+            // Mover cocodrilo hacia la víctima
+            if (!sceneRef.crocoBiting) {
+                sceneRef.crocoX += 4;
+                if (sceneRef.crocoX >= targetX - 30) {
+                    sceneRef.crocoBiting = true;
+                    sceneRef.crocoBiteTime = Date.now();
+                    // ¡MORDER! - aplicar fuerza y sangre
+                    target.parts.forEach(p => {
+                        if (p?.body) {
+                            p.setVelocity((Math.random() - 0.5) * 15, -10 - Math.random() * 5);
+                        }
+                    });
+                    spawnBlood(targetX, crocoY, 20);
+                }
+            } else {
+                // Después de morder, el cocodrilo se va
+                sceneRef.crocoX += 5;
+                if (sceneRef.crocoX > w + 100) {
+                    sceneRef.crocoActive = false;
+                    sceneRef.crocoTimer = Date.now();
+                }
+            }
+
+            // Dibujar cocodrilo
+            const cx = sceneRef.crocoX;
+            const mouthOpen = sceneRef.crocoBiting && Date.now() - sceneRef.crocoBiteTime < 300;
+
+            // Cuerpo
+            sceneRef.pantanoGraphics.fillStyle(0x228B22, 1);
+            sceneRef.pantanoGraphics.fillEllipse(cx, crocoY, 50, 18);
+            // Cola
+            sceneRef.pantanoGraphics.fillTriangle(cx - 50, crocoY, cx - 85, crocoY - 8, cx - 85, crocoY + 8);
+            // Cabeza
+            sceneRef.pantanoGraphics.fillStyle(0x2E8B2E, 1);
+            sceneRef.pantanoGraphics.fillEllipse(cx + 40, crocoY - 2, 25, 12);
+            // Hocico
+            if (mouthOpen) {
+                // Boca abierta
+                sceneRef.pantanoGraphics.fillStyle(0x2E8B2E, 1);
+                sceneRef.pantanoGraphics.fillRect(cx + 50, crocoY - 10, 30, 8);
+                sceneRef.pantanoGraphics.fillRect(cx + 50, crocoY + 2, 30, 8);
+                // Dientes
+                sceneRef.pantanoGraphics.fillStyle(0xFFFFFF, 1);
+                for (let t = 0; t < 4; t++) {
+                    sceneRef.pantanoGraphics.fillTriangle(cx + 55 + t * 7, crocoY - 2, cx + 52 + t * 7, crocoY - 6, cx + 58 + t * 7, crocoY - 6);
+                    sceneRef.pantanoGraphics.fillTriangle(cx + 55 + t * 7, crocoY + 2, cx + 52 + t * 7, crocoY + 6, cx + 58 + t * 7, crocoY + 6);
+                }
+            } else {
+                sceneRef.pantanoGraphics.fillRect(cx + 50, crocoY - 5, 30, 10);
+            }
+            // Ojos
+            sceneRef.pantanoGraphics.fillStyle(0xFFFF00, 1);
+            sceneRef.pantanoGraphics.fillCircle(cx + 35, crocoY - 8, 5);
+            sceneRef.pantanoGraphics.fillStyle(0x000000, 1);
+            sceneRef.pantanoGraphics.fillCircle(cx + 36, crocoY - 8, 2);
+            // Escamas
+            sceneRef.pantanoGraphics.fillStyle(0x1E6B1E, 1);
+            for (let s = 0; s < 5; s++) {
+                sceneRef.pantanoGraphics.fillTriangle(cx - 30 + s * 15, crocoY - 15, cx - 35 + s * 15, crocoY - 5, cx - 25 + s * 15, crocoY - 5);
+            }
+            // Patas
+            sceneRef.pantanoGraphics.fillStyle(0x228B22, 1);
+            sceneRef.pantanoGraphics.fillEllipse(cx - 20, crocoY + 15, 8, 5);
+            sceneRef.pantanoGraphics.fillEllipse(cx + 20, crocoY + 15, 8, 5);
+        }
+
     } else if (sceneRef.pantanoGraphics) {
         sceneRef.pantanoGraphics.clear();
+        sceneRef.crocoActive = false;
+        sceneRef.crocoTimer = null;
     }
 
     // === CRISTALES ===
@@ -7925,50 +7785,6 @@ function updateMapEffects() {
 
     } else if (sceneRef.ruinasGraphics) {
         sceneRef.ruinasGraphics.clear();
-    }
-
-    // === TORMENTA ===
-    if (currentMap === 'tormenta') {
-        if (!sceneRef.tormentaGraphics) {
-            sceneRef.tormentaGraphics = sceneRef.add.graphics();
-            sceneRef.tormentaGraphics.setDepth(-6);
-        }
-        sceneRef.tormentaGraphics.clear();
-
-        const w = game.scale.width;
-        const h = game.scale.height;
-
-        // Lluvia intensa
-        sceneRef.tormentaGraphics.lineStyle(1, 0x6699CC, 0.7);
-        for (let i = 0; i < 100; i++) {
-            const rx = (i * 20 + Date.now()/2) % w;
-            const ry = (Date.now()/2 + i * 15) % h;
-            sceneRef.tormentaGraphics.lineBetween(rx, ry, rx - 5, ry + 20);
-        }
-
-        // Rayos frecuentes
-        if (Math.random() < 0.02) {
-            const lx = Math.random() * w;
-            sceneRef.tormentaGraphics.lineStyle(4, 0xFFFFFF, 1);
-            sceneRef.tormentaGraphics.beginPath();
-            sceneRef.tormentaGraphics.moveTo(lx, 0);
-            let ly = 0;
-            while (ly < h) {
-                ly += 30 + Math.random() * 50;
-                sceneRef.tormentaGraphics.lineTo(lx + (Math.random() - 0.5) * 60, ly);
-            }
-            sceneRef.tormentaGraphics.strokePath();
-        }
-
-        // Charcos en el suelo
-        sceneRef.tormentaGraphics.fillStyle(0x4682B4, 0.5);
-        for (let i = 0; i < 5; i++) {
-            const px = 80 + i * (w / 5);
-            sceneRef.tormentaGraphics.fillEllipse(px, h - 45, 40, 10);
-        }
-
-    } else if (sceneRef.tormentaGraphics) {
-        sceneRef.tormentaGraphics.clear();
     }
 
     // === EFECTOS DE NUEVAS ARMAS ===
@@ -8156,7 +7972,48 @@ function updateWeapons() {
             if (weapon.type === 'granada' && weapon.timerText) {
                 weapon.timerText.setPosition(weapon.x, weapon.y - 25);
             }
+
         }
+    });
+}
+
+function deleteWeapon(weapon) {
+    if (!weapon) return;
+
+    // Limpiar timers
+    if (weapon.timerInterval) clearInterval(weapon.timerInterval);
+    if (weapon.timerText) weapon.timerText.destroy();
+
+    // Destruir gráficos
+    if (weapon.graphics) weapon.graphics.destroy();
+
+    // Remover cuerpo físico
+    if (weapon.body) {
+        try {
+            sceneRef.matter.world.remove(weapon.body);
+        } catch(e) {}
+    }
+
+    // Remover de arrays
+    const idx = weapons.indexOf(weapon);
+    if (idx > -1) weapons.splice(idx, 1);
+
+    const portalIdx = portals.indexOf(weapon);
+    if (portalIdx > -1) portals.splice(portalIdx, 1);
+
+    const trampIdx = trampolines.indexOf(weapon);
+    if (trampIdx > -1) trampolines.splice(trampIdx, 1);
+
+    // Efecto visual de eliminación
+    const poof = sceneRef.add.text(weapon.x, weapon.y, '💨', {
+        font: '24px Arial'
+    }).setOrigin(0.5).setDepth(50);
+    sceneRef.tweens.add({
+        targets: poof,
+        alpha: 0,
+        scale: 2,
+        duration: 300,
+        onComplete: () => poof.destroy()
     });
 }
 
