@@ -103,8 +103,96 @@
     <div class="section-title">IMPLEMENTADOS</div>
     <div class="grid" id="implemented-grid"></div>
 
-    <div class="section-title">PROPUESTAS NUEVAS</div>
+    <div class="section-title">🧑 PROPUESTAS NPCs</div>
     <div class="grid" id="pending-grid"></div>
+
+    <div class="section-title">🔫 PROPUESTAS ARMAS</div>
+    <div class="grid" id="weapons-grid">
+        <div class="npc-card pending">
+            <div class="npc-name">🔱 Tridente</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Tridente dorado de 3 puntas. Se lanza y regresa como boomerang. Hace triple daño y empuja en 3 direcciones.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">⚡ Rayo de Tesla</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Arma electrica que dispara rayos que saltan entre NPCs cercanos. Efecto de cadena electrica.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🧊 Congelador</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Dispara rayo azul que congela NPCs en hielo por 5 segundos. Los NPCs congelados se rompen si los golpeas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🕳️ Agujero Negro Mini</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Crea un mini agujero negro que atrae todo (NPCs, armas, balas) hacia el centro por 10 segundos.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🪄 Varita Magica</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Transforma NPCs en otros tipos aleatorios. Click en NPC = transformacion con particulas magicas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🎸 Guitarra Electrica</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Onda de sonido que empuja NPCs hacia atras. Mas tiempo presionado = onda mas fuerte. Efecto visual de ondas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🧲 Super Iman</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Iman gigante que puede atraer O repeler (toggle). Afecta NPCs y todas las armas metalicas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🎯 Francotirador</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Rifle de largo alcance. Click para apuntar, muestra linea laser. Disparo atraviesa multiples NPCs.</div>
+        </div>
+    </div>
+
+    <div class="section-title">🗺️ PROPUESTAS MUNDOS</div>
+    <div class="grid" id="worlds-grid">
+        <div class="npc-card pending">
+            <div class="npc-name">🌋 Super Volcan</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Volcan activo en el centro. Lanza rocas de lava periodicamente. Suelo se agrieta y sale fuego. Lluvia de ceniza.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🏰 Castillo Medieval</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Castillo con torres, almenas, puente levadizo. Flechas disparan desde las torres. Catapulta lanza rocas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🚀 Estacion Espacial</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Interior de nave espacial. Gravedad cero, paneles de control, ventanas con estrellas. Airlocks que succionan NPCs al espacio.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🎪 Circo</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Carpa de circo con trampolines, canones que disparan NPCs, cuerda floja, plataformas giratorias.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🏭 Fabrica</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Fabrica industrial con bandas transportadoras que mueven NPCs, prensas hidraulicas, trituradoras, robots soldadores.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🎢 Parque de Diversiones</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Montaña rusa funcional, rueda de la fortuna giratoria, casa de espejos, carrusel. NPCs pueden subirse a los juegos.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">⚔️ Arena de Gladiadores</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Coliseo romano con gradas, puertas que sueltan leones/tigres, trampas en el suelo, armas esparcidas.</div>
+        </div>
+        <div class="npc-card pending">
+            <div class="npc-name">🌪️ Dimension Caotica</div>
+            <div class="npc-status status-pending">PROPUESTA</div>
+            <div class="npc-desc">Gravedad cambia cada 10 segundos (arriba, abajo, izq, der). Plataformas flotantes, portales aleatorios, colores psicodelicos.</div>
+        </div>
+    </div>
 
     <script>
         const SCALE = 3;
@@ -208,14 +296,70 @@
                 desc: 'Casco blanco con visera dorada reflectante, traje espacial blanco con parches, tanque de oxigeno en la espalda'
             },
             {
-                id: 'king', name: 'Rey', emoji: '🤴',
+                id: 'king', name: 'Rey Azul', emoji: '🤴',
                 implemented: true,
-                desc: 'Corona dorada con joyas rojas, barba castaña, capa de armino (blanca con puntos negros), tunica roja con bordados dorados'
+                desc: 'REY DE CLASH ROYALE: Corona dorada con picos y joyas, cejas blancas gruñonas, barba blanca grande, armadura azul con capa, cinturon dorado con joya roja, botas doradas'
             },
             {
-                id: 'queen', name: 'Reina', emoji: '👸',
+                id: 'queen', name: 'Princesa', emoji: '👸',
                 implemented: true,
-                desc: 'Corona alta dorada con joyas, pelo largo castano, vestido largo rojo con bordados dorados, collar de perlas, guantes blancos'
+                desc: 'PRINCESA DE CLASH ROYALE: Pelo largo naranja con flequillo, tiara dorada con joya rosa, ojos grandes expresivos, vestido morado con detalles rosas, cinturon dorado (SIN ARCO)'
+            },
+            {
+                id: 'mini_pekka', name: 'Mini PEKKA', emoji: '🔵',
+                implemented: true,
+                desc: 'Robot azul de Clash Royale. Casco cuadrado azul oscuro con visor y ojos rojos brillantes, cuernitos en el casco, armadura azul metalica, nucleo de energia azul brillante en el pecho, extremidades roboticas con articulaciones. Dice PANCAKES al aparecer'
+            },
+            // === PROPUESTAS NUEVAS ===
+            {
+                id: 'steve', name: 'Steve', emoji: '⛏️',
+                implemented: false,
+                desc: 'PROPUESTA: Personaje de Minecraft. Cabeza cuadrada con cara pixelada (ojos azules, nariz, barba), cuerpo cuadrado azul (camisa), piernas moradas (pantalon). Todo con look pixelado/cuadrado'
+            },
+            {
+                id: 'creeper', name: 'Creeper', emoji: '💚',
+                implemented: false,
+                desc: 'PROPUESTA: Monstruo verde de Minecraft. Cuerpo rectangular verde con cara triste pixelada (ojos negros cuadrados, boca en forma de frown). Sin brazos, 4 patas cortas. Explota al morir'
+            },
+            {
+                id: 'goku', name: 'Goku', emoji: '🟠',
+                implemented: false,
+                desc: 'PROPUESTA: Pelo negro puntiagudo hacia arriba (Super Saiyan: dorado), gi naranja con cinturon azul, botas azules, musculos marcados. Aura de ki al aparecer'
+            },
+            {
+                id: 'naruto', name: 'Naruto', emoji: '🍥',
+                implemented: false,
+                desc: 'PROPUESTA: Pelo rubio puntiagudo, bandana con placa metalica, ojos azules, marcas de bigotes en las mejillas, chaqueta naranja con negro, pantalon naranja'
+            },
+            {
+                id: 'among_us', name: 'Tripulante', emoji: '📮',
+                implemented: false,
+                desc: 'PROPUESTA: Forma de frijol/capsula, visor azul brillante en la cara, mochila/tanque en la espalda. Colores variados (rojo, azul, verde, etc). Sin piernas visibles'
+            },
+            {
+                id: 'freddy', name: 'Freddy', emoji: '🐻',
+                implemented: false,
+                desc: 'PROPUESTA: Oso animatronico marron de FNAF. Sombrero de copa negro, corbatin negro, ojos azules metalicos, orejas redondas, articulaciones roboticas visibles, microfono en mano'
+            },
+            {
+                id: 'sans', name: 'Sans', emoji: '💀',
+                implemented: false,
+                desc: 'PROPUESTA: Esqueleto de Undertale. Craneo redondo con sonrisa perpetua, ojos que brillan azul, sudadera azul con capucha, shorts negros, pantuflas rosas'
+            },
+            {
+                id: 'pikachu', name: 'Pikachu', emoji: '⚡',
+                implemented: false,
+                desc: 'PROPUESTA: Raton electrico amarillo. Orejas puntiagudas con puntas negras, mejillas rojas, cola en forma de rayo, ojos grandes negros, nariz pequena'
+            },
+            {
+                id: 'spiderman', name: 'Spider-Man', emoji: '🕷️',
+                implemented: false,
+                desc: 'PROPUESTA: Traje rojo y azul con telarana en patron, mascara con ojos blancos grandes, arana negra en el pecho, guantes con lanzatelaranas'
+            },
+            {
+                id: 'batman', name: 'Batman', emoji: '🦇',
+                implemented: false,
+                desc: 'PROPUESTA: Traje negro/gris oscuro, capa negra larga, mascara con orejas de murcielago, simbolo de murcielago amarillo en el pecho, cinturon de utilidades amarillo'
             }
         ];
 
@@ -1011,132 +1155,192 @@
                     ctx.stroke();
                 }
             } else if (isKing) {
+                // REY AZUL DE CLASH ROYALE
                 if (isHead) {
-                    // Cara
+                    // Cara con expresión gruñona
                     fillStyle(ctx, 0xFFDBB4);
                     ctx.beginPath();
                     ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Corona
+                    // Corona dorada con picos
                     fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(2, 0, width - 4, height/2 - 2);
                     ctx.beginPath();
-                    ctx.moveTo(2, height/2 - 4);
-                    ctx.lineTo(2, 0);
-                    ctx.lineTo(6, 4);
-                    ctx.lineTo(width/2, 0);
-                    ctx.lineTo(width - 6, 4);
-                    ctx.lineTo(width - 2, 0);
-                    ctx.lineTo(width - 2, height/2 - 4);
+                    ctx.moveTo(2, 0);
+                    ctx.lineTo(4, -4);
+                    ctx.lineTo(6, 0);
                     ctx.fill();
-                    // Joyas rojas
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 2, 0);
+                    ctx.lineTo(width/2, -6);
+                    ctx.lineTo(width/2 + 2, 0);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width - 6, 0);
+                    ctx.lineTo(width - 4, -4);
+                    ctx.lineTo(width - 2, 0);
+                    ctx.fill();
+                    // Joyas de la corona
                     fillStyle(ctx, 0xFF0000);
                     ctx.beginPath();
-                    ctx.arc(width/2, 3, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, 2, 2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Ojos
-                    fillStyle(ctx, 0x000000);
-                    ctx.beginPath();
-                    ctx.arc(width/2 - 3, height/2, 1.5, 0, Math.PI * 2);
-                    ctx.arc(width/2 + 3, height/2, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Barba
-                    fillStyle(ctx, 0x8B4513);
-                    ctx.beginPath();
-                    ctx.ellipse(width/2, height/2 + 7, 5, 4, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (partName === 'torso') {
-                    // Tunica roja
-                    fillStyle(ctx, 0xCC0000);
-                    ctx.beginPath();
-                    ctx.roundRect(0, 0, width, height, 3);
-                    ctx.fill();
-                    // Capa armino
-                    fillStyle(ctx, 0xFFF8DC);
-                    ctx.fillRect(0, 0, 6, height);
-                    ctx.fillRect(width - 6, 0, 6, height);
-                    // Puntos negros armino
-                    fillStyle(ctx, 0x000000);
-                    for (let i = 0; i < 4; i++) {
-                        ctx.beginPath();
-                        ctx.arc(3, 5 + i * 9, 1, 0, Math.PI * 2);
-                        ctx.arc(width - 3, 5 + i * 9, 1, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    // Bordado dorado
-                    fillStyle(ctx, 0xFFD700);
-                    ctx.fillRect(width/2 - 1, 5, 2, height - 10);
-                } else {
-                    fillStyle(ctx, 0xCC0000);
-                    ctx.beginPath();
-                    ctx.roundRect(0, 0, width, height, 3);
-                    ctx.fill();
-                }
-            } else if (isQueen) {
-                if (isHead) {
-                    // Cara
-                    fillStyle(ctx, 0xFFDBB4);
-                    ctx.beginPath();
-                    ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Corona alta
-                    fillStyle(ctx, 0xFFD700);
-                    ctx.beginPath();
-                    ctx.moveTo(3, height/2 - 2);
-                    ctx.lineTo(3, -2);
-                    ctx.lineTo(7, 3);
-                    ctx.lineTo(width/2 - 2, -4);
-                    ctx.lineTo(width/2, -8);
-                    ctx.lineTo(width/2 + 2, -4);
-                    ctx.lineTo(width - 7, 3);
-                    ctx.lineTo(width - 3, -2);
-                    ctx.lineTo(width - 3, height/2 - 2);
-                    ctx.fill();
-                    // Joyas
                     fillStyle(ctx, 0x0000FF);
                     ctx.beginPath();
-                    ctx.arc(width/2, -5, 2, 0, Math.PI * 2);
+                    ctx.arc(4, 2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width - 4, 2, 1.5, 0, Math.PI * 2);
                     ctx.fill();
-                    fillStyle(ctx, 0xFF0000);
+                    // Cejas gruñonas blancas
+                    strokeStyle(ctx, 0xFFFFFF);
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(6, 0, 1.5, 0, Math.PI * 2);
-                    ctx.arc(width - 6, 0, 1.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Pelo largo
-                    fillStyle(ctx, 0x8B4513);
+                    ctx.moveTo(width/2 - 6, height/2 - 5);
+                    ctx.lineTo(width/2 - 2, height/2 - 3);
+                    ctx.stroke();
                     ctx.beginPath();
-                    ctx.ellipse(2, height/2 + 4, 3, 8, 0, 0, Math.PI * 2);
-                    ctx.ellipse(width - 2, height/2 + 4, 3, 8, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    // Ojos
+                    ctx.moveTo(width/2 + 2, height/2 - 3);
+                    ctx.lineTo(width/2 + 6, height/2 - 5);
+                    ctx.stroke();
+                    // Ojos enojados
                     fillStyle(ctx, 0x000000);
                     ctx.beginPath();
-                    ctx.arc(width/2 - 3, height/2, 1.5, 0, Math.PI * 2);
-                    ctx.arc(width/2 + 3, height/2, 1.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 - 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Labios
-                    fillStyle(ctx, 0xCC4444);
+                    // Barba blanca grande estilo Clash
+                    fillStyle(ctx, 0xFFFFFF);
                     ctx.beginPath();
-                    ctx.ellipse(width/2, height/2 + 5, 3, 1.5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, height/2 + 8, 6, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 5, height/2 + 4, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 5, height/2 + 4, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Bigote blanco
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 3, height/2 + 3, 2, 1, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 3, height/2 + 3, 2, 1, 0, 0, Math.PI * 2);
                     ctx.fill();
                 } else if (partName === 'torso') {
-                    // Vestido rojo
-                    fillStyle(ctx, 0xCC0000);
+                    // Armadura/capa azul estilo Clash
+                    fillStyle(ctx, 0x2266CC);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
-                    // Bordados dorados
+                    // Capa con borde oscuro
+                    fillStyle(ctx, 0x1155AA);
+                    ctx.fillRect(0, 0, 6, height);
+                    ctx.fillRect(width - 6, 0, 6, height);
+                    // Cinturon dorado
                     fillStyle(ctx, 0xFFD700);
-                    ctx.fillRect(0, 0, width, 3);
-                    ctx.fillRect(0, height - 3, width, 3);
-                    // Collar de perlas
-                    fillStyle(ctx, 0xFFFFF0);
-                    for (let i = 0; i < 5; i++) {
+                    ctx.fillRect(0, height/2 - 3, width, 6);
+                    // Hebilla con joya
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Simbolo de corona en el pecho
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 4, 12);
+                    ctx.lineTo(width/2, 6);
+                    ctx.lineTo(width/2 + 4, 12);
+                    ctx.fill();
+                } else {
+                    // Pantalones/botas azules
+                    fillStyle(ctx, 0x1155AA);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Botas doradas
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0xDAA520);
                         ctx.beginPath();
-                        ctx.arc(width/2 - 8 + i * 4, 6, 2, 0, Math.PI * 2);
+                        ctx.roundRect(0, height - 8, width, 8, 2);
                         ctx.fill();
                     }
+                }
+            } else if (isQueen) {
+                // PRINCESA DE CLASH ROYALE (sin arco)
+                if (isHead) {
+                    // Cara
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, width/2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo largo naranja/rubio estilo Princesa
+                    fillStyle(ctx, 0xFF8C00);
+                    ctx.beginPath();
+                    ctx.ellipse(0, height/2, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width, height/2, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, 2, 8, 4, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    // Flequillo
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, 4, 3, 3, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, 4, 3, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Tiara dorada (no corona grande)
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(width/2 - 6, 0, 12, 3);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, -3);
+                    ctx.lineTo(width/2 - 2, 0);
+                    ctx.lineTo(width/2 + 2, 0);
+                    ctx.fill();
+                    // Joya rosa en tiara
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, -1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos grandes y expresivos
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2, 2, 2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2, 2, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pupilas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo en ojos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 1, 0.5, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 - 1, 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa
+                    strokeStyle(ctx, 0xFF6699);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 4, 2, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    // Vestido morado/rosa estilo Princesa
+                    fillStyle(ctx, 0x9932CC);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Detalles del vestido
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.fillRect(width/2 - 3, 0, 6, height);
+                    // Cinturon con joya
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, height/3 - 2, width, 4);
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/3, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cuello del vestido
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, (width - 4) / 2, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
                 } else {
-                    fillStyle(ctx, 0xCC0000);
+                    // Vestido largo morado
+                    fillStyle(ctx, 0x9932CC);
                     ctx.beginPath();
                     ctx.roundRect(0, 0, width, height, 3);
                     ctx.fill();
@@ -1320,6 +1524,91 @@
                     ctx.fill();
                     ctx.globalAlpha = 1;
                 }
+            } else if (npcType === 'mini_pekka') {
+                // MINI P.E.K.K.A - Robot azul de Clash Royale
+                const blueArmor = 0x2E5A8F;
+                const darkBlue = 0x1E3A5F;
+                const lightBlue = 0x4A7AB0;
+
+                if (isHead) {
+                    // Casco cuadrado azul
+                    fillStyle(ctx, darkBlue);
+                    ctx.fillRect(1, 1, width - 2, height - 2);
+                    // Parte superior mas oscura
+                    fillStyle(ctx, 0x152840);
+                    ctx.fillRect(2, 0, width - 4, 6);
+                    // Cuernitos
+                    fillStyle(ctx, blueArmor);
+                    ctx.fillRect(3, 0, 3, 4);
+                    ctx.fillRect(width - 6, 0, 3, 4);
+                    // Visor
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(3, height/2 - 4, width - 6, 8);
+                    // Ojos rojos brillantes
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo en ojos
+                    fillStyle(ctx, 0xFF6666);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Rejilla boca
+                    fillStyle(ctx, 0x333333);
+                    ctx.fillRect(5, height/2 + 6, width - 10, 3);
+                } else if (partName === 'torso') {
+                    // Peto azul
+                    fillStyle(ctx, blueArmor);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 2);
+                    ctx.fill();
+                    // Placa central
+                    fillStyle(ctx, darkBlue);
+                    ctx.fillRect(width/4, 2, width/2, height - 4);
+                    // Nucleo de energia
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x87CEEB);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName.includes('arm')) {
+                    // Brazos roboticos
+                    fillStyle(ctx, blueArmor);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 2);
+                    ctx.fill();
+                    // Articulaciones
+                    fillStyle(ctx, darkBlue);
+                    ctx.fillRect(0, height/3 - 2, width, 4);
+                    ctx.fillRect(0, height*2/3 - 2, width, 4);
+                    // Puño
+                    fillStyle(ctx, 0x152840);
+                    ctx.beginPath();
+                    ctx.roundRect(0, height - 6, width, 6, 2);
+                    ctx.fill();
+                } else {
+                    // Piernas roboticas
+                    fillStyle(ctx, blueArmor);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 2);
+                    ctx.fill();
+                    // Rodillera
+                    fillStyle(ctx, darkBlue);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 8, width/2 - 1, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pie robotico
+                    fillStyle(ctx, 0x152840);
+                    ctx.beginPath();
+                    ctx.roundRect(0, height - 8, width, 8, 2);
+                    ctx.fill();
+                }
             } else if (isGenie) {
                 if (isHead) {
                     // Piel azul
@@ -1425,7 +1714,8 @@
                 demon: 0xCC2222, vampire: 0xF5F5F5, fairy: 0xFFDBB4,
                 zombie: 0x7A9A6A, ghost: 0xFFFFFF, superhero: 0xFFDBB4,
                 villain: 0x111111, astronaut: 0xFFFFFF, king: 0xFFDBB4,
-                queen: 0xFFDBB4, mermaid: 0xB0E0E6, genie: 0x4169E1
+                queen: 0xFFDBB4, mermaid: 0xB0E0E6, genie: 0x4169E1,
+                mini_pekka: 0x2E5A8F
             };
 
             const skinColor = skinColors[npcType] || 0xFFDBB4;

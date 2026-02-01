@@ -202,7 +202,8 @@ const shopItems = {
         { id: 'astronaut', name: 'Astronauta', emoji: '🧑‍🚀', price: 250 },
         { id: 'king', name: 'Rey', emoji: '🤴', price: 500 },
         { id: 'queen', name: 'Reina', emoji: '👸', price: 500 },
-        { id: 'esqueleto', name: 'Esqueleto', emoji: '💀', price: 80 }
+        { id: 'esqueleto', name: 'Esqueleto', emoji: '💀', price: 80 },
+        { id: 'mini_pekka', name: 'Mini PEKKA', emoji: '🔵', price: 500 }
     ],
     weapons: [
         { id: 'pistola', name: 'Pistola', emoji: '🔫', price: 0 },
@@ -638,6 +639,39 @@ function initGameContent(scene) {
                 if (isWeaponHit) {
                     spawnBlood(x, y, Math.min(8, Math.floor(vel / 4)));
                     playHitSound(vel / 20);
+
+                    // Armas puntiagudas se entierran en los NPCs
+                    const sharpWeapons = ['cuchillo', 'espada', 'katana', 'hacha', 'flecha'];
+                    weapons.forEach(weapon => {
+                        if (!weapon.body || weapon.stuckTo) return;
+                        if (!sharpWeapons.includes(weapon.type)) return;
+                        if (weapon.body !== bodyA && weapon.body !== bodyB) return;
+
+                        // Encontrar la parte del ragdoll golpeada
+                        const otherBody = (weapon.body === bodyA) ? bodyB : bodyA;
+                        if (otherBody.collisionFilter?.category !== 0x0002) return;
+
+                        // Solo enterrarse si hay velocidad suficiente
+                        if (vel < 8) return;
+
+                        // Crear constraint para pegar el arma al ragdoll
+                        try {
+                            const constraint = Phaser.Physics.Matter.Matter.Constraint.create({
+                                bodyA: weapon.body,
+                                bodyB: otherBody,
+                                pointA: { x: 0, y: 0 },
+                                pointB: { x: 0, y: 0 },
+                                stiffness: 0.9,
+                                length: 0
+                            });
+                            sceneRef.matter.world.add(constraint);
+                            weapon.stuckTo = otherBody;
+                            weapon.stuckConstraint = constraint;
+
+                            // Efecto visual: más sangre al enterrarse
+                            spawnBlood(x, y, 10);
+                        } catch(e) {}
+                    });
                 } else if (!isGroundCollision) {
                     // Solo hacer sonido y sangre si NO es colisión con suelo
                     const bloodChance = isLowPerf ? 0.15 : 0.25;
@@ -1477,6 +1511,92 @@ function playScream() {
         voiceOsc.stop(now + duration);
         voiceOsc2.stop(now + duration);
         noiseSource.stop(now + duration);
+    } catch (e) {}
+}
+
+function playPancakesSound() {
+    // Mini P.E.K.K.A dice "PANCAKES!" con voz robótica
+    if (!audioContext) return;
+    try {
+        const now = audioContext.currentTime;
+
+        // Sílabas: PAN - CAKES con entonación robótica
+        const syllables = [
+            { start: 0, duration: 0.2, freq: 200, text: 'PAN' },
+            { start: 0.22, duration: 0.35, freq: 280, text: 'CAKES' }
+        ];
+
+        syllables.forEach(syl => {
+            // Oscilador principal (voz robótica)
+            const osc = audioContext.createOscillator();
+            osc.type = 'square'; // Sonido robótico cuadrado
+            osc.frequency.setValueAtTime(syl.freq, now + syl.start);
+            osc.frequency.linearRampToValueAtTime(syl.freq * 1.1, now + syl.start + syl.duration * 0.3);
+            osc.frequency.linearRampToValueAtTime(syl.freq * 0.9, now + syl.start + syl.duration);
+
+            // Segundo oscilador para dar cuerpo
+            const osc2 = audioContext.createOscillator();
+            osc2.type = 'sawtooth';
+            osc2.frequency.setValueAtTime(syl.freq * 1.01, now + syl.start);
+            osc2.frequency.linearRampToValueAtTime(syl.freq * 1.11, now + syl.start + syl.duration * 0.3);
+            osc2.frequency.linearRampToValueAtTime(syl.freq * 0.91, now + syl.start + syl.duration);
+
+            // Modulación para efecto robótico
+            const modOsc = audioContext.createOscillator();
+            modOsc.type = 'sine';
+            modOsc.frequency.value = 30; // Vibrato rápido
+            const modGain = audioContext.createGain();
+            modGain.gain.value = 15;
+            modOsc.connect(modGain);
+            modGain.connect(osc.frequency);
+
+            // Mezcla
+            const mix = audioContext.createGain();
+            mix.gain.value = 0.3;
+            osc.connect(mix);
+            osc2.connect(mix);
+
+            // Envolvente
+            const env = audioContext.createGain();
+            env.gain.setValueAtTime(0, now + syl.start);
+            env.gain.linearRampToValueAtTime(0.8, now + syl.start + 0.02);
+            env.gain.setValueAtTime(0.8, now + syl.start + syl.duration * 0.7);
+            env.gain.linearRampToValueAtTime(0, now + syl.start + syl.duration);
+
+            // Filtro para darle más carácter
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 800;
+            filter.Q.value = 2;
+
+            mix.connect(filter);
+            filter.connect(env);
+            env.connect(audioContext.destination);
+
+            modOsc.start(now + syl.start);
+            osc.start(now + syl.start);
+            osc2.start(now + syl.start);
+            modOsc.stop(now + syl.start + syl.duration);
+            osc.stop(now + syl.start + syl.duration);
+            osc2.stop(now + syl.start + syl.duration);
+        });
+
+        // Efecto de "eco" robótico al final
+        setTimeout(() => {
+            if (!audioContext) return;
+            const echoNow = audioContext.currentTime;
+            const echoOsc = audioContext.createOscillator();
+            echoOsc.type = 'square';
+            echoOsc.frequency.value = 250;
+            const echoGain = audioContext.createGain();
+            echoGain.gain.setValueAtTime(0.15, echoNow);
+            echoGain.gain.exponentialRampToValueAtTime(0.01, echoNow + 0.2);
+            echoOsc.connect(echoGain);
+            echoGain.connect(audioContext.destination);
+            echoOsc.start(echoNow);
+            echoOsc.stop(echoNow + 0.2);
+        }, 600);
+
     } catch (e) {}
 }
 
@@ -2639,6 +2759,11 @@ function createRagdoll(scene, x, y, color, npcType = 'normal') {
             shirtColor = 0xAAAAAA; // Costillas gris
             pantsColor = 0x888888; // Huesos piernas oscuro
             break;
+        case 'mini_pekka':
+            skinColor = 0x1E3A5F; // Azul oscuro metálico
+            shirtColor = 0x2E5A8F; // Azul metálico
+            pantsColor = 0x1E3A5F; // Azul oscuro
+            break;
     }
 
     if (isZombie) {
@@ -3056,6 +3181,87 @@ function createPartTexture(scene, name, width, height, color, isHead = false, np
                 graphics.lineBetween(0, 5 + i * (height / 3), width, 8 + i * (height / 3));
             }
         }
+    } else if (npcType === 'mini_pekka') {
+        // MINI P.E.K.K.A - Robot azul de Clash Royale
+        const blueArmor = 0x2E5A8F;
+        const darkBlue = 0x1E3A5F;
+        const lightBlue = 0x4A7AB0;
+
+        if (isHead) {
+            // Casco cuadrado/angular azul
+            graphics.fillStyle(darkBlue, 1);
+            graphics.fillRect(1, 1, width - 2, height - 2);
+            // Parte superior del casco más oscura
+            graphics.fillStyle(0x152840, 1);
+            graphics.fillRect(2, 0, width - 4, 6);
+            // Cuernitos/antenas pequeñas
+            graphics.fillStyle(blueArmor, 1);
+            graphics.fillRect(3, 0, 3, 4);
+            graphics.fillRect(width - 6, 0, 3, 4);
+            // Visor rectangular con ojos rojos brillantes
+            graphics.fillStyle(0x111111, 1);
+            graphics.fillRect(3, height/2 - 4, width - 6, 8);
+            // Ojos rojos brillantes
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2 - 4, height/2, 3);
+            graphics.fillCircle(width/2 + 4, height/2, 3);
+            // Brillo en los ojos
+            graphics.fillStyle(0xFF6666, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 1, 1);
+            graphics.fillCircle(width/2 + 3, height/2 - 1, 1);
+            // Línea de la boca/rejilla
+            graphics.fillStyle(0x333333, 1);
+            graphics.fillRect(5, height/2 + 6, width - 10, 3);
+            // Detalles metálicos
+            graphics.lineStyle(1, lightBlue, 0.6);
+            graphics.strokeRect(2, 2, width - 4, height - 4);
+        } else if (name === 'torso') {
+            // Peto de armadura azul robótico
+            graphics.fillStyle(blueArmor, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 2);
+            // Placa central
+            graphics.fillStyle(darkBlue, 1);
+            graphics.fillRect(width/4, 2, width/2, height - 4);
+            // Núcleo de energía (círculo azul brillante)
+            graphics.fillStyle(0x00BFFF, 1);
+            graphics.fillCircle(width/2, height/2, 5);
+            graphics.fillStyle(0x87CEEB, 1);
+            graphics.fillCircle(width/2, height/2, 3);
+            // Líneas de armadura
+            graphics.lineStyle(1, 0x152840, 1);
+            graphics.lineBetween(width/4, 0, width/4, height);
+            graphics.lineBetween(width*3/4, 0, width*3/4, height);
+            graphics.lineBetween(0, height/3, width, height/3);
+            graphics.lineBetween(0, height*2/3, width, height*2/3);
+            // Brillo metálico
+            graphics.fillStyle(lightBlue, 0.4);
+            graphics.fillRect(2, 2, 5, 8);
+        } else if (name.includes('arm')) {
+            // Brazos robóticos azules
+            graphics.fillStyle(blueArmor, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 2);
+            // Segmentos articulados
+            graphics.fillStyle(darkBlue, 1);
+            graphics.fillRect(0, height/3 - 2, width, 4);
+            graphics.fillRect(0, height*2/3 - 2, width, 4);
+            // Mano/puño más oscuro
+            graphics.fillStyle(0x152840, 1);
+            graphics.fillRoundedRect(0, height - 6, width, 6, 2);
+        } else {
+            // Piernas robóticas
+            graphics.fillStyle(blueArmor, 1);
+            graphics.fillRoundedRect(0, 0, width, height, 2);
+            // Rodillera
+            graphics.fillStyle(darkBlue, 1);
+            graphics.fillEllipse(width/2, 8, width - 2, 6);
+            // Segmentos
+            graphics.lineStyle(1, 0x152840, 1);
+            graphics.lineBetween(0, height/3, width, height/3);
+            graphics.lineBetween(0, height*2/3, width, height*2/3);
+            // Pie robótico
+            graphics.fillStyle(0x152840, 1);
+            graphics.fillRoundedRect(0, height - 8, width, 8, 2);
+        }
     } else if (npcType === 'fairy') {
         if (isHead) {
             graphics.fillStyle(0xFFE4E1, 1);
@@ -3341,74 +3547,133 @@ function createPartTexture(scene, name, width, height, color, isHead = false, np
             graphics.lineBetween(0, height/2, width, height/2);
         }
     } else if (npcType === 'king') {
+        // REY AZUL DE CLASH ROYALE
         if (isHead) {
+            // Cara con expresión gruñona
             graphics.fillStyle(0xFFDBB4, 1);
             graphics.fillCircle(width/2, height/2 + 2, width/2 - 2);
+            // Corona dorada con picos
             graphics.fillStyle(0xFFD700, 1);
-            graphics.fillRect(2, 0, width - 4, height/2 - 4);
-            graphics.fillTriangle(2, 0, 2, height/2 - 4, 6, 4);
-            graphics.fillTriangle(width/2, 0, width/2 - 4, height/2 - 6, width/2 + 4, height/2 - 6);
-            graphics.fillTriangle(width - 2, 0, width - 2, height/2 - 4, width - 6, 4);
+            graphics.fillRect(2, 0, width - 4, height/2 - 2);
+            graphics.fillTriangle(2, 0, 4, -4, 6, 0);
+            graphics.fillTriangle(width/2 - 2, 0, width/2, -6, width/2 + 2, 0);
+            graphics.fillTriangle(width - 6, 0, width - 4, -4, width - 2, 0);
+            // Joyas de la corona
             graphics.fillStyle(0xFF0000, 1);
-            graphics.fillCircle(width/2, 3, 2);
+            graphics.fillCircle(width/2, 2, 2);
+            graphics.fillStyle(0x0000FF, 1);
+            graphics.fillCircle(4, 2, 1.5);
+            graphics.fillCircle(width - 4, 2, 1.5);
+            // Cejas gruñonas
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.lineStyle(2, 0xFFFFFF, 1);
+            graphics.lineBetween(width/2 - 6, height/2 - 5, width/2 - 2, height/2 - 3);
+            graphics.lineBetween(width/2 + 2, height/2 - 3, width/2 + 6, height/2 - 5);
+            // Ojos enojados
             graphics.fillStyle(0x000000, 1);
-            graphics.fillCircle(width/2 - 3, height/2, 1.5);
-            graphics.fillCircle(width/2 + 3, height/2, 1.5);
-            graphics.fillStyle(0x8B4513, 1);
-            graphics.fillEllipse(width/2, height/2 + 7, 10, 8);
+            graphics.fillCircle(width/2 - 4, height/2 - 1, 2);
+            graphics.fillCircle(width/2 + 4, height/2 - 1, 2);
+            // Barba blanca grande estilo Clash
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillEllipse(width/2, height/2 + 8, 12, 10);
+            graphics.fillEllipse(width/2 - 6, height/2 + 4, 5, 6);
+            graphics.fillEllipse(width/2 + 6, height/2 + 4, 5, 6);
+            // Bigote blanco
+            graphics.fillEllipse(width/2 - 4, height/2 + 3, 4, 2);
+            graphics.fillEllipse(width/2 + 4, height/2 + 3, 4, 2);
         } else if (name === 'torso') {
-            graphics.fillStyle(0xCC0000, 1);
+            // Armadura/capa azul estilo Clash
+            graphics.fillStyle(0x2266CC, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
-            graphics.fillStyle(0xFFF8DC, 1);
+            // Capa con borde dorado
+            graphics.fillStyle(0x1155AA, 1);
             graphics.fillRect(0, 0, 6, height);
             graphics.fillRect(width - 6, 0, 6, height);
-            graphics.fillStyle(0x000000, 1);
-            for (let i = 0; i < 4; i++) {
-                graphics.fillCircle(3, 5 + i * 9, 1);
-                graphics.fillCircle(width - 3, 5 + i * 9, 1);
-            }
+            // Cinturon dorado
             graphics.fillStyle(0xFFD700, 1);
-            graphics.fillRect(width/2 - 1, 5, 2, height - 10);
+            graphics.fillRect(0, height/2 - 3, width, 6);
+            // Hebilla con joya
+            graphics.fillStyle(0xFF0000, 1);
+            graphics.fillCircle(width/2, height/2, 3);
+            // Simbolo de corona en el pecho
+            graphics.fillStyle(0xFFD700, 1);
+            graphics.fillTriangle(width/2 - 4, 12, width/2, 6, width/2 + 4, 12);
         } else {
-            graphics.fillStyle(0xCC0000, 1);
+            // Pantalones/botas azules
+            graphics.fillStyle(0x1155AA, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Botas doradas
+            if (name.includes('leg')) {
+                graphics.fillStyle(0xDAA520, 1);
+                graphics.fillRoundedRect(0, height - 8, width, 8, 2);
+            }
         }
     } else if (npcType === 'queen') {
+        // PRINCESA DE CLASH ROYALE (sin arco)
         if (isHead) {
+            // Cara
             graphics.fillStyle(0xFFDBB4, 1);
             graphics.fillCircle(width/2, height/2 + 2, width/2 - 2);
+            // Pelo largo naranja/rubio estilo Princesa
+            graphics.fillStyle(0xFF8C00, 1);
+            graphics.fillEllipse(0, height/2, 5, 12);
+            graphics.fillEllipse(width, height/2, 5, 12);
+            graphics.fillEllipse(width/2, 2, 10, 5);
+            // Flequillo
+            graphics.fillEllipse(width/2 - 4, 4, 4, 4);
+            graphics.fillEllipse(width/2 + 4, 4, 4, 4);
+            // Tiara dorada (no corona grande)
             graphics.fillStyle(0xFFD700, 1);
-            graphics.fillRect(3, -2, width - 6, height/2);
-            graphics.fillTriangle(width/2, -8, width/2 - 3, 0, width/2 + 3, 0);
-            graphics.fillStyle(0x0000FF, 1);
-            graphics.fillCircle(width/2, -5, 2);
-            graphics.fillStyle(0xFF0000, 1);
-            graphics.fillCircle(6, 0, 1.5);
-            graphics.fillCircle(width - 6, 0, 1.5);
+            graphics.fillRect(width/2 - 6, 0, 12, 3);
+            graphics.fillTriangle(width/2, -3, width/2 - 2, 0, width/2 + 2, 0);
+            // Joya rosa en tiara
+            graphics.fillStyle(0xFF69B4, 1);
+            graphics.fillCircle(width/2, -1, 2);
+            // Ojos grandes y expresivos
             graphics.fillStyle(0x8B4513, 1);
-            graphics.fillEllipse(2, height/2 + 4, 6, 16);
-            graphics.fillEllipse(width - 2, height/2 + 4, 6, 16);
+            graphics.fillEllipse(width/2 - 4, height/2, 3, 2.5);
+            graphics.fillEllipse(width/2 + 4, height/2, 3, 2.5);
+            // Pupilas
             graphics.fillStyle(0x000000, 1);
-            graphics.fillCircle(width/2 - 3, height/2, 1.5);
-            graphics.fillCircle(width/2 + 3, height/2, 1.5);
-            graphics.fillStyle(0xCC4444, 1);
-            graphics.fillEllipse(width/2, height/2 + 5, 6, 3);
+            graphics.fillCircle(width/2 - 4, height/2, 1);
+            graphics.fillCircle(width/2 + 4, height/2, 1);
+            // Brillo en ojos
+            graphics.fillStyle(0xFFFFFF, 1);
+            graphics.fillCircle(width/2 - 5, height/2 - 1, 0.5);
+            graphics.fillCircle(width/2 + 3, height/2 - 1, 0.5);
+            // Sonrisa
+            graphics.lineStyle(1, 0xFF6699, 1);
+            graphics.beginPath();
+            graphics.arc(width/2, height/2 + 4, 3, 0.2, Math.PI - 0.2);
+            graphics.strokePath();
         } else if (name === 'torso') {
-            graphics.fillStyle(0xCC0000, 1);
+            // Vestido morado/rosa estilo Princesa
+            graphics.fillStyle(0x9932CC, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Detalles del vestido
+            graphics.fillStyle(0xFF69B4, 1);
+            graphics.fillRect(width/2 - 3, 0, 6, height);
+            // Cinturon con joya
             graphics.fillStyle(0xFFD700, 1);
-            graphics.fillRect(0, 0, width, 3);
-            graphics.fillRect(0, height - 3, width, 3);
-            graphics.fillStyle(0xFFFFF0, 1);
-            for (let i = 0; i < 5; i++) {
-                graphics.fillCircle(width/2 - 8 + i * 4, 6, 2);
-            }
+            graphics.fillRect(0, height/3 - 2, width, 4);
+            graphics.fillStyle(0xFF69B4, 1);
+            graphics.fillCircle(width/2, height/3, 3);
+            // Cuello del vestido
+            graphics.fillStyle(0xFF69B4, 1);
+            graphics.fillEllipse(width/2, 2, width - 4, 6);
         } else {
-            graphics.fillStyle(0xCC0000, 1);
+            // Vestido largo morado
+            graphics.fillStyle(0x9932CC, 1);
             graphics.fillRoundedRect(0, 0, width, height, 3);
+            // Detalles rosas
+            if (name.includes('leg')) {
+                graphics.fillStyle(0xFF69B4, 0.5);
+                graphics.fillRect(width/3, 0, width/3, height);
+            }
+            // Brazos con mangas
             if (name.includes('arm')) {
-                graphics.fillStyle(0xFFFFFF, 1);
-                graphics.fillRect(0, height - 8, width, 8);
+                graphics.fillStyle(0xFFDBB4, 1);
+                graphics.fillRoundedRect(0, height - 6, width, 6, 2);
             }
         }
     } else if (npcType === 'mermaid') {
@@ -4081,6 +4346,11 @@ function spawnNpc(npcType) {
     }
     const newX = Phaser.Math.Between(80, game.scale.width - 80);
     createRagdoll(sceneRef, newX, game.scale.height - 150, teamColors[currentTeam], npcType);
+
+    // Mini P.E.K.K.A dice "PANCAKES!"
+    if (npcType === 'mini_pekka') {
+        playPancakesSound();
+    }
 }
 
 function changeMap(mapId) {
@@ -6677,6 +6947,9 @@ function updateMapEffects() {
         const h = game.scale.height;
         const groundY = h - 50;
 
+        // Posiciones de cristales para detección de colisión
+        const crystalPositions = [];
+
         // Cristales grandes
         const crystalColors = [0x00CED1, 0x9400D3, 0xFF1493, 0x00FF00, 0xFFD700];
         for (let i = 0; i < 5; i++) {
@@ -6689,16 +6962,47 @@ function updateMapEffects() {
             // Brillo
             sceneRef.cristalesGraphics.fillStyle(0xFFFFFF, 0.5);
             sceneRef.cristalesGraphics.fillTriangle(cx - 5, groundY - 20, cx + 2, groundY - 20, cx, groundY - ch + 10);
+            // Guardar posición para colisión
+            crystalPositions.push({ x: cx, y: groundY - ch/2, w: 30, h: ch, fromGround: true });
         }
 
-        // Cristales pequeños en el techo
+        // Cristales pequeños en el techo (también hacen daño)
         for (let i = 0; i < 8; i++) {
             const cx = 50 + i * (w / 8);
             const ch = 30 + (i % 4) * 15;
             const color = crystalColors[i % 5];
             sceneRef.cristalesGraphics.fillStyle(color, 0.7);
             sceneRef.cristalesGraphics.fillTriangle(cx - 10, 0, cx + 10, 0, cx, ch);
+            // Guardar posición para colisión
+            crystalPositions.push({ x: cx, y: ch/2, w: 20, h: ch, fromGround: false });
         }
+
+        // Verificar colisión de ragdolls con cristales
+        ragdolls.forEach(rag => {
+            if (!rag.parts) return;
+            rag.parts.forEach(part => {
+                if (!part || !part.body) return;
+                crystalPositions.forEach(crystal => {
+                    const dx = Math.abs(part.x - crystal.x);
+                    const dy = Math.abs(part.y - crystal.y);
+                    // Colisión con el área del cristal
+                    if (dx < crystal.w/2 + 5 && dy < crystal.h/2 + 5) {
+                        // Daño! Sangre y empuje
+                        spawnBlood(part.x, part.y, 3);
+                        // Empujar lejos del cristal
+                        const pushDir = crystal.fromGround ? -1 : 1;
+                        const pushX = (part.x - crystal.x) * 0.3;
+                        const pushY = pushDir * 8;
+                        try {
+                            Phaser.Physics.Matter.Matter.Body.setVelocity(part.body, {
+                                x: part.body.velocity.x + pushX,
+                                y: part.body.velocity.y + pushY
+                            });
+                        } catch(e) {}
+                    }
+                });
+            });
+        });
 
         // Partículas brillantes
         for (let i = 0; i < 15; i++) {
