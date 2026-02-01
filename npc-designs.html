@@ -1759,6 +1759,1479 @@
                     ctx.fill();
                     ctx.globalAlpha = 1;
                 }
+            } else if (npcType === 'freddy') {
+                // FREDDY FAZBEAR - FNAF 1
+                if (isHead) {
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas redondas
+                    fillStyle(ctx, 0x654321);
+                    ctx.beginPath();
+                    ctx.arc(2, height/2 - 6, 4, 0, Math.PI * 2);
+                    ctx.arc(width - 2, height/2 - 6, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombrero de copa
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 6, -4, 12, 4);
+                    ctx.fillRect(width/2 - 4, -10, 8, 6);
+                    // Ojos azules roboticos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x0066FF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico
+                    fillStyle(ctx, 0xA0522D);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nariz negra
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Corbatin negro
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 2);
+                    ctx.lineTo(width/2 - 6, 6);
+                    ctx.lineTo(width/2, 10);
+                    ctx.lineTo(width/2 + 6, 6);
+                    ctx.fill();
+                    // Botones
+                    fillStyle(ctx, 0x654321);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/2 + 8, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Articulaciones
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, width/2 - 1, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (npcType === 'bonnie') {
+                // BONNIE - FNAF 1
+                if (isHead) {
+                    fillStyle(ctx, 0x6A5ACD);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas largas de conejo
+                    fillStyle(ctx, 0x5A4ABA);
+                    ctx.fillRect(width/2 - 7, -10, 5, 12);
+                    ctx.fillRect(width/2 + 2, -10, 5, 12);
+                    fillStyle(ctx, 0xFF9999);
+                    ctx.fillRect(width/2 - 6, -8, 3, 8);
+                    ctx.fillRect(width/2 + 3, -8, 3, 8);
+                    // Ojos rojos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico
+                    fillStyle(ctx, 0x8A7AC9);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Dientes
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(width/2 - 3, height/2 + 5, 2, 3);
+                    ctx.fillRect(width/2 + 1, height/2 + 5, 2, 3);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x6A5ACD);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Corbatin rojo
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 2);
+                    ctx.lineTo(width/2 - 6, 6);
+                    ctx.lineTo(width/2, 10);
+                    ctx.lineTo(width/2 + 6, 6);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x6A5ACD);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, width/2 - 1, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (npcType === 'chica') {
+                // CHICA - FNAF 1
+                if (isHead) {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Plumas en cabeza
+                    fillStyle(ctx, 0xFFA500);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, -2, 3, 4, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(width/2, -3, 3, 5, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, -2, 3, 4, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos morados
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x9400D3);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pico naranja
+                    fillStyle(ctx, 0xFF8C00);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 4, height/2 + 2);
+                    ctx.lineTo(width/2, height/2 + 8);
+                    ctx.lineTo(width/2 + 4, height/2 + 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Babero LET'S EAT
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 - 2, 10, 12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.font = '5px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("LET'S", width/2, height/2 - 4);
+                    ctx.fillText("EAT!", width/2, height/2 + 2);
+                } else {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, width/2 - 1, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (npcType === 'foxy') {
+                // FOXY - FNAF 1
+                if (isHead) {
+                    fillStyle(ctx, 0xCC3300);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas puntiagudas
+                    fillStyle(ctx, 0xAA2200);
+                    ctx.beginPath();
+                    ctx.moveTo(2, height/2 - 4);
+                    ctx.lineTo(0, -4);
+                    ctx.lineTo(6, height/2 - 6);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width - 2, height/2 - 4);
+                    ctx.lineTo(width, -4);
+                    ctx.lineTo(width - 6, height/2 - 6);
+                    ctx.fill();
+                    // Parche de pirata
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojo amarillo
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico largo
+                    fillStyle(ctx, 0xDD4422);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 6, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Dientes dorados
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(width/2 - 4, height/2 + 6, 2, 3);
+                    ctx.fillRect(width/2, height/2 + 6, 2, 3);
+                    ctx.fillRect(width/2 + 3, height/2 + 5, 2, 2);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xCC3300);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Partes deterioradas
+                    fillStyle(ctx, 0x444444);
+                    ctx.fillRect(width/4, height/3, 4, 8);
+                    ctx.fillRect(width*2/3, height/2, 5, 6);
+                } else if (partName === 'armR') {
+                    // Garfio
+                    fillStyle(ctx, 0xCC3300);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height - 6, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0xC0C0C0);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, height - 6);
+                    ctx.lineTo(width/2 - 3, height);
+                    ctx.lineTo(width/2 + 3, height);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(width/2, height + 2, 4, Math.PI, Math.PI * 2);
+                    ctx.stroke();
+                } else {
+                    fillStyle(ctx, 0xCC3300);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Pantalon rasgado
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0x8B4513);
+                        ctx.fillRect(0, 0, width, height/2);
+                        fillStyle(ctx, 0x444444);
+                        ctx.fillRect(width/3, height/3, 3, 5);
+                    }
+                }
+            } else if (npcType === 'golden_freddy') {
+                // GOLDEN FREDDY - FNAF 1
+                if (isHead) {
+                    fillStyle(ctx, 0xDAA520);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas
+                    fillStyle(ctx, 0xB8860B);
+                    ctx.beginPath();
+                    ctx.arc(2, height/2 - 6, 4, 0, Math.PI * 2);
+                    ctx.arc(width - 2, height/2 - 6, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombrero
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 6, -4, 12, 4);
+                    ctx.fillRect(width/2 - 4, -10, 8, 6);
+                    // Cuencas VACIAS (aterrador)
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 4, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico
+                    fillStyle(ctx, 0xC4A000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xDAA520);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 2);
+                    ctx.lineTo(width/2 - 6, 6);
+                    ctx.lineTo(width/2, 10);
+                    ctx.lineTo(width/2 + 6, 6);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0xDAA520);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (npcType === 'puppet') {
+                // PUPPET/MARIONETTE - FNAF 2
+                if (isHead) {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos negros vacios con lagrimas moradas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Lagrimas moradas
+                    fillStyle(ctx, 0x800080);
+                    ctx.fillRect(width/2 - 5, height/2 + 1, 2, 6);
+                    ctx.fillRect(width/2 + 3, height/2 + 1, 2, 6);
+                    // Mejillas rojas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 7, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 7, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Labios rojos
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.fillRect(width/2 - 3, height/2 + 5, 6, 2);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Rayas blancas
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(0, height/3, width, 3);
+                    ctx.fillRect(0, height*2/3, width, 3);
+                } else {
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(0, height/2, width, 2);
+                }
+            } else if (npcType === 'mangle') {
+                // MANGLE - FNAF 2
+                if (isHead) {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Detalles rosas
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 5, height/2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojo amarillo y ojo negro
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 + 4, height/2 - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Labial rosa
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.fillRect(width/2 - 3, height/2 + 5, 6, 2);
+                    // Segunda cabeza colgando
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.arc(width + 3, height/2 + 5, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Cuerpo muy destruido - endoesqueleto visible
+                    fillStyle(ctx, 0x444444);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(width/4, 0, width/2, height/3);
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.fillRect(0, height/2, width/3, height/3);
+                }
+            } else if (npcType === 'springtrap') {
+                // SPRINGTRAP - FNAF 3
+                if (isHead) {
+                    fillStyle(ctx, 0x556B2F);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas de conejo rotas
+                    fillStyle(ctx, 0x4A5D23);
+                    ctx.fillRect(width/2 - 6, -8, 4, 10);
+                    ctx.fillRect(width/2 + 2, -6, 4, 8);
+                    // Ojos grises muertos
+                    fillStyle(ctx, 0x808080);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Agujeros mostrando cuerpo adentro
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.arc(width/2 + 6, height/2 + 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Boca rota
+                    fillStyle(ctx, 0x333333);
+                    ctx.fillRect(width/2 - 4, height/2 + 4, 8, 4);
+                } else {
+                    fillStyle(ctx, 0x556B2F);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Agujeros mostrando cuerpo
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.beginPath();
+                    ctx.arc(width/3, height/3, 3, 0, Math.PI * 2);
+                    ctx.arc(width*2/3, height*2/3, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (npcType === 'circus_baby') {
+                // CIRCUS BABY - Sister Location
+                if (isHead) {
+                    fillStyle(ctx, 0xFFE4E1);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo rojo en coletas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.ellipse(0, height/2 - 2, 4, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width, height/2 - 2, 4, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 0, 8, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos verdes brillantes
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mejillas rosadas
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 7, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 7, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nariz roja
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Detalles blancos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(width/2 - 2, 0, 4, height);
+                    // Botones
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/3, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height*2/3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (npcType === 'ballora') {
+                // BALLORA - Sister Location
+                if (isHead) {
+                    fillStyle(ctx, 0xE6E6FA);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo morado
+                    fillStyle(ctx, 0x800080);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, 10, 5, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(0, height/2, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width, height/2, 3, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos CERRADOS
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 2, 0, Math.PI);
+                    ctx.arc(width/2 + 4, height/2 - 1, 2, 0, Math.PI);
+                    ctx.stroke();
+                    // Labios
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 3, 1.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Tutu morado
+                    fillStyle(ctx, 0x9932CC);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Falda de ballet
+                    fillStyle(ctx, 0xDDA0DD);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height - 4, width/2 + 4, 8, 0, 0, Math.PI);
+                    ctx.fill();
+                } else {
+                    if (partName.includes('leg')) {
+                        // Zapatillas de ballet
+                        fillStyle(ctx, 0xE6E6FA);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height - 5, 3);
+                        ctx.fill();
+                        fillStyle(ctx, 0xFFB6C1);
+                        ctx.beginPath();
+                        ctx.roundRect(0, height - 5, width, 5, 2);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0xE6E6FA);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'funtime_freddy') {
+                // FUNTIME FREDDY - Sister Location
+                if (isHead) {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Detalles rosas
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.beginPath();
+                    ctx.arc(2, height/2 - 4, 4, 0, Math.PI * 2);
+                    ctx.arc(width - 2, height/2 - 4, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombrero
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 5, -3, 10, 3);
+                    ctx.fillRect(width/2 - 3, -8, 6, 5);
+                    // Ojos azules
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.fillRect(0, 0, 5, height);
+                    ctx.fillRect(width - 5, 0, 5, height);
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 2);
+                    ctx.lineTo(width/2 - 5, 6);
+                    ctx.lineTo(width/2, 10);
+                    ctx.lineTo(width/2 + 5, 6);
+                    ctx.fill();
+                } else if (partName === 'armL') {
+                    // Bon-Bon en mano
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height - 8, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height - 4, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0xFFB6C1);
+                    ctx.fillRect(0, 0, 3, height);
+                    ctx.fillRect(width - 3, 0, 3, height);
+                }
+            } else if (npcType === 'nightmare_freddy') {
+                // NIGHTMARE FREDDY - FNAF 4
+                if (isHead) {
+                    fillStyle(ctx, 0x4A3728);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombrero roto
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 5, -2, 10, 3);
+                    ctx.fillRect(width/2 - 3, -6, 6, 4);
+                    // Ojos rojos brillantes
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // DIENTES AFILADOS ENORMES
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 6, height/2 + 3);
+                    ctx.lineTo(width/2 - 5, height/2 + 8);
+                    ctx.lineTo(width/2 - 4, height/2 + 3);
+                    ctx.moveTo(width/2 - 2, height/2 + 3);
+                    ctx.lineTo(width/2 - 1, height/2 + 9);
+                    ctx.lineTo(width/2, height/2 + 3);
+                    ctx.moveTo(width/2 + 2, height/2 + 3);
+                    ctx.lineTo(width/2 + 3, height/2 + 8);
+                    ctx.lineTo(width/2 + 4, height/2 + 3);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x4A3728);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Freddles (mini freddys)
+                    fillStyle(ctx, 0x3A2718);
+                    ctx.beginPath();
+                    ctx.arc(width/4, height/4, 4, 0, Math.PI * 2);
+                    ctx.arc(width*3/4, height/3, 4, 0, Math.PI * 2);
+                    ctx.arc(width/3, height*2/3, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojitos rojos de freddles
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/4 - 1, height/4 - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(width/4 + 1, height/4 - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x4A3728);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Garras
+                    fillStyle(ctx, 0x333333);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 2, height);
+                    ctx.lineTo(width/2 - 3, height + 4);
+                    ctx.lineTo(width/2, height);
+                    ctx.lineTo(width/2 + 3, height + 4);
+                    ctx.lineTo(width/2 + 2, height);
+                    ctx.fill();
+                }
+            } else if (npcType === 'nightmare_bonnie') {
+                // NIGHTMARE BONNIE - FNAF 4
+                if (isHead) {
+                    fillStyle(ctx, 0x2F2F5F);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas rotas
+                    fillStyle(ctx, 0x1F1F4F);
+                    ctx.fillRect(width/2 - 6, -10, 4, 12);
+                    ctx.fillRect(width/2 + 2, -8, 4, 10);
+                    // Ojos rojos
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // DIENTES GIGANTES
+                    fillStyle(ctx, 0xFFFFFF);
+                    for (let i = -5; i <= 5; i += 2) {
+                        ctx.beginPath();
+                        ctx.moveTo(width/2 + i, height/2 + 3);
+                        ctx.lineTo(width/2 + i, height/2 + 8);
+                        ctx.lineTo(width/2 + i + 1, height/2 + 3);
+                        ctx.fill();
+                    }
+                } else {
+                    fillStyle(ctx, 0x2F2F5F);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Desgarros
+                    fillStyle(ctx, 0x444444);
+                    ctx.fillRect(width/3, height/4, 4, 6);
+                    ctx.fillRect(width*2/3, height/2, 3, 8);
+                }
+            } else if (npcType === 'glamrock_freddy') {
+                // GLAMROCK FREDDY - Security Breach
+                if (isHead) {
+                    fillStyle(ctx, 0xFFA500);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas
+                    fillStyle(ctx, 0xFF8C00);
+                    ctx.beginPath();
+                    ctx.arc(2, height/2 - 5, 4, 0, Math.PI * 2);
+                    ctx.arc(width - 2, height/2 - 5, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pintura facial - estrellas
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 7, height/2 - 3, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 7, height/2 - 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos azules amigables
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x0066FF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Hocico
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 5, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFA500);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Hombreras con picos
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.fillRect(0, 0, 6, 8);
+                    ctx.fillRect(width - 6, 0, 6, 8);
+                    // Pecho que se abre
+                    fillStyle(ctx, 0x333333);
+                    ctx.beginPath();
+                    ctx.roundRect(width/4, height/3, width/2, height/2, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0xFFA500);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.fillRect(0, 0, 4, height/3);
+                    ctx.fillRect(width - 4, 0, 4, height/3);
+                }
+            } else if (npcType === 'glamrock_chica') {
+                // GLAMROCK CHICA - Security Breach
+                if (isHead) {
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo verde punk
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 0, 8, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, -2);
+                    ctx.lineTo(width/2 - 3, -8);
+                    ctx.lineTo(width/2 + 3, -8);
+                    ctx.fill();
+                    // Ojos verdes
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pico
+                    fillStyle(ctx, 0xFF8C00);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 4, height/2 + 2);
+                    ctx.lineTo(width/2, height/2 + 7);
+                    ctx.lineTo(width/2 + 4, height/2 + 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFFF00);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Top rosa
+                    fillStyle(ctx, 0xFF69B4);
+                    ctx.fillRect(0, 0, width, height/2);
+                    // Detalles
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/4, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    if (partName.includes('leg')) {
+                        // Leggins rosados
+                        fillStyle(ctx, 0xFF69B4);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0xFFFF00);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'roxanne_wolf') {
+                // ROXANNE WOLF - Security Breach
+                if (isHead) {
+                    fillStyle(ctx, 0xC0C0C0);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo plateado largo
+                    fillStyle(ctx, 0xE8E8E8);
+                    ctx.beginPath();
+                    ctx.ellipse(0, height/2, 4, 10, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width, height/2, 4, 10, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas de lobo
+                    fillStyle(ctx, 0xA0A0A0);
+                    ctx.beginPath();
+                    ctx.moveTo(2, height/2 - 4);
+                    ctx.lineTo(0, -4);
+                    ctx.lineTo(6, height/2 - 6);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width - 2, height/2 - 4);
+                    ctx.lineTo(width, -4);
+                    ctx.lineTo(width - 6, height/2 - 6);
+                    ctx.fill();
+                    // Ojos verdes
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 1, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pintura facial
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.fillRect(width/2 - 8, height/2, 3, 1);
+                    ctx.fillRect(width/2 + 5, height/2, 3, 1);
+                    // Hocico
+                    fillStyle(ctx, 0xDDDDDD);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 4, 4, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xC0C0C0);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Top morado
+                    fillStyle(ctx, 0x800080);
+                    ctx.fillRect(0, 0, width, height/2);
+                    // Collar
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, height/2 - 2, width, 4);
+                } else {
+                    fillStyle(ctx, 0xC0C0C0);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cola esponjosa
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0xE8E8E8);
+                        ctx.beginPath();
+                        ctx.ellipse(width + 4, height/2, 6, 10, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'steve') {
+                // STEVE - Minecraft
+                if (isHead) {
+                    // Cabeza cuadrada
+                    fillStyle(ctx, 0xD2B48C);
+                    ctx.fillRect(0, 0, width, height);
+                    // Pelo cafe
+                    fillStyle(ctx, 0x4A3728);
+                    ctx.fillRect(0, 0, width, height/3);
+                    // Ojos azules cuadrados
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(width/2 - 6, height/2 - 2, 4, 4);
+                    ctx.fillRect(width/2 + 2, height/2 - 2, 4, 4);
+                    fillStyle(ctx, 0x0000FF);
+                    ctx.fillRect(width/2 - 5, height/2 - 1, 2, 2);
+                    ctx.fillRect(width/2 + 3, height/2 - 1, 2, 2);
+                    // Nariz
+                    fillStyle(ctx, 0xC4A484);
+                    ctx.fillRect(width/2 - 1, height/2 + 2, 2, 2);
+                    // Barba corta
+                    fillStyle(ctx, 0x3A2718);
+                    ctx.fillRect(width/2 - 3, height/2 + 5, 6, 3);
+                } else if (partName === 'torso') {
+                    // Camisa azul
+                    fillStyle(ctx, 0x00CED1);
+                    ctx.fillRect(0, 0, width, height);
+                    // Detalles
+                    fillStyle(ctx, 0x008B8B);
+                    ctx.fillRect(0, 0, 4, height);
+                    ctx.fillRect(width - 4, 0, 4, height);
+                } else {
+                    if (partName.includes('leg')) {
+                        // Pantalon morado
+                        fillStyle(ctx, 0x4B0082);
+                        ctx.fillRect(0, 0, width, height);
+                    } else {
+                        // Brazos piel
+                        fillStyle(ctx, 0xD2B48C);
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                }
+            } else if (npcType === 'creeper') {
+                // CREEPER - Minecraft
+                if (isHead) {
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.fillRect(0, 0, width, height);
+                    // Cara triste pixelada
+                    fillStyle(ctx, 0x000000);
+                    // Ojos cuadrados
+                    ctx.fillRect(width/2 - 7, height/2 - 4, 4, 4);
+                    ctx.fillRect(width/2 + 3, height/2 - 4, 4, 4);
+                    // Boca de frown
+                    ctx.fillRect(width/2 - 2, height/2 + 2, 4, 2);
+                    ctx.fillRect(width/2 - 4, height/2 + 4, 2, 3);
+                    ctx.fillRect(width/2 + 2, height/2 + 4, 2, 3);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.fillRect(0, 0, width, height);
+                    // Textura pixelada
+                    fillStyle(ctx, 0x00CC00);
+                    for (let i = 0; i < 4; i++) {
+                        ctx.fillRect((i * 8) % width, (i * 10) % height, 4, 4);
+                    }
+                } else {
+                    // 4 patas cortas (sin brazos)
+                    fillStyle(ctx, 0x00FF00);
+                    ctx.fillRect(0, 0, width, height);
+                    fillStyle(ctx, 0x00CC00);
+                    ctx.fillRect(0, height - 4, width, 4);
+                }
+            } else if (npcType === 'goku') {
+                // GOKU - Dragon Ball
+                if (isHead) {
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo negro puntiagudo
+                    fillStyle(ctx, 0x111111);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 6, height/2 - 6);
+                    ctx.lineTo(width/2 - 8, -6);
+                    ctx.lineTo(width/2 - 2, height/2 - 8);
+                    ctx.lineTo(width/2, -10);
+                    ctx.lineTo(width/2 + 2, height/2 - 8);
+                    ctx.lineTo(width/2 + 8, -4);
+                    ctx.lineTo(width/2 + 6, height/2 - 6);
+                    ctx.fill();
+                    // Ojos negros
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 4, 3, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    // Gi naranja
+                    fillStyle(ctx, 0xFF6600);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cinturon azul
+                    fillStyle(ctx, 0x0066CC);
+                    ctx.fillRect(0, height/2 - 2, width, 5);
+                    // Simbolo
+                    fillStyle(ctx, 0x0066CC);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/4, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    if (partName.includes('leg')) {
+                        // Pantalon naranja
+                        fillStyle(ctx, 0xFF6600);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height - 6, 3);
+                        ctx.fill();
+                        // Botas azules
+                        fillStyle(ctx, 0x0066CC);
+                        ctx.beginPath();
+                        ctx.roundRect(0, height - 6, width, 6, 2);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0xFF6600);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'naruto') {
+                // NARUTO
+                if (isHead) {
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Pelo rubio puntiagudo
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/2 - 4);
+                    ctx.lineTo(-4, -4);
+                    ctx.lineTo(width/4, height/2 - 6);
+                    ctx.lineTo(width/2 - 2, -6);
+                    ctx.lineTo(width/2 + 2, height/2 - 8);
+                    ctx.lineTo(width*3/4, -4);
+                    ctx.lineTo(width, height/2 - 4);
+                    ctx.fill();
+                    // Bandana
+                    fillStyle(ctx, 0x0066CC);
+                    ctx.fillRect(0, height/2 - 6, width, 4);
+                    // Placa metalica
+                    fillStyle(ctx, 0xC0C0C0);
+                    ctx.fillRect(width/2 - 4, height/2 - 6, 8, 4);
+                    // Ojos azules
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 + 1, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 + 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Marcas de bigotes
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 8, height/2 + 3);
+                    ctx.lineTo(width/2 - 4, height/2 + 4);
+                    ctx.moveTo(width/2 - 8, height/2 + 5);
+                    ctx.lineTo(width/2 - 4, height/2 + 5);
+                    ctx.moveTo(width/2 + 4, height/2 + 4);
+                    ctx.lineTo(width/2 + 8, height/2 + 3);
+                    ctx.moveTo(width/2 + 4, height/2 + 5);
+                    ctx.lineTo(width/2 + 8, height/2 + 5);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    // Chaqueta naranja
+                    fillStyle(ctx, 0xFF6600);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Parte negra
+                    fillStyle(ctx, 0x111111);
+                    ctx.fillRect(width/2 - 3, 0, 6, height);
+                } else {
+                    // Pantalon naranja
+                    fillStyle(ctx, 0xFF6600);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                }
+            } else if (npcType === 'among_us') {
+                // AMONG US - Tripulante
+                if (isHead) {
+                    // Forma de capsula/frijol
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Visor azul
+                    fillStyle(ctx, 0x87CEEB);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 + 2, height/2 - 1, 6, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo del visor
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 + 4, height/2 - 3, 2, 1.5, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Cuerpo de frijol
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2, width/2, height/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mochila/tanque
+                    fillStyle(ctx, 0xCC0000);
+                    ctx.beginPath();
+                    ctx.ellipse(width + 2, height/2, 5, 10, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Patas cortas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 5);
+                    ctx.fill();
+                }
+            } else if (npcType === 'sans') {
+                // SANS - Undertale
+                if (isHead) {
+                    // Craneo redondo
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Cuencas de ojos
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 2, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojo que brilla azul
+                    fillStyle(ctx, 0x00BFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sonrisa perpetua
+                    fillStyle(ctx, 0x000000);
+                    ctx.fillRect(width/2 - 6, height/2 + 4, 12, 2);
+                    // Dientes
+                    fillStyle(ctx, 0xFFFFFF);
+                    for (let i = -5; i < 6; i += 2) {
+                        ctx.fillRect(width/2 + i, height/2 + 4, 1, 2);
+                    }
+                } else if (partName === 'torso') {
+                    // Sudadera azul
+                    fillStyle(ctx, 0x0066CC);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Capucha
+                    fillStyle(ctx, 0x004499);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, 2, width/2, 5, 0, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    // Bolsillo
+                    fillStyle(ctx, 0x004499);
+                    ctx.fillRect(width/4, height*2/3, width/2, height/4);
+                } else {
+                    if (partName.includes('leg')) {
+                        // Shorts negros
+                        fillStyle(ctx, 0x111111);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height/2, 3);
+                        ctx.fill();
+                        // Piernas de hueso
+                        fillStyle(ctx, 0xFFFFFF);
+                        ctx.beginPath();
+                        ctx.roundRect(width/4, height/2, width/2, height/2 - 4, 3);
+                        ctx.fill();
+                        // Pantuflas rosas
+                        fillStyle(ctx, 0xFF69B4);
+                        ctx.beginPath();
+                        ctx.roundRect(0, height - 4, width, 4, 2);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0x0066CC);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'pikachu') {
+                // PIKACHU - Pokemon
+                if (isHead) {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas puntiagudas
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.moveTo(2, height/2 - 4);
+                    ctx.lineTo(-2, -8);
+                    ctx.lineTo(6, height/2 - 6);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width - 2, height/2 - 4);
+                    ctx.lineTo(width + 2, -8);
+                    ctx.lineTo(width - 6, height/2 - 6);
+                    ctx.fill();
+                    // Puntas negras de orejas
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.moveTo(-1, -6);
+                    ctx.lineTo(-2, -8);
+                    ctx.lineTo(1, -4);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width + 1, -6);
+                    ctx.lineTo(width + 2, -8);
+                    ctx.lineTo(width - 1, -4);
+                    ctx.fill();
+                    // Ojos grandes negros
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 4, height/2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Brillo en ojos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 5, height/2 - 3, 1, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 3, height/2 - 3, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mejillas rojas
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2 - 8, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.arc(width/2 + 8, height/2 + 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Nariz
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Rayas marrones
+                    fillStyle(ctx, 0x8B4513);
+                    ctx.fillRect(width/4, 0, 3, height/2);
+                    ctx.fillRect(width*3/4 - 3, 0, 3, height/2);
+                } else {
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cola en forma de rayo
+                    if (partName.includes('leg') && partName === 'legR') {
+                        fillStyle(ctx, 0xFFD700);
+                        ctx.beginPath();
+                        ctx.moveTo(width, height/2);
+                        ctx.lineTo(width + 8, height/2 - 4);
+                        ctx.lineTo(width + 4, height/2);
+                        ctx.lineTo(width + 10, height/2 + 4);
+                        ctx.lineTo(width, height/2 + 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'spiderman') {
+                // SPIDER-MAN
+                if (isHead) {
+                    // Mascara roja
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Ojos blancos grandes
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 4, 5, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 4, 5, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Borde negro de ojos
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 4, 5, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 4, 5, 0.3, 0, Math.PI * 2);
+                    ctx.stroke();
+                    // Telarañas
+                    ctx.beginPath();
+                    ctx.moveTo(width/2, 0);
+                    ctx.lineTo(width/2, height);
+                    ctx.moveTo(0, height/2);
+                    ctx.lineTo(width, height/2);
+                    ctx.stroke();
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0xFF0000);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Araña negra en el pecho
+                    fillStyle(ctx, 0x000000);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, 3, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Patas de araña
+                    strokeStyle(ctx, 0x000000);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 2, height/3);
+                    ctx.lineTo(width/2 - 8, height/3 - 6);
+                    ctx.moveTo(width/2 + 2, height/3);
+                    ctx.lineTo(width/2 + 8, height/3 - 6);
+                    ctx.moveTo(width/2 - 2, height/3 + 2);
+                    ctx.lineTo(width/2 - 8, height/3 + 8);
+                    ctx.moveTo(width/2 + 2, height/3 + 2);
+                    ctx.lineTo(width/2 + 8, height/3 + 8);
+                    ctx.stroke();
+                    // Partes azules
+                    fillStyle(ctx, 0x0000FF);
+                    ctx.fillRect(0, height/2, width, height/2);
+                } else {
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0x0000FF);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                        // Botas rojas
+                        fillStyle(ctx, 0xFF0000);
+                        ctx.beginPath();
+                        ctx.roundRect(0, height - 8, width, 8, 2);
+                        ctx.fill();
+                    } else {
+                        fillStyle(ctx, 0xFF0000);
+                        ctx.beginPath();
+                        ctx.roundRect(0, 0, width, height, 3);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'batman') {
+                // BATMAN
+                if (isHead) {
+                    // Mascara negra
+                    fillStyle(ctx, 0x1a1a1a);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Orejas de murcielago
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 6, height/2 - 8);
+                    ctx.lineTo(width/2 - 8, -6);
+                    ctx.lineTo(width/2 - 2, height/2 - 6);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 + 6, height/2 - 8);
+                    ctx.lineTo(width/2 + 8, -6);
+                    ctx.lineTo(width/2 + 2, height/2 - 6);
+                    ctx.fill();
+                    // Parte de cara visible
+                    fillStyle(ctx, 0xFFDBB4);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2 + 4, 6, 0, Math.PI);
+                    ctx.fill();
+                    // Ojos blancos
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2 - 4, height/2 - 1, 3, 2, -0.2, 0, Math.PI * 2);
+                    ctx.ellipse(width/2 + 4, height/2 - 1, 3, 2, 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (partName === 'torso') {
+                    // Traje gris oscuro
+                    fillStyle(ctx, 0x2F2F2F);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Simbolo de murcielago amarillo
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, 8, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    fillStyle(ctx, 0x000000);
+                    // Murcielago
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/3, 3, 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 2, height/3);
+                    ctx.lineTo(width/2 - 6, height/3 - 3);
+                    ctx.lineTo(width/2 - 4, height/3 + 1);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 + 2, height/3);
+                    ctx.lineTo(width/2 + 6, height/3 - 3);
+                    ctx.lineTo(width/2 + 4, height/3 + 1);
+                    ctx.fill();
+                    // Cinturon de utilidades
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(0, height*2/3, width, 4);
+                } else {
+                    // Traje gris/negro
+                    fillStyle(ctx, 0x2F2F2F);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Capa negra
+                    if (partName.includes('arm')) {
+                        fillStyle(ctx, 0x111111);
+                        ctx.beginPath();
+                        ctx.moveTo(width, 0);
+                        ctx.lineTo(width + 6, height);
+                        ctx.lineTo(width, height);
+                        ctx.fill();
+                    }
+                }
+            } else if (npcType === 'monty_gator') {
+                // MONTGOMERY GATOR - Security Breach
+                if (isHead) {
+                    fillStyle(ctx, 0x228B22);
+                    ctx.beginPath();
+                    ctx.arc(width/2, height/2, width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Mohawk naranja
+                    fillStyle(ctx, 0xFF4500);
+                    ctx.beginPath();
+                    ctx.moveTo(width/2 - 3, 0);
+                    ctx.lineTo(width/2, -8);
+                    ctx.lineTo(width/2 + 3, 0);
+                    ctx.fill();
+                    ctx.fillRect(width/2 - 2, -2, 4, 4);
+                    // Gafas de sol estrella
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.fillRect(width/2 - 8, height/2 - 4, 6, 4);
+                    ctx.fillRect(width/2 + 2, height/2 - 4, 6, 4);
+                    fillStyle(ctx, 0x000000);
+                    ctx.fillRect(width/2 - 7, height/2 - 3, 4, 2);
+                    ctx.fillRect(width/2 + 3, height/2 - 3, 4, 2);
+                    // Hocico de caiman
+                    fillStyle(ctx, 0x32CD32);
+                    ctx.beginPath();
+                    ctx.ellipse(width/2, height/2 + 5, 6, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Dientes
+                    fillStyle(ctx, 0xFFFFFF);
+                    ctx.fillRect(width/2 - 4, height/2 + 6, 2, 2);
+                    ctx.fillRect(width/2 + 2, height/2 + 6, 2, 2);
+                } else if (partName === 'torso') {
+                    fillStyle(ctx, 0x228B22);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Chaqueta
+                    fillStyle(ctx, 0x8B0000);
+                    ctx.fillRect(0, 0, 6, height);
+                    ctx.fillRect(width - 6, 0, 6, height);
+                    // Cadena dorada
+                    fillStyle(ctx, 0xFFD700);
+                    ctx.beginPath();
+                    ctx.arc(width/4, height/3, 2, 0, Math.PI * 2);
+                    ctx.arc(width/2, height/3 + 2, 2, 0, Math.PI * 2);
+                    ctx.arc(width*3/4, height/3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    fillStyle(ctx, 0x228B22);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, width, height, 3);
+                    ctx.fill();
+                    // Cola larga
+                    if (partName.includes('leg')) {
+                        fillStyle(ctx, 0x32CD32);
+                        ctx.beginPath();
+                        ctx.ellipse(width + 6, height/2, 8, 4, 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
             } else {
                 // Default NPC
                 if (isHead) {
