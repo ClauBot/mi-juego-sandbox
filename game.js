@@ -18,6 +18,18 @@ const viewport = getViewportSize();
 const screenWidth = viewport.width;
 const screenHeight = viewport.height;
 
+// === ESTILOS RESPONSIVE ===
+// Detectar pantalla pequeña (móviles)
+const isSmallScreen = window.innerHeight < 600;
+const isVerySmallScreen = window.innerWidth <= 360; // iPhone SE, etc.
+
+// Constantes responsive
+const TOUCH_AREA_SIZE = isVerySmallScreen ? 60 : (isMobile ? 55 : 45);
+const BUTTON_SIZE = isMobile ? (isVerySmallScreen ? 55 : 50) : 45;
+const MENU_FONT_SIZE = isMobile ? 28 : 18; // Mayor en móviles
+const MENU_TITLE_FONT = `bold ${isMobile ? 28 : 22}px Arial`;
+const MENU_ITEM_FONT = `bold ${isMobile ? 15 : 12}px Arial`;
+
 // Constantes de optimización para móvil
 const MAX_BLOOD_PARTICLES = isLowPerf ? 15 : 50;
 const MAX_RAGDOLLS = 35;
@@ -368,7 +380,7 @@ function checkDailyReward() {
 function showNotification(text) {
     if (!sceneRef) return;
     const notif = sceneRef.add.text(game.scale.width / 2, 100, text, {
-        font: 'bold 24px Arial',
+        font: `bold ${isMobile ? 28 : 24}px Arial`,
         fill: '#FFD700',
         stroke: '#000000',
         strokeThickness: 4
@@ -1623,9 +1635,18 @@ function playSplatSound() {
 }
 
 function onResize(gameSize) {
+    // Actualizar constantes responsive
+    isSmallScreen = window.innerHeight < 600;
+    isVerySmallScreen = window.innerWidth <= 360;
+    
     // Actualizar botón de música cuando cambia el tamaño
     if (musicButton) {
         updateMusicButton();
+    }
+    
+    // Actualizar posición de botones UI si es necesario
+    if (sceneRef) {
+        // El juego se redimensionará automáticamente gracias a Phaser
     }
 }
 
@@ -4610,9 +4631,13 @@ function createPartTexture(scene, name, width, height, color, isHead = false, np
 }
 
 function createUI(scene) {
-    const btnSize = isMobile ? 50 : 45;
-    const margin = 8;
-    const topY = margin;
+    // Calcular offset de Safe Area para notch
+    const safeAreaTop = window.innerHeight < 600 ? 
+        (window.innerHeight * 0.08 + (window.innerHeight - window.visualViewport?.height || 0)) : 8;
+    
+    const btnSize = BUTTON_SIZE;
+    const margin = isVerySmallScreen ? 6 : 8;
+    const topY = isMobile ? safeAreaTop : margin;
     const screenW = game.scale.width;
 
     // === BARRA SUPERIOR DERECHA (horizontal, compacta) ===
@@ -4625,7 +4650,7 @@ function createUI(scene) {
     teamButton = scene.add.graphics();
     drawTeamButton(teamButton, teamColors[currentTeam], teamX, topY, btnSize);
 
-    const teamZone = scene.add.zone(teamX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    const teamZone = scene.add.zone(teamX + btnSize/2, topY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     teamZone.setInteractive();
     teamZone.on('pointerdown', () => {
         currentTeam = (currentTeam + 1) % 4;
@@ -4639,7 +4664,7 @@ function createUI(scene) {
     npcButton.setDepth(100);
     drawNpcButton(spawnX, topY, btnSize);
 
-    const spawnZone = scene.add.zone(spawnX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    const spawnZone = scene.add.zone(spawnX + btnSize/2, topY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     spawnZone.setInteractive();
     spawnZone.setDepth(100);
     spawnZone.on('pointerdown', () => {
@@ -4660,7 +4685,7 @@ function createUI(scene) {
     weaponButton.setDepth(100);
     drawWeaponButton(weaponX, topY, btnSize);
 
-    const weaponZone = scene.add.zone(weaponX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    const weaponZone = scene.add.zone(weaponX + btnSize/2, topY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     weaponZone.setInteractive();
     weaponZone.setDepth(100);
     weaponZone.on('pointerdown', () => {
@@ -4675,7 +4700,7 @@ function createUI(scene) {
     const musicBtnSize = isMobile ? 50 : 45;
     const musicBtnX = margin + musicBtnSize/2;
     const musicBtnY = game.scale.height - margin - musicBtnSize/2;
-    const musicZone = scene.add.zone(musicBtnX, musicBtnY, musicBtnSize + 10, musicBtnSize + 10);
+    const musicZone = scene.add.zone(musicBtnX, musicBtnY, TOUCH_AREA_SIZE + 10, TOUCH_AREA_SIZE + 10);
     musicZone.setInteractive();
     musicZone.setDepth(100);
     musicZone.on('pointerdown', (pointer) => {
@@ -4701,7 +4726,7 @@ function createUI(scene) {
         font: '24px Arial'
     }).setOrigin(0.5).setDepth(100);
 
-    const mapZone = scene.add.zone(mapX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    const mapZone = scene.add.zone(mapX + btnSize/2, topY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     mapZone.setInteractive();
     mapZone.setDepth(100);
     mapZone.on('pointerdown', () => toggleMapMenu());
@@ -4720,7 +4745,7 @@ function createUI(scene) {
     const slowY = game.scale.height - margin - btnSize;
     drawSlowMotionButton(slowX, slowY, btnSize);
 
-    const slowZone = scene.add.zone(slowX + btnSize/2, slowY + btnSize/2, btnSize, btnSize);
+    const slowZone = scene.add.zone(slowX + btnSize/2, slowY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     slowZone.setInteractive();
     slowZone.setDepth(100);
     slowZone.on('pointerdown', () => toggleSlowMotion());
@@ -4736,14 +4761,14 @@ function createUI(scene) {
         fill: '#FFFFFF'
     }).setOrigin(0.5).setDepth(100);
 
-    const exitZone = scene.add.zone(exitX + btnSize/2, topY + btnSize/2, btnSize, btnSize);
+    const exitZone = scene.add.zone(exitX + btnSize/2, topY + btnSize/2, TOUCH_AREA_SIZE, TOUCH_AREA_SIZE);
     exitZone.setInteractive();
     exitZone.setDepth(100);
     exitZone.on('pointerdown', () => toggleExitMenu());
 
     // === INDICADOR DE MAYHEMS (centrado arriba, más visible) ===
     mayhemsText = scene.add.text(screenW / 2, topY + btnSize/2, '💎 ' + formatNumber(mayhems), {
-        font: 'bold 22px Arial',
+        font: MENU_TITLE_FONT,
         fill: '#FFD700',
         stroke: '#000000',
         strokeThickness: 3
@@ -4920,25 +4945,31 @@ function updateWeaponMenu() {
     // Solo mostrar armas desbloqueadas
     const unlockedWeapons = shopItems.weapons.filter(weapon => unlockedItems.weapons.includes(weapon.id));
 
-    const cols = 4;
-    const itemW = 70;
-    const itemH = 65;
+    // En pantallas pequeñas, abrir hacia arriba
+    const openUpward = isSmallScreen;
+    
+    const cols = isVerySmallScreen ? 4 : 4;
+    const itemW = isVerySmallScreen ? 60 : 70;
+    const itemH = isVerySmallScreen ? 58 : 65;
     const menuW = cols * itemW + 15;
     const menuH = Math.ceil(unlockedWeapons.length / cols) * itemH + 15;
+
+    // Posicionar menú hacia arriba o hacia abajo según la pantalla
+    const menuY = openUpward ? -menuH - 10 : 0;
 
     // Fondo más oscuro con borde
     const menuBg = sceneRef.add.graphics();
     menuBg.fillStyle(0x1a1a2e, 0.98);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.fillRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     menuBg.lineStyle(2, 0x4a4a6a, 1);
-    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.strokeRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     weaponMenu.add(menuBg);
 
     unlockedWeapons.forEach((weapon, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
         const bx = -menuW/2 + 8 + col * itemW;
-        const by = 8 + row * itemH;
+        const by = menuY + 8 + row * itemH;
 
         const isSelected = currentWeapon === weapon.id;
 
@@ -4950,20 +4981,22 @@ function updateWeaponMenu() {
         btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         weaponMenu.add(btn);
 
-        // Emoji más grande
+        // Emoji más grande en móviles
         const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, weapon.emoji, {
-            font: '28px Arial'
+            font: isMobile ? '26px Arial' : '28px Arial'
         }).setOrigin(0.5);
         weaponMenu.add(emoji);
 
-        // Nombre del arma
+        // Nombre del arma con fuente responsive
         const name = sceneRef.add.text(bx + (itemW-8)/2, by + 46, weapon.name, {
-            font: 'bold 9px Arial',
+            font: MENU_ITEM_FONT,
             fill: isSelected ? '#AAAAFF' : '#CCCCCC'
         }).setOrigin(0.5);
         weaponMenu.add(name);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
+        // Zona interactiva más grande en móviles pequeños
+        const zoneSize = isVerySmallScreen ? 60 : (itemW - 8);
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, zoneSize, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         weaponMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -5000,25 +5033,31 @@ function updateMapMenu() {
     // Solo mostrar mapas desbloqueados
     const unlockedMaps = shopItems.worlds.filter(world => unlockedItems.worlds.includes(world.id));
 
-    const cols = 4;
-    const itemW = 70;
-    const itemH = 65;
+    // En pantallas pequeñas, abrir hacia arriba
+    const openUpward = isSmallScreen;
+
+    const cols = isVerySmallScreen ? 4 : 4;
+    const itemW = isVerySmallScreen ? 60 : 70;
+    const itemH = isVerySmallScreen ? 58 : 65;
     const menuW = cols * itemW + 15;
     const menuH = Math.ceil(unlockedMaps.length / cols) * itemH + 15;
+
+    // Posicionar menú hacia arriba o hacia abajo según la pantalla
+    const menuY = openUpward ? -menuH - 10 : 0;
 
     // Fondo más oscuro con borde
     const menuBg = sceneRef.add.graphics();
     menuBg.fillStyle(0x1a1a2e, 0.98);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.fillRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     menuBg.lineStyle(2, 0x4a4a6a, 1);
-    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.strokeRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     mapMenu.add(menuBg);
 
     unlockedMaps.forEach((map, i) => {
         const col = i % cols;
         const row = Math.floor(i / cols);
         const bx = -menuW/2 + 8 + col * itemW;
-        const by = 8 + row * itemH;
+        const by = menuY + 8 + row * itemH;
 
         const isSelected = currentMap === map.id;
 
@@ -5030,20 +5069,22 @@ function updateMapMenu() {
         btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         mapMenu.add(btn);
 
-        // Emoji más grande
+        // Emoji más grande en móviles
         const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, map.emoji, {
-            font: '26px Arial'
+            font: isMobile ? '24px Arial' : '26px Arial'
         }).setOrigin(0.5);
         mapMenu.add(emoji);
 
-        // Nombre del mapa
+        // Nombre del mapa con fuente responsive
         const name = sceneRef.add.text(bx + (itemW-8)/2, by + 46, map.name, {
-            font: 'bold 9px Arial',
+            font: MENU_ITEM_FONT,
             fill: isSelected ? '#FFCC88' : '#CCCCCC'
         }).setOrigin(0.5);
         mapMenu.add(name);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
+        // Zona interactiva más grande en móviles pequeños
+        const zoneSize = isVerySmallScreen ? 60 : (itemW - 8);
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, zoneSize, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         mapMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -5123,20 +5164,26 @@ function updateNpcMenu() {
     if (npcMenuPage >= maxPages) npcMenuPage = maxPages - 1;
     if (npcMenuPage < 0) npcMenuPage = 0;
 
-    const cols = 3;
-    const rows = 3;
-    const itemW = 80;
-    const itemH = 70;
+    // En pantallas pequeñas, abrir hacia arriba
+    const openUpward = isSmallScreen;
+
+    const cols = isVerySmallScreen ? 3 : 3;
+    const rows = isVerySmallScreen ? 3 : 3;
+    const itemW = isVerySmallScreen ? 65 : 80;
+    const itemH = isVerySmallScreen ? 60 : 70;
     const menuW = cols * itemW + 15;
     const navH = maxPages > 1 ? 35 : 0;
     const menuH = rows * itemH + 15 + navH;
 
+    // Posicionar menú hacia arriba o hacia abajo según la pantalla
+    const menuY = openUpward ? -menuH - 10 : 0;
+
     // Fondo del menú
     const menuBg = sceneRef.add.graphics();
     menuBg.fillStyle(0x1a1a2e, 0.98);
-    menuBg.fillRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.fillRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     menuBg.lineStyle(2, 0x4a4a6a, 1);
-    menuBg.strokeRoundedRect(-menuW/2, 0, menuW, menuH, 12);
+    menuBg.strokeRoundedRect(-menuW/2, menuY, menuW, menuH, 12);
     npcMenu.add(menuBg);
 
     // NPCs de la página actual
@@ -5147,7 +5194,7 @@ function updateNpcMenu() {
         const col = i % cols;
         const row = Math.floor(i / cols);
         const bx = -menuW/2 + 8 + col * itemW;
-        const by = 8 + row * itemH;
+        const by = menuY + 8 + row * itemH;
 
         const isSelected = currentNpcType === npc.id;
 
@@ -5158,18 +5205,22 @@ function updateNpcMenu() {
         btn.strokeRoundedRect(bx, by, itemW - 8, itemH - 8, 8);
         npcMenu.add(btn);
 
-        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 22, npc.emoji, {
-            font: '28px Arial'
+        // Emoji más grande en móviles
+        const emoji = sceneRef.add.text(bx + (itemW-8)/2, by + 20, npc.emoji, {
+            font: isMobile ? '24px Arial' : '28px Arial'
         }).setOrigin(0.5);
         npcMenu.add(emoji);
 
-        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 48, npc.name, {
-            font: 'bold 9px Arial',
+        // Nombre del NPC con fuente responsive
+        const name = sceneRef.add.text(bx + (itemW-8)/2, by + 45, npc.name, {
+            font: MENU_ITEM_FONT,
             fill: isSelected ? '#AAFFAA' : '#CCCCCC'
         }).setOrigin(0.5);
         npcMenu.add(name);
 
-        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, itemW-8, itemH-8, 0x000000, 0);
+        // Zona interactiva más grande en móviles pequeños
+        const zoneSize = isVerySmallScreen ? 60 : (itemW - 8);
+        const zoneGraphic = sceneRef.add.rectangle(bx + (itemW-8)/2, by + (itemH-8)/2, zoneSize, itemH-8, 0x000000, 0);
         zoneGraphic.setInteractive();
         npcMenu.add(zoneGraphic);
         zoneGraphic.on('pointerdown', () => {
@@ -5182,7 +5233,7 @@ function updateNpcMenu() {
 
     // Navegación si hay más de una página
     if (maxPages > 1) {
-        const navY = rows * itemH + 12;
+        const navY = menuY + rows * itemH + 12;
 
         // Botón anterior
         if (npcMenuPage > 0) {

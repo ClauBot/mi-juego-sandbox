@@ -23,6 +23,28 @@
     <script src="game.js?v=8"></script>
 
     <script>
+        // Safe Area Handling para iPhone con notch/island
+        function updateSafeAreaPadding() {
+            const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')) || 
+                               (window.innerHeight < 600 ? Math.max(20, window.innerHeight * 0.08) : 0);
+            
+            // Aplicar padding-top al body
+            document.body.style.paddingTop = `${safeAreaTop}px`;
+            
+            // Ajustar posición del canvas si es necesario
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+                canvas.style.top = `${safeAreaTop}px`;
+            }
+        }
+
+        // Ejecutar al cargar y al cambiar orientación
+        document.addEventListener('DOMContentLoaded', updateSafeAreaPadding);
+        window.addEventListener('resize', updateSafeAreaPadding);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateSafeAreaPadding, 100);
+        });
+
         // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
